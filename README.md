@@ -21,11 +21,13 @@ It has a React frontend (in the `frontend` folder) and a simple FastAPI backend.
 
 ## Environment Variables
 
-Set the following variables to enable external APIs:
+Copy `.env.example` to `.env` in the project root and fill in your own values.
+These variables enable external APIs:
 
 ```
 GEMINI_API=your_api_key
 GOOGLE_APPLICATION_CREDENTIALS=~/.config/gcloud/tts-service-account.json
+REACT_APP_API_URL=http://localhost:8000
 ```
 
 ## Google cloud tts
