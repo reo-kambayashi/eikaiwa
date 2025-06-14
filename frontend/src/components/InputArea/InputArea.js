@@ -3,7 +3,7 @@
 // テキスト入力、音声入力ボタン、送信ボタンを含むUIです
 // ============================================================================
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import VoiceControls from '../VoiceControls';
 import { UI_MESSAGES } from '../../utils/constants';
 
@@ -29,21 +29,12 @@ const InputArea = ({
   onSend,
   onVoiceToggle
 }) => {
-  // ローカル入力状態（音声認識用）
-  const [localValue, setLocalValue] = useState(value);
-
-  // 外部から渡された値が変更されたときにローカル状態を更新
-  useEffect(() => {
-    setLocalValue(value);
-  }, [value]);
-
   /**
    * 入力値変更時の処理
    * @param {Event} e - 入力イベント
    */
   const handleInputChange = (e) => {
     const newValue = e.target.value;
-    setLocalValue(newValue);
     onChange(newValue);
   };
 
@@ -100,14 +91,14 @@ const InputArea = ({
   /**
    * 送信ボタンを無効にする条件
    */
-  const isSendDisabled = isLoading || (!localValue.trim() && !isListening);
+  const isSendDisabled = isLoading || (!value.trim() && !isListening);
 
   return (
     <div className="input-area">
       {/* テキスト入力フィールド */}
       <input
         type="text"
-        value={localValue}
+        value={value}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         placeholder={getPlaceholder()}

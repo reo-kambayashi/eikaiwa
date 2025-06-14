@@ -4,16 +4,17 @@
 // ============================================================================
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { fetchWelcomeMessage, sendMessageToAI } from '../utils/api';
+import { sendMessageToAI } from '../utils/api';
 
 /**
  * チャット機能を管理するカスタムフック
  * @param {string} level - 英語レベル
  * @param {string} practiceType - 練習タイプ
+ * @param {boolean} isGrammarCheckEnabled - 文法チェック機能の有効状態
  * @param {Function} onAIResponse - AI応答時のコールバック関数
  * @returns {Object} チャット状態と制御関数
  */
-export const useChat = (level, practiceType, onAIResponse) => {
+export const useChat = (level, practiceType, isGrammarCheckEnabled, onAIResponse) => {
   // メッセージ履歴の管理
   const [messages, setMessages] = useState([]);
   
@@ -38,52 +39,24 @@ export const useChat = (level, practiceType, onAIResponse) => {
   }, [messages, scrollToBottom]);
 
   /**
-   * ウェルカムメッセージを取得してチャットを初期化する関数
+   * チャットを初期化する関数（ウェルカムメッセージなし）
    */
   const initializeChat = useCallback(async () => {
-    try {
-      console.log('Initializing chat with:', { level, practiceType });
-      
-      const welcomeText = await fetchWelcomeMessage(level, practiceType);
-      const welcomeMessage = { 
-        sender: 'AI Tutor', 
-        text: welcomeText,
-        timestamp: new Date().toISOString()
-      };
-      
-      setMessages([welcomeMessage]);
-      
-      // AI応答コールバックがある場合は実行
-      if (onAIResponse) {
-        onAIResponse(welcomeText);
-      }
-      
-      console.log('Chat initialized successfully');
-      
-    } catch (error) {
-      console.error('Error initializing chat:', error);
-      
-      // エラー時のフォールバックメッセージ
-      const fallbackMessage = {
-        sender: 'AI Tutor',
-        text: "Hello! Welcome to English Communication App! I'm here to help you practice English. How are you today?",
-        timestamp: new Date().toISOString()
-      };
-      
-      setMessages([fallbackMessage]);
-      
-      if (onAIResponse) {
-        onAIResponse(fallbackMessage.text);
-      }
-    }
-  }, [level, practiceType, onAIResponse]);
+    console.log('Initializing chat without welcome message');
+    
+    // 空のメッセージ配列で初期化
+    setMessages([]);
+    
+    console.log('Chat initialized successfully (empty state)');
+  }, []);
 
   /**
-   * 設定が変更されたときにチャットを再初期化
+   * コンポーネントマウント時の初期化のみ実行
    */
   useEffect(() => {
     initializeChat();
-  }, [initializeChat]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 空の依存配列で初回のみ実行（initializeChatは意図的に依存関係から除外）
 
   /**
    * ユーザーメッセージを送信してAI応答を取得する関数
@@ -107,16 +80,23 @@ export const useChat = (level, practiceType, onAIResponse) => {
       timestamp: new Date().toISOString()
     };
 
-    setMessages(prevMessages => [...prevMessages, userMessage]);
+    setMessages(prevMessages => {
+      const updatedMessages = [...prevMessages, userMessage];
+      console.log('Updated messages with user message:', updatedMessages.length);
+      return updatedMessages;
+    });
+    
     setIsLoading(true);
 
     try {
       // AIに現在のメッセージと会話履歴を送信
+      // 注意: ここでは現在のmessages状態を使用（ユーザーメッセージ追加前の状態）
       const aiResponse = await sendMessageToAI(
         trimmedMessage,
         level,
         practiceType,
-        messages // 現在の会話履歴を含める
+        messages, // 現在の会話履歴を使用
+        isGrammarCheckEnabled // 文法チェック設定を含める
       );
 
       // AI応答を履歴に追加
@@ -126,7 +106,11 @@ export const useChat = (level, practiceType, onAIResponse) => {
         timestamp: new Date().toISOString()
       };
 
-      setMessages(prevMessages => [...prevMessages, aiMessage]);
+      setMessages(prevMessages => {
+        const finalMessages = [...prevMessages, aiMessage];
+        console.log('Final messages with AI response:', finalMessages.length);
+        return finalMessages;
+      });
 
       // AI応答コールバックがある場合は実行
       if (onAIResponse) {
@@ -153,7 +137,7 @@ export const useChat = (level, practiceType, onAIResponse) => {
     } finally {
       setIsLoading(false);
     }
-  }, [level, practiceType, messages, isLoading, onAIResponse]);
+  }, [level, practiceType, isGrammarCheckEnabled, messages, isLoading, onAIResponse]);
 
   /**
    * チャット履歴をクリアする関数

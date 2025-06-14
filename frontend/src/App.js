@@ -36,14 +36,19 @@ function App() {
     practiceType,
     isVoiceInputEnabled,
     isVoiceOutputEnabled,
+    isGrammarCheckEnabled,
+    speakingRate,
     updateLevel,
     updatePracticeType,
     toggleVoiceInput,
-    toggleVoiceOutput
+    toggleVoiceOutput,
+    toggleGrammarCheck,
+    updateSpeakingRate,
+    resetSpeakingRateToDefault
   } = useSettings();
 
-  // 音声出力機能
-  const { speak } = useVoiceOutput(isVoiceOutputEnabled);
+  // 音声出力機能（読み上げ速度を含む）
+  const { speak } = useVoiceOutput(isVoiceOutputEnabled, speakingRate);
 
   // チャット機能（AI応答時に音声出力）
   const {
@@ -51,7 +56,7 @@ function App() {
     isLoading,
     messagesEndRef,
     sendMessage
-  } = useChat(level, practiceType, speak);
+  } = useChat(level, practiceType, isGrammarCheckEnabled, speak);
 
   // 音声入力機能
   const {
@@ -78,12 +83,13 @@ function App() {
       return;
     }
 
-    // 音声認識結果またはテキスト入力をクリア
+    console.log('Sending message:', messageToSend);
+
+    // 先に入力をクリア（送信前にクリア）
     if (isListening) {
       clearTranscript();
-    } else {
-      setInput('');
     }
+    setInput('');
 
     // メッセージを送信
     const success = await sendMessage(messageToSend);
@@ -92,6 +98,8 @@ function App() {
       console.log('Message sent successfully');
     } else {
       console.error('Failed to send message');
+      // 送信に失敗した場合は入力値を復元
+      setInput(messageToSend);
     }
   };
 
@@ -149,12 +157,17 @@ function App() {
         practiceType={practiceType}
         isVoiceInputEnabled={isVoiceInputEnabled}
         isVoiceOutputEnabled={isVoiceOutputEnabled}
+        isGrammarCheckEnabled={isGrammarCheckEnabled}
+        speakingRate={speakingRate}
         isVoiceSupported={isVoiceSupported}
         isLoading={isLoading}
         onLevelChange={updateLevel}
         onPracticeTypeChange={updatePracticeType}
         onVoiceInputToggle={toggleVoiceInput}
         onVoiceOutputToggle={toggleVoiceOutput}
+        onGrammarCheckToggle={toggleGrammarCheck}
+        onSpeakingRateChange={updateSpeakingRate}
+        onSpeakingRateReset={resetSpeakingRateToDefault}
       />
 
       {/* チャット表示エリア */}
@@ -186,6 +199,16 @@ function App() {
             <small>Voice Supported: {isVoiceSupported ? 'Yes' : 'No'}</small>
             <br />
             <small>Listening: {isListening ? 'Yes' : 'No'}</small>
+            <br />
+            <small>Messages Count: {messages.length}</small>
+            <br />
+            <small>Current Input: "{input}"</small>
+            <br />
+            <small>Transcript: "{transcript}"</small>
+            <br />
+            <small>Speaking Rate: {speakingRate.toFixed(1)}x</small>
+            <br />
+            <small>Grammar Check: {isGrammarCheckEnabled ? 'Enabled' : 'Disabled'}</small>
           </>
         )}
       </div>

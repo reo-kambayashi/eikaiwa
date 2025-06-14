@@ -9,9 +9,10 @@ import { convertTextToSpeech, fallbackTextToSpeech } from '../utils/api';
 /**
  * 音声出力機能を管理するカスタムフック
  * @param {boolean} isEnabled - 音声出力が有効かどうか
+ * @param {number} speakingRate - 読み上げ速度（0.5〜2.0の範囲）
  * @returns {Object} 音声出力関数
  */
-export const useVoiceOutput = (isEnabled) => {
+export const useVoiceOutput = (isEnabled, speakingRate = 1.0) => {
 
   /**
    * テキストを音声で再生する関数
@@ -33,10 +34,10 @@ export const useVoiceOutput = (isEnabled) => {
     }
 
     try {
-      console.log('Attempting to speak text:', text.substring(0, 50) + '...');
+      console.log('Attempting to speak text:', text.substring(0, 50) + '...', 'at rate:', speakingRate);
       
-      // Google Cloud TTSを試行
-      const audioElement = await convertTextToSpeech(text);
+      // Google Cloud TTSを試行（読み上げ速度を含める）
+      const audioElement = await convertTextToSpeech(text, speakingRate);
       
       if (audioElement) {
         // Google TTSが成功した場合
@@ -61,7 +62,7 @@ export const useVoiceOutput = (isEnabled) => {
       } else {
         // Google TTSが失敗した場合はブラウザTTSにフォールバック
         console.log('Google TTS failed, using browser TTS fallback');
-        fallbackTextToSpeech(text);
+        fallbackTextToSpeech(text, speakingRate);
         return true; // ブラウザTTSは同期的なので即座にtrueを返す
       }
       
@@ -70,10 +71,10 @@ export const useVoiceOutput = (isEnabled) => {
       
       // 全てが失敗した場合もブラウザTTSを試行
       console.log('All TTS methods failed, attempting final browser TTS fallback');
-      fallbackTextToSpeech(text);
+      fallbackTextToSpeech(text, speakingRate);
       return false;
     }
-  }, [isEnabled]);
+  }, [isEnabled, speakingRate]);
 
   /**
    * 音声出力が利用可能かチェックする関数
