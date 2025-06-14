@@ -25,7 +25,14 @@ Set the following variables to enable external APIs:
 
 ```
 GEMINI_API=your_api_key
-GOOGLE_APPLICATION_CREDENTIALS=path/to/credentials.json
+GOOGLE_APPLICATION_CREDENTIALS=~/.config/gcloud/tts-service-account.json
+```
+
+## Google cloud tts
+Download json file from https://console.cloud.google.com/
+```bash
+mv ~/Downloads/your-downloaded-key.json ~/.config/gcloud/tts-service-account.json #(option) mv json file
+gcloud auth application-default login
 ```
 
 ## Frontend Setup
