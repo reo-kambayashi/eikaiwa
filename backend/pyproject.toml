@@ -1,8 +1,9 @@
 [project]
 name = "eikaiwa-backend"
 version = "0.1.0"
-
-[project.dependencies]
-fastapi = "*"
-uvicorn = "*"
-python-dotenv = "*"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "python-dotenv",
+    "google-generativeai"
+]
