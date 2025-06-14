@@ -52,6 +52,27 @@ async def api_status():
     }
 
 
+@app.get("/api/welcome", response_model=Response)
+async def get_welcome_message(level: str = "beginner", practice_type: str = "conversation"):
+    """Generate a personalized welcome message based on user settings."""
+    
+    try:
+        if not model:
+            return Response(reply="Hello! Welcome to English Communication App! Please set up your API key to get started.")
+        
+        welcome_prompt = create_welcome_prompt(level, practice_type)
+        response = model.generate_content(welcome_prompt)
+        
+        if response.text:
+            return Response(reply=response.text)
+        else:
+            return Response(reply="Hello! Welcome to English Communication App! Let's start practicing English together!")
+            
+    except Exception as e:
+        print(f"Error generating welcome message: {str(e)}")
+        return Response(reply="Hello! Welcome to English Communication App! I'm here to help you practice English. How are you today?")
+
+
 class Request(BaseModel):
     """Message sent from the frontend."""
 
@@ -217,3 +238,46 @@ Note: You can use phonetic symbols like /θ/ for 'th' sound, /r/ vs /l/ distinct
             practice_type, practice_instructions["conversation"])
 
     return full_prompt
+
+
+def create_welcome_prompt(level: str, practice_type: str) -> str:
+    """
+    Create a personalized welcome message based on user's level and practice type.
+    
+    Args:
+        level: beginner, intermediate, or advanced
+        practice_type: conversation, grammar, vocabulary, or pronunciation
+    
+    Returns:
+        A welcoming prompt that encourages the user to start practicing
+    """
+    
+    level_greetings = {
+        "beginner": "I'm excited to help you start your English learning journey! Don't worry about making mistakes - that's how we learn.",
+        "intermediate": "Great to see you continuing your English studies! You're doing wonderful, and I'm here to help you improve even more.",
+        "advanced": "Welcome! I'm impressed by your dedication to mastering English. Let's work together to polish your skills to perfection."
+    }
+    
+    practice_introductions = {
+        "conversation": "Let's have a natural conversation! I'll ask questions and share stories to help you practice speaking naturally.",
+        "grammar": "I'll help you perfect your grammar by gently correcting mistakes and explaining the rules in simple terms.",
+        "vocabulary": "We'll expand your vocabulary together! I'll introduce new words and help you use them in context.",
+        "pronunciation": "Let's work on your pronunciation! I'll help you with tricky sounds and give you tips for speaking more clearly."
+    }
+    
+    base_welcome = f"""
+You are a friendly English conversation partner welcoming a Japanese student.
+The student is at {level.upper()} level and wants to practice {practice_type.upper()}.
+
+Create a warm, encouraging welcome message that:
+- Greets the student in a friendly way
+- Acknowledges their level and practice focus
+- Asks an engaging opening question to start the conversation
+- Uses appropriate vocabulary for their level
+- Shows enthusiasm and support
+
+Make it feel like meeting a friendly teacher who genuinely cares about their progress.
+Keep it conversational and encouraging, not formal or robotic.
+"""
+    
+    return base_welcome
