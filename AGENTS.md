@@ -3,7 +3,7 @@
 ## Implementation Requirements
 Please write code and design the directory structure in a way that is easy to understand, even for beginners.
 Be sure to add comments frequently and place them appropriately throughout the code.
-Please update the README.md file as needed.
+Please update the README.md and instructions.md file as needed.
 
 ## APIs
 GEMINI_API
