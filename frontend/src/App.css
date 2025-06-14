@@ -385,6 +385,229 @@ h1 {
   font-family: monospace;
 }
 
+/* ============================================================================
+   読み上げ速度コントロール用スタイル
+   ============================================================================ */
+
+/* 読み上げ速度設定グループ */
+.speaking-rate-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* スライダーのスタイル */
+.speaking-rate-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #ddd;
+  outline: none;
+  cursor: pointer;
+}
+
+.speaking-rate-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #007bff;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.speaking-rate-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #007bff;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* 速度情報とリセットボタン */
+.speaking-rate-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rate-value {
+  font-weight: bold;
+  color: #007bff;
+  font-size: 1.1rem;
+}
+
+.reset-rate-button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.reset-rate-button:hover {
+  background-color: #5a6268;
+}
+
+.reset-rate-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 速度ラベル */
+.rate-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #6c757d;
+  margin-top: 0.25rem;
+}
+
+/* レベル別デフォルト値の表示 */
+.level-defaults {
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.level-defaults small {
+  color: #6c757d;
+  font-size: 0.7rem;
+  font-style: italic;
+}
+
+/* ============================================================================
+   学習機能コントロール用スタイル
+   ============================================================================ */
+
+/* 学習機能設定グループ */
+.learning-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* 機能切り替えボタンのスタイル */
+.feature-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.feature-toggle:hover {
+  background-color: rgba(0,123,255,0.1);
+}
+
+.feature-toggle input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+/* 機能説明のスタイル */
+.feature-description {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background-color: rgba(0,123,255,0.1);
+  border-radius: 5px;
+  border-left: 4px solid #007bff;
+}
+
+.feature-description small {
+  color: #495057;
+  line-height: 1.4;
+}
+
+.feature-description strong {
+  color: #007bff;
+}
+
+/* 文法チェック関連のメッセージスタイル */
+.grammar-suggestion {
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 0.5rem 0;
+}
+
+.grammar-suggestion.correction {
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+}
+
+.suggestion-header {
+  font-weight: bold;
+  color: #856404;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.suggestion-header.correction {
+  color: #0c5460;
+}
+
+.original-text {
+  background-color: #f8f9fa;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin: 0.5rem 0;
+  border-left: 3px solid #dc3545;
+}
+
+.improved-text {
+  background-color: #d4edda;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin: 0.5rem 0;
+  border-left: 3px solid #28a745;
+}
+
+.suggestion-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.suggestion-button {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.suggestion-button.primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.suggestion-button.primary:hover {
+  background-color: #0056b3;
+}
+
+.suggestion-button.secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.suggestion-button.secondary:hover {
+  background-color: #545b62;
+}
+
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
   .App {
@@ -401,4 +624,48 @@ h1 {
     padding: 0.75rem 1rem;
     font-size: 0.9rem;
   }
+  
+  .speaking-rate-controls {
+    gap: 0.25rem;
+  }
+  
+  .rate-labels {
+    font-size: 0.7rem;
+  }
+  
+  .level-defaults small {
+    font-size: 0.65rem;
+  }
+  
+  .feature-description {
+    padding: 0.5rem;
+  }
+  
+  .suggestion-actions {
+    flex-direction: column;
+  }
+  
+  .suggestion-button {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+/* 空のメッセージエリアのスタイル */
+.no-messages {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.no-messages p {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.no-messages small {
+  display: block;
+  font-size: 0.9rem;
+  opacity: 0.8;
 }
