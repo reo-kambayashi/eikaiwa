@@ -17,7 +17,7 @@ It has a React frontend (in the `frontend` folder) and a simple FastAPI backend.
 3. Start the server:
 
    ```bash
-   uvicorn backend.main:app --reload
+   uvicorn main:app --reload
    ```
 
 ## Environment Variables
