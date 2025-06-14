@@ -60,9 +60,11 @@
 .input-area {
   display: flex;
   gap: 0.5rem;
+  align-items: center;
   background-color: white;
-  padding: 1rem;
+  border: 1px solid #ddd;
   border-radius: 10px;
+  padding: 0.5rem;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
@@ -102,8 +104,10 @@ button:disabled {
 
 .debug-info {
   margin-top: 1rem;
-  text-align: center;
-  color: #666;
+  padding: 0.5rem;
+  background-color: rgba(0,0,0,0.05);
+  border-radius: 5px;
+  font-family: monospace;
 }
 
 h1 {
@@ -179,37 +183,222 @@ h1 {
 }
 
 .voice-button {
+  position: relative;
+  border: 2px solid #28a745;
   background-color: #28a745;
   color: white;
-  border: none;
+  padding: 0.5rem;
   border-radius: 50%;
-  width: 45px;
-  height: 45px;
-  font-size: 18px;
   cursor: pointer;
-  transition: all 0.3s;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+  margin: 0 0.5rem;
+  width: 50px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.voice-button:hover:not(:disabled) {
+.voice-button:hover {
   background-color: #218838;
+  border-color: #218838;
   transform: scale(1.05);
-}
-
-.voice-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
 }
 
 .voice-button.listening {
   background-color: #dc3545;
-  animation: pulse 1s infinite;
+  border-color: #dc3545;
+  animation: pulse 2s infinite;
 }
 
+.voice-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.voice-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* リスニング中のパルスアニメーション */
 @keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+  }
+}
+
+/* リスニングインジケーター */
+.listening-indicator {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #ff0000;
+  border-radius: 50%;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* 入力エリアの改良 */
+.input-area {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 0.5rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.message-input {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  background-color: transparent;
+}
+
+.message-input.listening {
+  background-color: #fff3cd;
+  border-radius: 5px;
+}
+
+.send-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.send-button:hover {
+  background-color: #0056b3;
+}
+
+.send-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.send-button.loading {
+  opacity: 0.7;
+}
+
+/* ローディングスピナー */
+.loading-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* タイピングインジケーターの改良 */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.typing-indicator .dot {
+  width: 6px;
+  height: 6px;
+  background-color: #6c757d;
+  border-radius: 50%;
+  animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-indicator .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-10px);
+  }
+}
+
+/* メッセージの改良 */
+.message {
+  position: relative;
+}
+
+.message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.message .timestamp {
+  display: block;
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-top: 0.25rem;
+}
+
+/* デバッグ情報のスタイル改良 */
+.debug-info {
+  margin-top: 1rem;
+  padding: 0.5rem;
+  background-color: rgba(0,0,0,0.05);
+  border-radius: 5px;
+  font-family: monospace;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .App {
+    padding: 0.5rem;
+  }
+  
+  .voice-button {
+    width: 45px;
+    height: 45px;
+    font-size: 1rem;
+  }
+  
+  .send-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
 }

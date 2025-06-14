@@ -39,7 +39,7 @@ GOOGLE_APPLICATION_CREDENTIALS = os.getenv(
 # The gemini-1.5-flash model provides fast, high-quality responses
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-2.5-flash-preview-05-20")
 else:
     model = None
 
@@ -86,6 +86,7 @@ class Request(BaseModel):
     practice_type: str = (
         "conversation"  # Type: conversation, grammar, vocabulary, pronunciation
     )
+    conversation_history: list = []  # Previous messages for context
 
 
 class Response(BaseModel):
@@ -230,7 +231,7 @@ async def respond(req: Request):
 
         # Create specialized prompts based on practice type and level
         prompt = create_conversation_prompt(
-            req.text, req.level, req.practice_type
+            req.text, req.level, req.practice_type, req.conversation_history
         )
 
         # Generate response using Gemini
@@ -252,7 +253,7 @@ async def respond(req: Request):
 
 
 def create_conversation_prompt(
-    user_text: str, level: str, practice_type: str
+    user_text: str, level: str, practice_type: str, conversation_history: list = None
 ) -> str:
     """
     Create specialized prompts for different types of English conversation practice.
@@ -261,10 +262,24 @@ def create_conversation_prompt(
         user_text: The user's input message
         level: beginner, intermediate, or advanced
         practice_type: conversation, grammar, vocabulary, or pronunciation
+        conversation_history: Previous messages for context
 
     Returns:
         A formatted prompt string optimized for the specified practice type and level
     """
+
+    # Format conversation history for context
+    history_context = ""
+    if conversation_history and len(conversation_history) > 0:
+        history_context = "\n\nCONVERSATION HISTORY (for context):\n"
+        # Show last 10 messages to avoid token limit issues
+        recent_history = conversation_history[-10:] if len(
+            conversation_history) > 10 else conversation_history
+        for msg in recent_history:
+            sender = msg.get('sender', 'Unknown')
+            text = msg.get('text', '')
+            history_context += f"{sender}: {text}\n"
+        history_context += "\n"
 
     # Base instructions for all practice types
     base_instructions = f"""
@@ -279,7 +294,8 @@ IMPORTANT GUIDELINES:
 - Provide gentle corrections when needed
 - Ask follow-up questions to keep the conversation flowing
 - Use examples and explanations when helpful
-"""
+- Reference previous parts of the conversation when relevant
+{history_context}"""
 
     # Level-specific adjustments
     level_adjustments = {

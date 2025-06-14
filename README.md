@@ -28,18 +28,61 @@
 
 ```
 eikaiwa/
-├── backend/           # Python FastAPIサーバー
-│   ├── main.py       # メインアプリケーション
-│   └── requirements.txt
-├── frontend/         # React フロントエンド
+├── backend/                    # Python FastAPIサーバー
+│   ├── main.py                # メインアプリケーション
+│   └── requirements.txt       # Python依存関係
+├── frontend/                  # React フロントエンド
 │   ├── src/
-│   │   ├── App.js   # メインReactコンポーネント
-│   │   └── App.css  # スタイルシート
+│   │   ├── components/        # 再利用可能なUIコンポーネント
+│   │   │   ├── ChatBox/      # チャット表示エリア
+│   │   │   ├── InputArea/    # メッセージ入力エリア
+│   │   │   ├── SettingsPanel/ # 学習設定パネル
+│   │   │   └── VoiceControls/ # 音声機能制御
+│   │   ├── hooks/            # カスタムフック（状態管理ロジック）
+│   │   │   ├── useChat.js    # チャット機能
+│   │   │   ├── useSettings.js # 設定管理
+│   │   │   ├── useVoiceInput.js # 音声認識機能
+│   │   │   ├── useVoiceOutput.js # 音声合成機能
+│   │   │   └── useKeyboardShortcuts.js # キーボードショートカット
+│   │   ├── utils/            # ユーティリティ関数
+│   │   │   ├── api.js        # API通信関数
+│   │   │   └── constants.js  # 定数定義
+│   │   ├── App.js           # メインアプリケーション
+│   │   └── App.css          # スタイルシート
 │   └── package.json
-├── .env             # 環境変数（要設定）
-├── .env.example     # 環境変数テンプレート
-└── README.md        # このファイル
+├── .env                      # 環境変数（要設定）
+├── .env.example              # 環境変数テンプレート
+├── AGENTS.md                 # 開発ガイドライン
+├── instructions.md           # 使用説明書（詳細）
+└── README.md                 # このファイル
 ```
+
+## 🏗️ コードアーキテクチャ
+
+このプロジェクトは **初心者にも理解しやすい** 構造でリファクタリングされています：
+
+### フロントエンド設計原則
+
+1. **機能別分離**: 各機能を独立したコンポーネントとフックに分離
+2. **再利用性**: 共通のUIコンポーネントとロジックを抽象化
+3. **可読性**: 豊富なコメントと明確な命名規則
+4. **保守性**: 疎結合な設計でメンテナンスを容易に
+
+### コンポーネント構成
+
+- **App.js**: メインアプリケーション（統合とレイアウト）
+- **SettingsPanel**: 学習設定UI（レベル、タイプ、音声設定）
+- **ChatBox**: メッセージ履歴表示
+- **InputArea**: テキスト・音声入力エリア
+- **VoiceControls**: 音声認識ボタン
+
+### カスタムフック
+
+- **useSettings**: 設定状態管理
+- **useChat**: チャット機能とAI通信
+- **useVoiceInput**: 音声認識機能
+- **useVoiceOutput**: 音声合成機能
+- **useKeyboardShortcuts**: キーボードショートカット
 
 ## 🚀 セットアップ手順
 
