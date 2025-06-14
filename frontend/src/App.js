@@ -28,6 +28,35 @@ function App() {
     scrollToBottom();
   }, [messages]);
 
+  // Fetch welcome message when component mounts or settings change
+  useEffect(() => {
+    fetchWelcomeMessage();
+  }, [level, practiceType]);
+
+  // Fetch welcome message from backend
+  const fetchWelcomeMessage = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/welcome?level=${level}&practice_type=${practiceType}`);
+      if (res.ok) {
+        const data = await res.json();
+        setMessages([{ sender: 'AI Tutor', text: data.reply }]);
+      } else {
+        // Fallback welcome message
+        setMessages([{ 
+          sender: 'AI Tutor', 
+          text: `Hello! Welcome to English Communication App! I'm your ${level} level ${practiceType} practice partner. How are you today?` 
+        }]);
+      }
+    } catch (err) {
+      console.error('Error fetching welcome message:', err);
+      // Fallback welcome message
+      setMessages([{ 
+        sender: 'AI Tutor', 
+        text: "Hello! Welcome to English Communication App! I'm here to help you practice English. How are you today?" 
+      }]);
+    }
+  };
+
   // Send the message to the backend and handle the response  
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -55,12 +84,12 @@ function App() {
       }
       
       const data = await res.json();
-      setMessages((msgs) => [...msgs, { sender: 'Bot', text: data.reply }]);
+      setMessages((msgs) => [...msgs, { sender: 'AI Tutor', text: data.reply }]);
     } catch (err) {
       console.error('Error sending message:', err);
       setMessages((msgs) => [
         ...msgs,
-        { sender: 'Bot', text: `Error contacting server: ${err.message}` },
+        { sender: 'AI Tutor', text: `Error contacting server: ${err.message}` },
       ]);
     } finally {
       setIsLoading(false);
@@ -120,8 +149,8 @@ function App() {
           </div>
         ))}
         {isLoading && (
-          <div className="message bot loading">
-            <strong>Bot: </strong>
+          <div className="message ai-tutor loading">
+            <strong>AI Tutor: </strong>
             <span className="typing-indicator">Typing...</span>
           </div>
         )}

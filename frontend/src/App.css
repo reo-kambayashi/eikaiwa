@@ -38,6 +38,12 @@
   margin-right: auto;
 }
 
+.message.ai-tutor {
+  background-color: #e9ecef;
+  color: #333;
+  margin-right: auto;
+}
+
 .message.loading {
   opacity: 0.7;
 }
