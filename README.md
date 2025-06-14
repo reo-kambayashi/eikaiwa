@@ -20,6 +20,13 @@ It has a React frontend (in the `frontend` folder) and a simple FastAPI backend.
    uvicorn backend.main:app --reload
    ```
 
+   Run this command from the project root so Python can locate the
+   `backend` package. If you run it inside the `backend` directory, use:
+
+   ```bash
+   uvicorn main:app --reload
+   ```
+
 ## Environment Variables
 
 Copy `.env.example` to `.env` in the project root and fill in your own values.
