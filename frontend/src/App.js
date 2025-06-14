@@ -7,6 +7,10 @@ function App() {
   // List of chat messages to display
   const [messages, setMessages] = useState([]);
 
+  // Base URL for the backend. React reads environment variables starting with
+  // REACT_APP_. We provide a fallback so the app works out of the box.
+  const API_URL = process.env.REACT_APP_API_URL || '';
+
   // Send the message to the backend and handle the response
   const sendMessage = async () => {
     if (!input) return;
@@ -14,7 +18,7 @@ function App() {
     setMessages((msgs) => [...msgs, userMsg]);
     setInput('');
     try {
-      const res = await fetch('/api/respond', {
+      const res = await fetch(`${API_URL}/api/respond`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: input }),
