@@ -1,0 +1,28 @@
+.App {
+  max-width: 600px;
+  margin: 0 auto;
+  font-family: sans-serif;
+  padding: 1rem;
+}
+
+.chat-box {
+  border: 1px solid #ccc;
+  height: 300px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.message {
+  margin-bottom: 0.5rem;
+}
+
+.input-area {
+  display: flex;
+  gap: 0.5rem;
+}
+
+input {
+  flex: 1;
+  padding: 0.5rem;
+}
