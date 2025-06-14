@@ -9,8 +9,9 @@ It has a React frontend (in the `frontend` folder) and a simple FastAPI backend.
 2. Create the environment and install dependencies:
 
    ```bash
+   cd backend
    uv venv .venv
-   uv pip install -r backend/requirements.txt
+   uv pip install -r requirements.txt
    ```
 
 3. Start the server:
