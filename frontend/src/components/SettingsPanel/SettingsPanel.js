@@ -46,12 +46,6 @@ const SettingsPanel = ({
 }) => {
   return (
     <div className="settings-panel">
-      {/* 学習設定セクション */}
-      <div className="settings-section-header">
-        <h2>Learning Settings</h2>
-        <p>Customize your practice preferences</p>
-      </div>
-      
       {/* 英語レベル設定 */}
       <div className="setting-group">
         <label htmlFor="level">English Level</label>
@@ -84,12 +78,6 @@ const SettingsPanel = ({
             </option>
           ))}
         </select>
-      </div>
-
-      {/* 音声機能設定セクション */}
-      <div className="settings-section-header">
-        <h2>Voice Features</h2>
-        <p>Configure speech recognition and text-to-speech</p>
       </div>
 
       {/* 音声機能設定 */}
@@ -145,39 +133,48 @@ const SettingsPanel = ({
       {isVoiceOutputEnabled && (
         <div className="setting-group">
           <label htmlFor="speakingRate">Speaking Speed</label>
-          <select
-            id="speakingRate"
-            value={speakingRate}
-            onChange={(e) => onSpeakingRateChange(parseFloat(e.target.value))}
-            disabled={isLoading}
-          >
-            <option value="0.5">0.5x (Very Slow)</option>
-            <option value="0.75">0.75x (Slow)</option>
-            <option value="1.0">1.0x (Normal)</option>
-            <option value="1.25">1.25x (Fast)</option>
-            <option value="1.5">1.5x (Very Fast)</option>
-            <option value="2.0">2.0x (Maximum)</option>
-          </select>
-          <div className="speaking-rate-info">
-            <small>Current speed: <strong>{speakingRate.toFixed(1)}x</strong></small>
-            <button
-              type="button"
-              onClick={onSpeakingRateReset}
+          <div className="speed-slider-container">
+            <div className="speed-slider-labels">
+              <span className="speed-label-min">0.5x</span>
+              <span className="speed-label-center">1.0x</span>
+              <span className="speed-label-max">2.0x</span>
+            </div>
+            <input
+              type="range"
+              id="speakingRate"
+              min="0.5"
+              max="2.0"
+              step="0.05"
+              value={speakingRate}
+              onChange={(e) => onSpeakingRateChange(parseFloat(e.target.value))}
               disabled={isLoading}
-              className="reset-rate-button"
-              title="Reset to default"
-            >
-              Reset
-            </button>
+              className="speed-slider"
+            />
+            <div className="speaking-rate-info">
+              <div className="current-speed">
+                <strong>{speakingRate.toFixed(2)}x</strong>
+                <span className="speed-description">
+                  {speakingRate <= 0.7 ? ' (Very Slow)' :
+                   speakingRate <= 0.9 ? ' (Slow)' :
+                   speakingRate <= 1.1 ? ' (Normal)' :
+                   speakingRate <= 1.4 ? ' (Fast)' :
+                   speakingRate <= 1.7 ? ' (Very Fast)' :
+                   ' (Maximum)'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={onSpeakingRateReset}
+                disabled={isLoading}
+                className="reset-rate-button"
+                title="Reset to default speed for current level"
+              >
+                Reset
+              </button>
+            </div>
           </div>
         </div>
       )}
-
-      {/* 学習機能設定セクション */}
-      <div className="settings-section-header">
-        <h2>Learning Features</h2>
-        <p>Enhanced features to improve your learning experience</p>
-      </div>
 
       {/* 文法チェック設定 */}
       <div className="setting-group">
