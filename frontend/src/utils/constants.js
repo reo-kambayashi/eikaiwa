@@ -122,12 +122,12 @@ export const SPEECH_CLEANING_CONFIG = {
     { pattern: /\bu\b/gi, replacement: 'you' },          // u → you  
     { pattern: /\bw\/\b/gi, replacement: 'with' },       // w/ → with
     { pattern: /\bw\b/gi, replacement: 'with' },         // w → with
-    { pattern: /\&/g, replacement: 'and' },              // & → and
-    { pattern: /\@/g, replacement: 'at' },               // @ → at
+    { pattern: /&/g, replacement: 'and' },               // & → and
+    { pattern: /@/g, replacement: 'at' },                // @ → at
     { pattern: /\+/g, replacement: 'plus' },             // + → plus
-    { pattern: /\#/g, replacement: 'number' },           // # → number
+    { pattern: /#/g, replacement: 'number' },            // # → number
     { pattern: /\$/g, replacement: 'dollar' },           // $ → dollar
-    { pattern: /\%/g, replacement: 'percent' }           // % → percent
+    { pattern: /%/g, replacement: 'percent' }            // % → percent
   ]
 };
 
