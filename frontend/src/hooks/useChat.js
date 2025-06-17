@@ -8,13 +8,11 @@ import { sendMessageToAI } from '../utils/api';
 
 /**
  * チャット機能を管理するカスタムフック
- * @param {string} level - 英語レベル
- * @param {string} practiceType - 練習タイプ
  * @param {boolean} isGrammarCheckEnabled - 文法チェック機能の有効状態
  * @param {Function} onAIResponse - AI応答時のコールバック関数
  * @returns {Object} チャット状態と制御関数
  */
-export const useChat = (level, practiceType, isGrammarCheckEnabled, onAIResponse) => {
+export const useChat = (isGrammarCheckEnabled, onAIResponse) => {
   // メッセージ履歴の管理
   const [messages, setMessages] = useState([]);
   
@@ -64,13 +62,28 @@ export const useChat = (level, practiceType, isGrammarCheckEnabled, onAIResponse
    * @returns {Promise<boolean>} 送信成功/失敗
    */
   const sendMessage = useCallback(async (messageText) => {
-    // 空メッセージやローディング中はスキップ
-    if (!messageText || !messageText.trim() || isLoading) {
-      console.log('Skipping send - empty message or loading');
+    // 厳密な型チェックと検証
+    if (!messageText) {
+      console.log('Skipping send - no message provided');
+      return false;
+    }
+
+    if (typeof messageText !== 'string') {
+      console.log('Skipping send - message is not a string:', typeof messageText, messageText);
       return false;
     }
 
     const trimmedMessage = messageText.trim();
+    if (!trimmedMessage) {
+      console.log('Skipping send - message is empty after trim');
+      return false;
+    }
+
+    if (isLoading) {
+      console.log('Skipping send - already loading');
+      return false;
+    }
+
     console.log('Sending message:', trimmedMessage);
 
     // ユーザーメッセージを履歴に追加
@@ -93,17 +106,33 @@ export const useChat = (level, practiceType, isGrammarCheckEnabled, onAIResponse
       // 注意: ここでは現在のmessages状態を使用（ユーザーメッセージ追加前の状態）
       const aiResponse = await sendMessageToAI(
         trimmedMessage,
-        level,
-        practiceType,
         messages, // 現在の会話履歴を使用
         isGrammarCheckEnabled // 文法チェック設定を含める
       );
 
-      // AI応答を履歴に追加
+      console.log('✅ AI response received:', aiResponse);
+
+      // AI応答を履歴に追加（オブジェクトからreplyプロパティを安全に抽出）
+      let aiResponseText = 'I apologize, but I cannot respond right now.';
+      
+      if (aiResponse && typeof aiResponse === 'object') {
+        if (typeof aiResponse.reply === 'string' && aiResponse.reply.trim()) {
+          aiResponseText = aiResponse.reply.trim();
+        } else if (typeof aiResponse === 'string') {
+          aiResponseText = aiResponse.trim();
+        }
+      } else if (typeof aiResponse === 'string' && aiResponse.trim()) {
+        aiResponseText = aiResponse.trim();
+      }
+
       const aiMessage = {
         sender: 'AI Tutor',
-        text: aiResponse,
-        timestamp: new Date().toISOString()
+        text: aiResponseText, // 文字列として確実に格納
+        timestamp: new Date().toISOString(),
+        // 追加情報（今後の機能拡張用）
+        suggestions: aiResponse?.suggestions || [],
+        grammarFeedback: aiResponse?.grammarFeedback || null,
+        confidence: aiResponse?.confidence || 0
       };
 
       setMessages(prevMessages => {
@@ -112,9 +141,9 @@ export const useChat = (level, practiceType, isGrammarCheckEnabled, onAIResponse
         return finalMessages;
       });
 
-      // AI応答コールバックがある場合は実行
-      if (onAIResponse) {
-        onAIResponse(aiResponse);
+      // AI応答コールバックがある場合は実行（安全な文字列を渡す）
+      if (onAIResponse && typeof onAIResponse === 'function') {
+        onAIResponse(aiResponseText);
       }
 
       console.log('Message sent successfully');
@@ -137,7 +166,7 @@ export const useChat = (level, practiceType, isGrammarCheckEnabled, onAIResponse
     } finally {
       setIsLoading(false);
     }
-  }, [level, practiceType, isGrammarCheckEnabled, messages, isLoading, onAIResponse]);
+  }, [messages, isLoading, isGrammarCheckEnabled, onAIResponse]);
 
   /**
    * チャット履歴をクリアする関数

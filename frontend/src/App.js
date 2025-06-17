@@ -27,20 +27,15 @@ function App() {
   // カスタムフックによる状態管理
   // ============================================================================
   
-  // 設定管理（英語レベル、練習タイプ、音声機能）
+  // 設定管理（音声機能）
   const {
-    level,
-    practiceType,
     isVoiceInputEnabled,
     isVoiceOutputEnabled,
-    isGrammarCheckEnabled,
+    isGrammarCheckEnabled, // 常にtrue
     speakingRate,
     voiceInputTimeout,
-    updateLevel,
-    updatePracticeType,
     toggleVoiceInput,
     toggleVoiceOutput,
-    toggleGrammarCheck,
     updateSpeakingRate,
     resetSpeakingRateToDefault,
     updateVoiceInputTimeout
@@ -55,7 +50,7 @@ function App() {
     isLoading,
     messagesEndRef,
     sendMessage
-  } = useChat(level, practiceType, isGrammarCheckEnabled, speak);
+  } = useChat(isGrammarCheckEnabled, speak);
 
   // 音声入力機能
   const {
@@ -77,8 +72,9 @@ function App() {
   const handleSendMessage = async () => {
     const messageToSend = isListening ? transcript : input;
     
-    if (!messageToSend.trim()) {
-      console.log('No message to send');
+    // 型安全性チェックを追加
+    if (!messageToSend || typeof messageToSend !== 'string' || !messageToSend.trim()) {
+      console.log('No valid message to send');
       return;
     }
 
@@ -156,20 +152,14 @@ function App() {
         {/* 左側：学習設定パネル */}
         <div className="settings-section">
           <SettingsPanel
-            level={level}
-            practiceType={practiceType}
             isVoiceInputEnabled={isVoiceInputEnabled}
             isVoiceOutputEnabled={isVoiceOutputEnabled}
-            isGrammarCheckEnabled={isGrammarCheckEnabled}
             speakingRate={speakingRate}
             voiceInputTimeout={voiceInputTimeout}
             isVoiceSupported={isVoiceSupported}
             isLoading={isLoading}
-            onLevelChange={updateLevel}
-            onPracticeTypeChange={updatePracticeType}
             onVoiceInputToggle={toggleVoiceInput}
             onVoiceOutputToggle={toggleVoiceOutput}
-            onGrammarCheckToggle={toggleGrammarCheck}
             onSpeakingRateChange={updateSpeakingRate}
             onSpeakingRateReset={resetSpeakingRateToDefault}
             onVoiceInputTimeoutChange={updateVoiceInputTimeout}

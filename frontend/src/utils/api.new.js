@@ -4,7 +4,7 @@
 // エラーハンドリング、リトライ機能、キャッシングの改善を含む
 // ============================================================================
 
-import { API_CONFIG, TTS_CONFIG } from './constants';
+import { API_CONFIG, TTS_CONFIG, UI_MESSAGES } from './constants';
 import { AppError, ERROR_TYPES, withTimeout, withRetry, logError } from './errorHandling';
 
 // レスポンスキャッシュ（メモリベース）
@@ -124,31 +124,33 @@ const safeFetch = async (url, options = {}) => {
 /**
  * フォールバックメッセージを生成
  */
-const generateFallbackWelcomeMessage = () => {
-  return `Hello! Welcome to English Communication App! I'm your AI English tutor, ready to help you practice and improve your English skills. How can I assist you today?`;
+const generateFallbackWelcomeMessage = (level, practiceType) => {
+  const levelText = {
+    beginner: 'beginner level',
+    intermediate: 'intermediate level', 
+    advanced: 'advanced level'
+  };
+
+  const practiceText = {
+    conversation: 'conversation practice',
+    grammar: 'grammar practice',
+    vocabulary: 'vocabulary building',
+    pronunciation: 'pronunciation practice'
+  };
+
+  return `Hello! Welcome to English Communication App! I'm ready to help you with ${practiceText[practiceType] || 'English practice'} at ${levelText[level] || 'your'} level. How can I assist you today?`;
 };
 
 /**
  * 音声出力用のテキストクリーニング
  */
 const cleanTextForSpeech = (text) => {
-  // 厳密な入力チェック
-  if (!text) {
-    return '';
-  }
-  
-  if (typeof text !== 'string') {
-    return String(text);
-  }
+  if (!text) return '';
 
   let cleaned = text;
 
-  // 絵文字を除去（ES5互換の方法）
-  cleaned = cleaned.replace(/[\u{1F600}-\u{1F64F}]/gu, ''); // 顔文字
-  cleaned = cleaned.replace(/[\u{1F300}-\u{1F5FF}]/gu, ''); // その他のシンボル
-  cleaned = cleaned.replace(/[\u{1F680}-\u{1F6FF}]/gu, ''); // 交通機関とマップ
-  cleaned = cleaned.replace(/[\u{2600}-\u{26FF}]/gu, '');   // その他のシンボル
-  cleaned = cleaned.replace(/[\u{2700}-\u{27BF}]/gu, '');   // Dingbats
+  // 絵文字を除去
+  cleaned = cleaned.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '');
   
   // マークダウン記法を除去
   cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, '$1'); // **太字**
@@ -167,69 +169,69 @@ const cleanTextForSpeech = (text) => {
 
 /**
  * ウェルカムメッセージを取得する関数（最適化版）
+ * @param {string} level - 英語レベル
+ * @param {string} practiceType - 練習タイプ
  * @returns {Promise<string>} ウェルカムメッセージ
  */
-export const fetchWelcomeMessage = async () => {
-  const context = 'fetchWelcomeMessage()';
+export const fetchWelcomeMessage = async (level, practiceType) => {
+  const context = `fetchWelcomeMessage(${level}, ${practiceType})`;
   
   try {
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.WELCOME}`;
+    const params = new URLSearchParams({ level, practice_type: practiceType });
+    const fullUrl = `${url}?${params}`;
 
-    console.log('🔗 Fetching welcome message from:', url);
+    console.log('🔗 Fetching welcome message from:', fullUrl);
 
     const data = await withRetry(
-      () => safeFetch(url),
+      () => safeFetch(fullUrl),
       API_CONFIG.MAX_RETRIES
     );
 
     console.log('✅ Welcome message received:', data);
-    return data.reply || generateFallbackWelcomeMessage();
+    return data.reply || generateFallbackWelcomeMessage(level, practiceType);
     
   } catch (error) {
     logError(error, context);
-    return generateFallbackWelcomeMessage();
+    return generateFallbackWelcomeMessage(level, practiceType);
   }
 };
 
 /**
  * AIにメッセージを送信して応答を取得する関数（最適化版）
  * @param {string} text - ユーザーのメッセージ
+ * @param {string} level - 英語レベル
+ * @param {string} practiceType - 練習タイプ
  * @param {Array} conversationHistory - 会話履歴
  * @param {boolean} enableGrammarCheck - 文法チェックを有効にするか
  * @returns {Promise<Object>} AI応答オブジェクト
  */
 export const sendMessageToAI = async (
   text, 
+  level, 
+  practiceType, 
   conversationHistory = [], 
   enableGrammarCheck = true
 ) => {
-  const context = `sendMessageToAI(${text?.substring(0, 50) || 'undefined'}...)`;
+  const context = `sendMessageToAI(${text.substring(0, 50)}...)`;
   
-  // 厳密な入力チェック
-  if (!text) {
+  if (!text?.trim()) {
     throw new AppError('Message text is required', ERROR_TYPES.VALIDATION);
-  }
-  
-  if (typeof text !== 'string') {
-    throw new AppError('Message text must be a string', ERROR_TYPES.VALIDATION);
-  }
-  
-  const trimmedText = text.trim();
-  if (!trimmedText) {
-    throw new AppError('Message text cannot be empty', ERROR_TYPES.VALIDATION);
   }
 
   try {
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.RESPOND}`;
     
     const requestBody = {
-      text: trimmedText,
+      text: text.trim(),
+      level,
+      practice_type: practiceType,
       conversation_history: conversationHistory.slice(-10), // 最新10件のみ
       enable_grammar_check: enableGrammarCheck,
       timestamp: new Date().toISOString()
     };
 
-    console.log('🔗 Sending message to AI:', { text: trimmedText.substring(0, 100) });
+    console.log('🔗 Sending message to AI:', { text: text.substring(0, 100), level, practiceType });
 
     const data = await withRetry(
       () => safeFetch(url, {
@@ -267,29 +269,20 @@ export const sendMessageToAI = async (
 /**
  * テキストを音声に変換する関数（最適化版）
  * @param {string} text - 音声化するテキスト
+ * @param {string} level - 英語レベル
  * @param {number} speakingRate - 読み上げ速度
  * @returns {Promise<Blob>} 音声データ
  */
-export const textToSpeech = async (text, speakingRate = 1.0) => {
-  const context = `textToSpeech(${text?.substring(0, 50) || 'undefined'}...)`;
+export const textToSpeech = async (text, level = 'beginner', speakingRate = 1.0) => {
+  const context = `textToSpeech(${text.substring(0, 50)}...)`;
   
-  // 厳密な入力チェック
-  if (!text) {
+  if (!text?.trim()) {
     throw new AppError('Text is required for speech synthesis', ERROR_TYPES.VALIDATION);
-  }
-  
-  if (typeof text !== 'string') {
-    throw new AppError('Text must be a string for speech synthesis', ERROR_TYPES.VALIDATION);
-  }
-  
-  const trimmedText = text.trim();
-  if (!trimmedText) {
-    throw new AppError('Text cannot be empty for speech synthesis', ERROR_TYPES.VALIDATION);
   }
 
   try {
     // テキストをクリーニング
-    const cleanedText = cleanTextForSpeech(trimmedText);
+    const cleanedText = cleanTextForSpeech(text);
     
     if (!cleanedText.trim()) {
       throw new AppError('No valid text found for speech synthesis', ERROR_TYPES.VALIDATION);
@@ -304,12 +297,14 @@ export const textToSpeech = async (text, speakingRate = 1.0) => {
         speaking_rate: Math.max(0.5, Math.min(2.0, speakingRate)),
         pitch: TTS_CONFIG.PITCH || 1.0,
         volume: TTS_CONFIG.VOLUME || 1.0
-      }
+      },
+      level
     };
 
     console.log('🔗 Converting text to speech:', { 
       text: cleanedText.substring(0, 100), 
-      speakingRate
+      speakingRate, 
+      level 
     });
 
     const response = await withTimeout(
@@ -342,106 +337,6 @@ export const textToSpeech = async (text, speakingRate = 1.0) => {
       { originalError: error }
     );
   }
-};
-
-/**
- * テキストを音声に変換してHTMLAudioElementを返す関数（従来互換）
- * @param {string} text - 音声化するテキスト  
- * @param {number} speakingRate - 読み上げ速度
- * @returns {Promise<HTMLAudioElement>} 音声要素
- */
-export const convertTextToSpeech = async (text, speakingRate = 1.0) => {
-  // 厳密な入力チェック
-  if (!text) {
-    console.error('convertTextToSpeech: No text provided');
-    return null;
-  }
-  
-  if (typeof text !== 'string') {
-    console.error('convertTextToSpeech: Text must be a string, got:', typeof text);
-    return null;
-  }
-  
-  const trimmedText = text.trim();
-  if (!trimmedText) {
-    console.error('convertTextToSpeech: Text is empty after trim');
-    return null;
-  }
-
-  try {
-    const audioBlob = await textToSpeech(trimmedText, speakingRate);
-    const audioUrl = URL.createObjectURL(audioBlob);
-    const audioElement = new Audio(audioUrl);
-    
-    // メモリリーク防止のため、再生終了後にURLを開放
-    audioElement.addEventListener('ended', () => {
-      URL.revokeObjectURL(audioUrl);
-    });
-    
-    return audioElement;
-  } catch (error) {
-    logError(error, 'convertTextToSpeech');
-    return null;
-  }
-};
-
-/**
- * ブラウザの標準音声合成APIを使用するフォールバック関数
- * @param {string} text - 音声化するテキスト
- * @param {number} rate - 読み上げ速度
- * @returns {Promise<boolean>} 成功したかどうか
- */
-export const fallbackTextToSpeech = (text, rate = 1.0) => {
-  return new Promise((resolve) => {
-    if (!('speechSynthesis' in window)) {
-      console.warn('Speech synthesis not supported');
-      resolve(false);
-      return;
-    }
-
-    // 厳密な入力チェック
-    if (!text) {
-      console.warn('fallbackTextToSpeech: No text provided');
-      resolve(false);
-      return;
-    }
-    
-    if (typeof text !== 'string') {
-      console.warn('fallbackTextToSpeech: Text must be a string, got:', typeof text);
-      resolve(false);
-      return;
-    }
-    
-    const trimmedText = text.trim();
-    if (!trimmedText) {
-      console.warn('fallbackTextToSpeech: Text is empty after trim');
-      resolve(false);
-      return;
-    }
-
-    try {
-      const utterance = new SpeechSynthesisUtterance(trimmedText);
-      utterance.lang = 'en-US';
-      utterance.rate = Math.max(0.1, Math.min(10, rate)); // ブラウザの範囲制限
-      utterance.pitch = 1.0;
-      utterance.volume = 1.0;
-
-      utterance.onend = () => {
-        console.log('Fallback TTS completed');
-        resolve(true);
-      };
-
-      utterance.onerror = (error) => {
-        console.error('Fallback TTS error:', error);
-        resolve(false);
-      };
-
-      window.speechSynthesis.speak(utterance);
-    } catch (error) {
-      console.error('Fallback TTS failed:', error);
-      resolve(false);
-    }
-  });
 };
 
 /**

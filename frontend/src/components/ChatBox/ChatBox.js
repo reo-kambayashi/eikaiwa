@@ -4,6 +4,7 @@
 // ============================================================================
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 /**
  * チャット表示エリアコンポーネント
@@ -31,7 +32,23 @@ const ChatBox = ({ messages, isLoading, messagesEndRef }) => {
             className={`message ${message.sender.toLowerCase().replace(' ', '-')} ${message.isError ? 'error' : ''}`}
           >
             <strong>{message.sender}: </strong>
-            <span className="message-text">{message.text}</span>
+            <span className="message-text">
+              {(() => {
+                // 安全なテキスト表示のための処理
+                if (typeof message.text === 'string') {
+                  return message.text;
+                } else if (typeof message.text === 'object' && message.text !== null) {
+                  // オブジェクトの場合はreplyプロパティを優先
+                  if (message.text.reply && typeof message.text.reply === 'string') {
+                    return message.text.reply;
+                  }
+                  // replyがない場合はJSON文字列として表示
+                  return JSON.stringify(message.text);
+                } else {
+                  return String(message.text || 'No message content');
+                }
+              })()}
+            </span>
             {message.timestamp && (
               <small className="timestamp">
                 {new Date(message.timestamp).toLocaleTimeString()}
@@ -58,6 +75,23 @@ const ChatBox = ({ messages, isLoading, messagesEndRef }) => {
       <div ref={messagesEndRef} />
     </div>
   );
+};
+
+// PropTypesの定義
+ChatBox.propTypes = {
+  messages: PropTypes.arrayOf(
+    PropTypes.shape({
+      sender: PropTypes.string.isRequired,
+      text: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+      timestamp: PropTypes.string,
+      isError: PropTypes.bool,
+      suggestions: PropTypes.array,
+      grammarFeedback: PropTypes.object,
+      confidence: PropTypes.number
+    })
+  ).isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  messagesEndRef: PropTypes.object.isRequired
 };
 
 export default ChatBox;
