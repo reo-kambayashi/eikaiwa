@@ -46,9 +46,15 @@ const SettingsPanel = ({
 }) => {
   return (
     <div className="settings-panel">
+      {/* 学習設定セクション */}
+      <div className="settings-section-header">
+        <h2>Learning Settings</h2>
+        <p>Customize your practice preferences</p>
+      </div>
+      
       {/* 英語レベル設定 */}
       <div className="setting-group">
-        <label htmlFor="level">English Level:</label>
+        <label htmlFor="level">English Level</label>
         <select 
           id="level" 
           value={level} 
@@ -65,7 +71,7 @@ const SettingsPanel = ({
       
       {/* 練習タイプ設定 */}
       <div className="setting-group">
-        <label htmlFor="practiceType">Practice Type:</label>
+        <label htmlFor="practiceType">Practice Type</label>
         <select 
           id="practiceType" 
           value={practiceType} 
@@ -80,9 +86,15 @@ const SettingsPanel = ({
         </select>
       </div>
 
+      {/* 音声機能設定セクション */}
+      <div className="settings-section-header">
+        <h2>Voice Features</h2>
+        <p>Configure speech recognition and text-to-speech</p>
+      </div>
+
       {/* 音声機能設定 */}
       <div className="setting-group">
-        <label>Voice Controls:</label>
+        <label>Voice Controls</label>
         <div className="voice-controls">
           {/* 音声入力設定（サポートされている場合のみ表示） */}
           {isVoiceSupported && (
@@ -93,7 +105,7 @@ const SettingsPanel = ({
                 onChange={(e) => onVoiceInputToggle(e.target.checked)}
                 disabled={isLoading}
               />
-              Voice Input (音声入力)
+              <span>Voice Input</span>
             </label>
           )}
           
@@ -105,7 +117,7 @@ const SettingsPanel = ({
               onChange={(e) => onVoiceOutputToggle(e.target.checked)}
               disabled={isLoading}
             />
-            Voice Output (音声出力)
+            <span>Voice Output</span>
           </label>
         </div>
       </div>
@@ -113,7 +125,7 @@ const SettingsPanel = ({
       {/* 音声認識タイムアウト設定（音声入力が有効な場合のみ） */}
       {isVoiceInputEnabled && isVoiceSupported && (
         <div className="setting-group">
-          <label htmlFor="voiceInputTimeout">Voice Input Timeout (音声認識タイムアウト):</label>
+          <label htmlFor="voiceInputTimeout">Voice Input Timeout</label>
           <select 
             id="voiceInputTimeout" 
             value={voiceInputTimeout} 
@@ -126,19 +138,50 @@ const SettingsPanel = ({
               </option>
             ))}
           </select>
-          <div className="timeout-description">
-            <small>
-              ⏱️ How long to wait for voice input before automatically stopping.
-              <br/>
-              音声入力を自動的に停止するまでの待機時間です。
-            </small>
+        </div>
+      )}
+
+      {/* 読み上げ速度設定（音声出力が有効な場合のみ） */}
+      {isVoiceOutputEnabled && (
+        <div className="setting-group">
+          <label htmlFor="speakingRate">Speaking Speed</label>
+          <select
+            id="speakingRate"
+            value={speakingRate}
+            onChange={(e) => onSpeakingRateChange(parseFloat(e.target.value))}
+            disabled={isLoading}
+          >
+            <option value="0.5">0.5x (Very Slow)</option>
+            <option value="0.75">0.75x (Slow)</option>
+            <option value="1.0">1.0x (Normal)</option>
+            <option value="1.25">1.25x (Fast)</option>
+            <option value="1.5">1.5x (Very Fast)</option>
+            <option value="2.0">2.0x (Maximum)</option>
+          </select>
+          <div className="speaking-rate-info">
+            <small>Current speed: <strong>{speakingRate.toFixed(1)}x</strong></small>
+            <button
+              type="button"
+              onClick={onSpeakingRateReset}
+              disabled={isLoading}
+              className="reset-rate-button"
+              title="Reset to default"
+            >
+              Reset
+            </button>
           </div>
         </div>
       )}
 
+      {/* 学習機能設定セクション */}
+      <div className="settings-section-header">
+        <h2>Learning Features</h2>
+        <p>Enhanced features to improve your learning experience</p>
+      </div>
+
       {/* 文法チェック設定 */}
       <div className="setting-group">
-        <label>Learning Features:</label>
+        <label>Grammar Enhancement</label>
         <div className="learning-controls">
           <label className="feature-toggle">
             <input
@@ -147,71 +190,17 @@ const SettingsPanel = ({
               onChange={(e) => onGrammarCheckToggle(e.target.checked)}
               disabled={isLoading}
             />
-            Grammar Check & Suggestions (文法チェック・改善提案)
+            <span>Grammar Check & Suggestions</span>
           </label>
         </div>
         {isGrammarCheckEnabled && (
           <div className="feature-description">
             <small>
-              AIが不自然な表現を検出して改善案を提案します。<br/>
-              AI will detect unnatural expressions and suggest improvements.
+              <strong>Grammar Check:</strong> Provides real-time feedback on your writing with suggestions for improvement.
             </small>
           </div>
         )}
       </div>
-        
-        {/* 読み上げ速度設定（音声出力が有効な場合のみ） */}
-        {isVoiceOutputEnabled && (
-          <div className="setting-group">
-            <label htmlFor="speakingRate">Speaking Speed (読み上げ速度):</label>
-            <div className="speaking-rate-controls">
-              <input
-                id="speakingRate"
-                type="range"
-                min={TTS_CONFIG.MIN_SPEAKING_RATE}
-                max={TTS_CONFIG.MAX_SPEAKING_RATE}
-                step="0.1"
-                value={speakingRate}
-                onChange={(e) => onSpeakingRateChange(parseFloat(e.target.value))}
-                disabled={isLoading}
-                className="speaking-rate-slider"
-              />
-              <div className="speaking-rate-info">
-                <span className="rate-value">{speakingRate.toFixed(1)}x</span>
-                <button
-                  type="button"
-                  onClick={onSpeakingRateReset}
-                  disabled={isLoading}
-                  className="reset-rate-button"
-                  title="Reset to level default (レベルのデフォルトに戻す)"
-                >
-                  Reset
-                </button>
-              </div>
-              <div className="rate-labels">
-                <small>Slow (ゆっくり)</small>
-                <small>Normal (普通)</small>
-                <small>Fast (早い)</small>
-              </div>
-              <div className="level-defaults">
-                <small>
-                  Level defaults: Beginner(1.0x), Intermediate(1.2x), Advanced(1.4x)
-                </small>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {/* キーボードショートカットの案内（音声入力が有効な場合のみ） */}
-        {isVoiceInputEnabled && (
-          <div className="keyboard-shortcuts">
-            <small>
-              📝 <strong>Keyboard Shortcuts:</strong><br/>
-              • <kbd>{KEYBOARD_SHORTCUTS.VOICE_INPUT}</kbd> - Start voice input (音声入力開始)<br/>
-              • <kbd>{KEYBOARD_SHORTCUTS.SEND_MESSAGE}</kbd> - Stop voice input & send message (音声停止＆送信)
-            </small>
-          </div>
-        )}
     </div>
   );
 };
