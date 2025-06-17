@@ -7,8 +7,8 @@ for Japanese learners using Google Gemini AI and Google Cloud TTS.
 Key features:
 - AI conversation responses using Gemini
 - Text-to-speech synthesis for pronunciation practice
-- Level-based learning (beginner, intermediate, advanced)
-- Multiple practice types (conversation, grammar, vocabulary, pronunciation)
+- Grammar checking and feedback
+- Voice input and output customization
 """
 
 import base64
@@ -82,10 +82,6 @@ class Request(BaseModel):
     """
 
     text: str  # The user's input text or speech transcription
-    level: str = "beginner"  # Learning level: beginner, intermediate, advanced
-    practice_type: str = (
-        "conversation"  # Type: conversation, grammar, vocabulary, pronunciation
-    )
     conversation_history: list = []  # Previous messages for context
     enable_grammar_check: bool = True  # Whether to enable grammar checking
 
@@ -205,13 +201,10 @@ async def text_to_speech(request: TTSRequest):
 
 
 @app.get("/api/welcome", response_model=Response)
-async def get_welcome_message(
-    level: str = "beginner", practice_type: str = "conversation"
-):
-    """Generate a personalized welcome message based on user settings."""
+async def get_welcome_message():
+    """Generate a personalized welcome message."""
 
-    print(
-        f"🔔 Welcome request received: level={level}, practice_type={practice_type}")
+    print("🔔 Welcome request received")
 
     try:
         if not model:
@@ -219,7 +212,7 @@ async def get_welcome_message(
                 reply="Hello! Welcome to English Communication App! Please set up your API key to get started."
             )
 
-        welcome_prompt = create_welcome_prompt(level, practice_type)
+        welcome_prompt = create_welcome_prompt()
         response = model.generate_content(welcome_prompt)
 
         if response.text:
@@ -240,8 +233,7 @@ async def get_welcome_message(
 async def respond(req: Request):
     """Generate a response using Gemini API for English conversation practice."""
 
-    print(
-        f"🔔 Response request received: text='{req.text[:50]}...', level={req.level}, practice_type={req.practice_type}")
+    print(f"🔔 Response request received: text='{req.text[:50]}...'")
 
     try:
         if not model:
@@ -250,10 +242,8 @@ async def respond(req: Request):
                 reply="API key not configured. Please set GEMINI_API_KEY environment variable."
             )
 
-        # Create specialized prompts based on practice type and level
-        prompt = create_conversation_prompt(
-            req.text, req.level, req.practice_type, req.conversation_history
-        )
+        # Create conversation prompt
+        prompt = create_conversation_prompt(req.text, req.conversation_history)
 
         # Generate response using Gemini
         response = model.generate_content(prompt)
@@ -274,19 +264,17 @@ async def respond(req: Request):
 
 
 def create_conversation_prompt(
-    user_text: str, level: str, practice_type: str, conversation_history: list = None
+    user_text: str, conversation_history: list = None
 ) -> str:
     """
-    Create specialized prompts for different types of English conversation practice.
+    Create prompts for English conversation practice.
 
     Args:
         user_text: The user's input message
-        level: beginner, intermediate, or advanced
-        practice_type: conversation, grammar, vocabulary, or pronunciation
         conversation_history: Previous messages for context
 
     Returns:
-        A formatted prompt string optimized for the specified practice type and level
+        A formatted prompt string optimized for conversation practice
     """
 
     # Format conversation history for context
@@ -294,162 +282,57 @@ def create_conversation_prompt(
     if conversation_history and len(conversation_history) > 0:
         history_context = "\n\nCONVERSATION HISTORY (for context):\n"
         # Show last 10 messages to avoid token limit issues
-        recent_history = conversation_history[-10:] if len(
-            conversation_history) > 10 else conversation_history
+        recent_history = (
+            conversation_history[-10:]
+            if len(conversation_history) > 10
+            else conversation_history
+        )
         for msg in recent_history:
-            sender = msg.get('sender', 'Unknown')
-            text = msg.get('text', '')
+            sender = msg.get("sender", "Unknown")
+            text = msg.get("text", "")
             history_context += f"{sender}: {text}\n"
         history_context += "\n"
 
-    # Base instructions for all practice types
-    base_instructions = f"""
+    # Simplified conversation prompt
+    prompt = f"""
 You are an expert English teacher and conversation partner specializing in helping Japanese learners.
-Your student's English level is: {level.upper()}
-Practice focus: {practice_type.upper()}
 
 IMPORTANT GUIDELINES:
 - Always be encouraging and supportive
 - Use natural, conversational English
-- Adapt your vocabulary and grammar complexity to the student's level
 - Provide gentle corrections when needed
 - Ask follow-up questions to keep the conversation flowing
 - Use examples and explanations when helpful
 - Reference previous parts of the conversation when relevant
-{history_context}"""
+- Keep responses concise and engaging (1-3 sentences)
+- Focus on practical, everyday English
+{history_context}
 
-    # Level-specific adjustments
-    level_adjustments = {
-        "beginner": """
-- Use simple vocabulary and sentence structures
-- Speak more slowly and clearly
-- Repeat important words or phrases
-- Use basic grammar patterns
-- Provide extra encouragement
-""",
-        "intermediate": """
-- Use everyday vocabulary with some challenging words
-- Mix simple and complex sentences
-- Introduce idiomatic expressions occasionally
-- Help with common grammar mistakes
-- Encourage longer responses
-""",
-        "advanced": """
-- Use sophisticated vocabulary and expressions
-- Employ complex sentence structures
-- Discuss abstract topics and nuanced ideas
-- Focus on fluency and naturalness
-- Challenge with advanced grammar and idioms
-""",
-    }
+CURRENT MESSAGE FROM STUDENT:
+"{user_text}"
 
-    # Practice type-specific instructions
-    practice_instructions = {
-        "conversation": f"""
-CONVERSATION PRACTICE:
-- Engage in natural, flowing dialogue
-- Ask open-ended questions to encourage speaking
-- Share relatable experiences or opinions
-- Use appropriate conversational markers (Well, Actually, By the way, etc.)
-- Keep the conversation interesting and relevant
-
-{level_adjustments.get(level, level_adjustments["beginner"])}
-
-Student's message: "{user_text}"
-
-Respond naturally as a friendly conversation partner. Keep your response conversational and engaging.
-""",
-        "grammar": f"""
-GRAMMAR PRACTICE:
-- If there are grammar errors, gently correct them with explanations
-- Provide the correct form and explain why it's correct
-- Give 1-2 similar examples to reinforce the rule
-- Praise what the student did correctly
-- Suggest ways to practice this grammar point
-
-{level_adjustments.get(level, level_adjustments["beginner"])}
-
-Student's message: "{user_text}"
-
-Focus on helping with grammar while maintaining a supportive, conversational tone.
-""",
-        "vocabulary": f"""
-VOCABULARY PRACTICE:
-- Introduce 2-3 new words related to the topic
-- Explain meanings with simple definitions and examples
-- Help with word usage and collocations
-- Suggest synonyms or related expressions
-- Encourage the student to use new vocabulary in context
-
-{level_adjustments.get(level, level_adjustments["beginner"])}
-
-Student's message: "{user_text}"
-
-Help expand vocabulary while keeping the conversation natural and engaging.
-""",
-        "pronunciation": f"""
-PRONUNCIATION PRACTICE:
-- Focus on commonly mispronounced words by Japanese speakers
-- Provide phonetic guidance when helpful
-- Highlight rhythm and intonation patterns
-- Suggest practice techniques for difficult sounds
-- Be encouraging about pronunciation efforts
-
-{level_adjustments.get(level, level_adjustments["beginner"])}
-
-Student's message: "{user_text}"
-
-Provide pronunciation guidance while maintaining conversational flow.
-Note: You can use phonetic symbols like /θ/ for 'th' sound, /r/ vs /l/ distinction, etc.
-""",
-    }
-
-    # Combine all instructions
-    full_prompt = base_instructions + practice_instructions.get(
-        practice_type, practice_instructions["conversation"]
-    )
-
-    return full_prompt
-
-
-def create_welcome_prompt(level: str, practice_type: str) -> str:
-    """
-    Create a personalized welcome message based on user's level and practice type.
-
-    Args:
-        level: beginner, intermediate, or advanced
-        practice_type: conversation, grammar, vocabulary, or pronunciation
-
-    Returns:
-        A welcoming prompt that encourages the user to start practicing
-    """
-
-    level_greetings = {
-        "beginner": "I'm excited to help you start your English learning journey! Don't worry about making mistakes - that's how we learn.",
-        "intermediate": "Great to see you continuing your English studies! You're doing wonderful, and I'm here to help you improve even more.",
-        "advanced": "Welcome! I'm impressed by your dedication to mastering English. Let's work together to polish your skills to perfection.",
-    }
-
-    practice_introductions = {
-        "conversation": "Let's have a natural conversation! I'll ask questions and share stories to help you practice speaking naturally.",
-        "grammar": "I'll help you perfect your grammar by gently correcting mistakes and explaining the rules in simple terms.",
-        "vocabulary": "We'll expand your vocabulary together! I'll introduce new words and help you use them in context.",
-        "pronunciation": "Let's work on your pronunciation! I'll help you with tricky sounds and give you tips for speaking more clearly.",
-    }
-
-    base_welcome = f"""
-You are a friendly English conversation partner welcoming a Japanese student.
-The student is at {level.upper()} level and wants to practice {practice_type.upper()}.
-
-Create a warm, encouraging welcome message that:
-- Greets the student in a friendly way
-- Acknowledges their level and practice focus
-- Asks an engaging opening question to start the conversation
-- Uses appropriate vocabulary for their level
-- Shows enthusiasm and support
-
-Make it feel like meeting a friendly teacher who genuinely cares about their progress.
-Keep it conversational and encouraging, not formal or robotic.
+Please respond naturally as a friendly English teacher and conversation partner.
 """
 
-    return base_welcome
+    return prompt
+
+
+def create_welcome_prompt() -> str:
+    """Create a welcome prompt for new users."""
+
+    prompt = """
+You are an expert English teacher and conversation partner specializing in helping Japanese learners.
+
+Please create a warm, encouraging welcome message for a new student starting English conversation practice.
+
+GUIDELINES:
+- Keep it friendly and encouraging
+- Mention that you're here to help with English conversation
+- Invite them to start practicing by asking a question or sharing something about themselves
+- Keep it concise (2-3 sentences)
+- Use clear, natural English
+
+Please respond with a welcoming message to get the conversation started.
+"""
+
+    return prompt
