@@ -135,14 +135,14 @@ const SettingsPanel = ({
           <label htmlFor="speakingRate">Speaking Speed</label>
           <div className="speed-slider-container">
             <div className="speed-slider-labels">
-              <span className="speed-label-min">0.5x</span>
-              <span className="speed-label-center">1.0x</span>
+              <span className="speed-label-min">1.0x</span>
+              <span className="speed-label-center">1.5x</span>
               <span className="speed-label-max">2.0x</span>
             </div>
             <input
               type="range"
               id="speakingRate"
-              min="0.5"
+              min="1.0"
               max="2.0"
               step="0.05"
               value={speakingRate}
@@ -154,11 +154,10 @@ const SettingsPanel = ({
               <div className="current-speed">
                 <strong>{speakingRate.toFixed(2)}x</strong>
                 <span className="speed-description">
-                  {speakingRate <= 0.7 ? ' (Very Slow)' :
-                   speakingRate <= 0.9 ? ' (Slow)' :
-                   speakingRate <= 1.1 ? ' (Normal)' :
-                   speakingRate <= 1.4 ? ' (Fast)' :
-                   speakingRate <= 1.7 ? ' (Very Fast)' :
+                  {speakingRate <= 1.2 ? ' (Normal)' :
+                   speakingRate <= 1.4 ? ' (Slightly Fast)' :
+                   speakingRate <= 1.7 ? ' (Fast)' :
+                   speakingRate <= 1.9 ? ' (Very Fast)' :
                    ' (Maximum)'}
                 </span>
               </div>
