@@ -16,6 +16,13 @@ export const API_CONFIG = {
   }
 };
 
+// デバッグ情報をコンソールに出力
+console.log('🔧 API Configuration:', {
+  BASE_URL: API_CONFIG.BASE_URL,
+  REACT_APP_API_URL: process.env.REACT_APP_API_URL,
+  ENDPOINTS: API_CONFIG.ENDPOINTS
+});
+
 // 英語レベルの定義
 export const ENGLISH_LEVELS = [
   { value: 'beginner', label: 'Beginner (初級)' },
@@ -35,7 +42,16 @@ export const PRACTICE_TYPES = [
 export const SPEECH_RECOGNITION_CONFIG = {
   LANGUAGE: 'en-US',
   CONTINUOUS: false,
-  INTERIM_RESULTS: true
+  INTERIM_RESULTS: true,
+  // タイムアウト設定（秒）
+  TIMEOUT_OPTIONS: [
+    { value: 10, label: '10 seconds (10秒)' },
+    { value: 20, label: '20 seconds (20秒)' },
+    { value: 30, label: '30 seconds (30秒)' },
+    { value: 60, label: '1 minute (1分)' },
+    { value: 120, label: '2 minutes (2分)' }
+  ],
+  DEFAULT_TIMEOUT: 30  // デフォルトタイムアウト（秒）
 };
 
 // 音声合成の設定

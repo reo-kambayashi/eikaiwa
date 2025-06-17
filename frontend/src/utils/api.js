@@ -13,20 +13,30 @@ import { API_CONFIG, TTS_CONFIG, UI_MESSAGES, SPEECH_CLEANING_CONFIG } from './c
  */
 export const fetchWelcomeMessage = async (level, practiceType) => {
   try {
-    const response = await fetch(
-      `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.WELCOME}?level=${level}&practice_type=${practiceType}`
-    );
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.WELCOME}?level=${level}&practice_type=${practiceType}`;
+    console.log('🔗 Fetching welcome message from:', url);
+    
+    const response = await fetch(url);
+    
+    console.log('📡 Response status:', response.status);
+    console.log('📡 Response ok:', response.ok);
     
     if (response.ok) {
       const data = await response.json();
+      console.log('✅ Welcome message received:', data);
       return data.reply;
     } else {
       // サーバーエラーの場合はフォールバックメッセージを返す
-      console.warn('Failed to fetch welcome message from server');
+      console.warn('❌ Failed to fetch welcome message from server, status:', response.status);
       return generateFallbackWelcomeMessage(level, practiceType);
     }
   } catch (error) {
-    console.error('Error fetching welcome message:', error);
+    console.error('💥 Error fetching welcome message:', error);
+    console.error('💥 Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
     return generateFallbackWelcomeMessage(level, practiceType);
   }
 };
@@ -42,9 +52,15 @@ export const fetchWelcomeMessage = async (level, practiceType) => {
  */
 export const sendMessageToAI = async (text, level, practiceType, conversationHistory, enableGrammarCheck = true) => {
   try {
-    console.log('Sending request to:', `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.RESPOND}`);
+    const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.RESPOND}`;
+    console.log('🔗 Sending request to:', url);
+    console.log('📤 Request data:', {
+      text, level, practiceType, 
+      conversationHistoryLength: conversationHistory?.length || 0,
+      enableGrammarCheck
+    });
     
-    const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.RESPOND}`, {
+    const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -56,15 +72,24 @@ export const sendMessageToAI = async (text, level, practiceType, conversationHis
       }),
     });
 
+    console.log('📡 Response status:', response.status);
+    console.log('📡 Response ok:', response.ok);
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log('✅ AI response received:', data);
     return data.reply;
     
   } catch (error) {
-    console.error('Error sending message to AI:', error);
+    console.error('💥 Error sending message to AI:', error);
+    console.error('💥 Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
     throw new Error(`${UI_MESSAGES.ERRORS.SERVER_ERROR}: ${error.message}`);
   }
 };

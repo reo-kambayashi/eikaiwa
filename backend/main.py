@@ -87,6 +87,7 @@ class Request(BaseModel):
         "conversation"  # Type: conversation, grammar, vocabulary, pronunciation
     )
     conversation_history: list = []  # Previous messages for context
+    enable_grammar_check: bool = True  # Whether to enable grammar checking
 
 
 class Response(BaseModel):
@@ -127,6 +128,20 @@ async def root():
     Returns a simple JSON message when the server is operational.
     """
     return {"message": "English Communication App API is running"}
+
+
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint for Docker container monitoring.
+
+    This endpoint is used by Docker's HEALTHCHECK instruction
+    to verify that the application is running properly.
+
+    Returns:
+        dict: Simple status message indicating the service is healthy
+    """
+    return {"status": "healthy", "service": "eikaiwa-backend"}
 
 
 @app.get("/api/status")
@@ -195,6 +210,9 @@ async def get_welcome_message(
 ):
     """Generate a personalized welcome message based on user settings."""
 
+    print(
+        f"🔔 Welcome request received: level={level}, practice_type={practice_type}")
+
     try:
         if not model:
             return Response(
@@ -221,6 +239,9 @@ async def get_welcome_message(
 @app.post("/api/respond", response_model=Response)
 async def respond(req: Request):
     """Generate a response using Gemini API for English conversation practice."""
+
+    print(
+        f"🔔 Response request received: text='{req.text[:50]}...', level={req.level}, practice_type={req.practice_type}")
 
     try:
         if not model:

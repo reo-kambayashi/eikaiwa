@@ -8,15 +8,18 @@ import { SPEECH_RECOGNITION_CONFIG, UI_MESSAGES } from '../utils/constants';
 
 /**
  * 音声入力機能を管理するカスタムフック
+ * @param {number} timeout - タイムアウト時間（秒）
  * @returns {Object} 音声入力の状態と制御関数
  */
-export const useVoiceInput = () => {
+export const useVoiceInput = (timeout = SPEECH_RECOGNITION_CONFIG.DEFAULT_TIMEOUT) => {
   // 音声認識の状態管理
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   
   // 音声認識オブジェクトの参照
   const recognitionRef = useRef(null);
+  // タイムアウト用のタイマー参照
+  const timeoutRef = useRef(null);
 
   /**
    * 音声認識の初期化
@@ -79,15 +82,41 @@ export const useVoiceInput = () => {
     recognitionRef.current.onstart = () => {
       console.log('Speech recognition started');
       setIsListening(true);
+      
+      // タイムアウトタイマーを設定
+      if (timeout > 0) {
+        timeoutRef.current = setTimeout(() => {
+          console.log(`Speech recognition timeout after ${timeout} seconds`);
+          if (recognitionRef.current && isListening) {
+            try {
+              recognitionRef.current.stop();
+            } catch (error) {
+              console.error('Error stopping speech recognition on timeout:', error);
+            }
+          }
+        }, timeout * 1000);
+      }
     };
 
     recognitionRef.current.onend = () => {
       console.log('Speech recognition ended');
       setIsListening(false);
+      
+      // タイムアウトタイマーをクリア
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
     };
 
     // クリーンアップ関数
     return () => {
+      // タイムアウトタイマーをクリア
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      
       if (recognitionRef.current && isListening) {
         try {
           recognitionRef.current.stop();
@@ -96,7 +125,7 @@ export const useVoiceInput = () => {
         }
       }
     };
-  }, [isListening]);
+  }, [isListening, timeout]);
 
   /**
    * 音声入力を開始する関数
@@ -148,6 +177,12 @@ export const useVoiceInput = () => {
   const stopListening = useCallback(() => {
     if (!recognitionRef.current || !isListening) {
       return false;
+    }
+
+    // タイムアウトタイマーをクリア
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
 
     try {
