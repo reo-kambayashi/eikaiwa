@@ -828,134 +828,145 @@ h1 {
 }
 
 /* ============================================================================
-   読み上げ速度コントロール用スタイル
+   Speaking Speed コントロール（新規実装）
    ============================================================================ */
 
-/* スライダーコンテナ */
-.speed-slider-container {
+/* Speaking Speed 全体コンテナ */
+.speaking-speed-control {
   width: 100%;
-  margin-top: var(--space-sm);
-  padding: 0; /* コンテナ内のpaddingを削除 */
-  box-sizing: border-box; /* ボックスサイジングを明示的に設定 */
+  margin-top: var(--space-md);
 }
 
-/* スライダーラベル */
-.speed-slider-labels {
+/* スピード値とリセットボタンのヘッダー */
+.speed-control-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-xs);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  padding: 0 10px; /* スライダーのつまみの半分の幅 */
+  margin-bottom: var(--space-sm);
 }
 
-.speed-label-min,
-.speed-label-center,
-.speed-label-max {
-  font-weight: var(--font-weight-medium);
+.current-speed-display {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+}
+
+.speed-reset-btn {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.speed-reset-btn:hover {
+  background: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+/* スライダーのメインコンテナ */
+.speed-slider-wrapper {
+  position: relative;
+  width: 100%;
+  padding: var(--space-sm) 0;
 }
 
 /* スライダー本体 */
-.speed-slider {
-  width: calc(100% - 20px); /* つまみの幅分を引く */
-  height: 6px;
-  border-radius: var(--radius-sm);
+.speaking-speed-slider {
+  width: 100%;
+  height: 8px;
   background: var(--color-border);
+  border-radius: 4px;
   outline: none;
   cursor: pointer;
-  transition: all var(--transition-base);
-  margin: var(--space-sm) 10px; /* 左右に適切なマージンを設定 */
   -webkit-appearance: none;
   appearance: none;
-  box-sizing: border-box; /* ボックスサイジングを明示的に設定 */
 }
 
-.speed-slider:focus {
-  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
-}
-
-.speed-slider:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* WebKitブラウザ用スライダーつまみ */
-.speed-slider::-webkit-slider-thumb {
+/* WebKit スライダー つまみ */
+.speaking-speed-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 20px;
   height: 20px;
-  border-radius: 50%;
   background: var(--color-primary);
+  border-radius: 50%;
   cursor: pointer;
-  border: 2px solid var(--color-bg-primary);
-  box-shadow: var(--shadow-sm);
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: all var(--transition-base);
 }
 
-.speed-slider::-webkit-slider-thumb:hover {
+.speaking-speed-slider::-webkit-slider-thumb:hover {
   background: var(--color-primary-hover);
-  transform: scale(1.1);
-  box-shadow: var(--shadow-md);
+  transform: scale(1.05);
 }
 
-.speed-slider::-webkit-slider-thumb:active {
-  transform: scale(1.2);
-}
-
-/* Firefox用スライダーつまみ */
-.speed-slider::-moz-range-thumb {
+/* Firefox スライダー つまみ */
+.speaking-speed-slider::-moz-range-thumb {
   width: 20px;
   height: 20px;
-  border-radius: 50%;
   background: var(--color-primary);
+  border-radius: 50%;
   cursor: pointer;
-  border: 2px solid var(--color-bg-primary);
-  box-shadow: var(--shadow-sm);
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: all var(--transition-base);
 }
 
-.speed-slider::-moz-range-thumb:hover {
+.speaking-speed-slider::-moz-range-thumb:hover {
   background: var(--color-primary-hover);
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
-/* Firefox用スライダートラック */
-.speed-slider::-moz-range-track {
-  height: 6px;
-  border-radius: var(--radius-sm);
+/* Firefox スライダー トラック */
+.speaking-speed-slider::-moz-range-track {
+  height: 8px;
   background: var(--color-border);
+  border-radius: 4px;
+  border: none;
 }
 
-/* 現在の速度表示の改良 */
-.speaking-rate-info {
+/* スピード範囲ラベル */
+.speed-range-labels {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-top: var(--space-md);
-  padding: var(--space-sm) var(--space-md);
-  background-color: var(--color-bg-secondary);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-}
-
-.current-speed {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-}
-
-.current-speed strong {
-  color: var(--color-primary);
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-base);
-}
-
-.speed-description {
+  margin-top: var(--space-xs);
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
+}
+
+/* スピード説明テキスト */
+.speed-description-text {
+  text-align: center;
+  margin-top: var(--space-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
   font-style: italic;
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+  .speaking-speed-slider {
+    height: 10px;
+  }
+  
+  .speaking-speed-slider::-webkit-slider-thumb {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .speaking-speed-slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .speed-description-text {
+    display: none;
+  }
 }
 
 /* ============================================================================
@@ -1127,27 +1138,6 @@ h1 {
   .send-button {
     padding: 0.75rem 1rem;
     font-size: 0.9rem;
-  }
-  
-  /* スピードスライダーのモバイル対応 */
-  .speed-slider {
-    height: 8px;
-    margin: var(--space-md) 0;
-  }
-  
-  .speed-slider::-webkit-slider-thumb {
-    width: 20px;
-    height: 20px;
-  }
-  
-  .speed-slider::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-  }
-  
-  .speed-slider-labels {
-    font-size: var(--font-size-xs);
-    margin-bottom: var(--space-sm);
   }
   
   .current-speed {

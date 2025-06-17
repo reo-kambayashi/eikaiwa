@@ -19,9 +19,6 @@ import SettingsPanel from './components/SettingsPanel';
 import ChatBox from './components/ChatBox';
 import InputArea from './components/InputArea';
 
-// 定数とユーティリティ
-import { API_CONFIG } from './utils/constants';
-
 function App() {
   // ユーザー入力テキストの状態
   const [input, setInput] = useState('');

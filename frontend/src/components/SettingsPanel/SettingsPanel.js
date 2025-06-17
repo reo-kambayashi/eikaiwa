@@ -4,7 +4,7 @@
 // ============================================================================
 
 import React from 'react';
-import { ENGLISH_LEVELS, PRACTICE_TYPES, KEYBOARD_SHORTCUTS, TTS_CONFIG, SPEECH_RECOGNITION_CONFIG } from '../../utils/constants';
+import { ENGLISH_LEVELS, PRACTICE_TYPES, SPEECH_RECOGNITION_CONFIG } from '../../utils/constants';
 
 /**
  * 学習設定パネルコンポーネント
@@ -133,43 +133,50 @@ const SettingsPanel = ({
       {isVoiceOutputEnabled && (
         <div className="setting-group">
           <label htmlFor="speakingRate">Speaking Speed</label>
-          <div className="speed-slider-container">
-            <div className="speed-slider-labels">
-              <span className="speed-label-min">1.0x</span>
-              <span className="speed-label-center">1.5x</span>
-              <span className="speed-label-max">2.0x</span>
-            </div>
-            <input
-              type="range"
-              id="speakingRate"
-              min="1.0"
-              max="2.0"
-              step="0.05"
-              value={speakingRate}
-              onChange={(e) => onSpeakingRateChange(parseFloat(e.target.value))}
-              disabled={isLoading}
-              className="speed-slider"
-            />
-            <div className="speaking-rate-info">
-              <div className="current-speed">
-                <strong>{speakingRate.toFixed(2)}x</strong>
-                <span className="speed-description">
-                  {speakingRate <= 1.2 ? ' (Normal)' :
-                   speakingRate <= 1.4 ? ' (Slightly Fast)' :
-                   speakingRate <= 1.7 ? ' (Fast)' :
-                   speakingRate <= 1.9 ? ' (Very Fast)' :
-                   ' (Maximum)'}
-                </span>
-              </div>
+          <div className="speaking-speed-control">
+            {/* スピード値表示とリセットボタン */}
+            <div className="speed-control-header">
+              <span className="current-speed-display">{speakingRate.toFixed(2)}x</span>
               <button
                 type="button"
                 onClick={onSpeakingRateReset}
                 disabled={isLoading}
-                className="reset-rate-button"
-                title="Reset to default speed for current level"
+                className="speed-reset-btn"
+                title="Reset to default speed"
               >
                 Reset
               </button>
+            </div>
+            
+            {/* スライダー */}
+            <div className="speed-slider-wrapper">
+              <input
+                type="range"
+                id="speakingRate"
+                min="1.0"
+                max="2.0"
+                step="0.05"
+                value={speakingRate}
+                onChange={(e) => onSpeakingRateChange(parseFloat(e.target.value))}
+                disabled={isLoading}
+                className="speaking-speed-slider"
+              />
+              
+              {/* 範囲ラベル */}
+              <div className="speed-range-labels">
+                <span>1.0x</span>
+                <span>1.5x</span>
+                <span>2.0x</span>
+              </div>
+              
+              {/* スピード説明 */}
+              <div className="speed-description-text">
+                {speakingRate <= 1.2 ? 'Normal speed' :
+                 speakingRate <= 1.4 ? 'Slightly fast' :
+                 speakingRate <= 1.7 ? 'Fast' :
+                 speakingRate <= 1.9 ? 'Very fast' :
+                 'Maximum speed'}
+              </div>
             </div>
           </div>
         </div>
