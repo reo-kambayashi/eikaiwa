@@ -88,7 +88,7 @@
 .app-header {
   background-color: var(--color-bg-secondary);
   color: var(--color-primary);
-  padding: var(--space-lg);
+  padding: var(--space-md); /* 縮小: lg → md */
   text-align: center;
   box-shadow: var(--shadow-md);
   border-bottom: 1px solid var(--color-border);
@@ -96,7 +96,7 @@
 
 .app-header h1 {
   margin: 0;
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-xl); /* 縮小: 2xl → xl */
   font-weight: var(--font-weight-semibold);
   letter-spacing: -0.02em;
 }
@@ -105,9 +105,9 @@
 .app-layout {
   display: flex;
   flex: 1;
-  gap: var(--space-lg);
-  padding: var(--space-lg);
-  height: calc(100vh - 100px); /* ヘッダーの高さを考慮 */
+  gap: var(--space-md); /* 縮小: lg → md */
+  padding: var(--space-md); /* 縮小: lg → md */
+  height: calc(100vh - 70px); /* ヘッダーの高さを調整 */
 }
 
 /* 左側：設定セクション */
@@ -115,7 +115,7 @@
   flex: 1;
   background-color: var(--color-bg-secondary);
   border-radius: var(--radius-lg);
-  padding: var(--space-xl);
+  padding: var(--space-lg); /* 縮小: xl → lg */
   box-shadow: var(--shadow-md);
   overflow-y: auto;
   border: 1px solid var(--color-border);
@@ -123,14 +123,14 @@
 
 /* 設定セクションヘッダー */
 .settings-section-header {
-  margin-bottom: var(--space-lg);
-  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-md); /* 縮小: lg → md */
+  padding-bottom: var(--space-sm); /* 縮小: md → sm */
   border-bottom: 2px solid var(--color-border);
 }
 
 .settings-section-header h2 {
   color: var(--color-primary);
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base); /* 縮小: lg → base */
   font-weight: var(--font-weight-semibold);
   margin: 0 0 var(--space-xs) 0;
   letter-spacing: -0.01em;
@@ -138,7 +138,7 @@
 
 .settings-section-header p {
   color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs); /* 縮小: sm → xs */
   margin: 0;
   line-height: 1.5;
 }
@@ -150,7 +150,7 @@
   flex-direction: column;
   background-color: var(--color-bg-secondary);
   border-radius: var(--radius-lg);
-  padding: var(--space-xl);
+  padding: var(--space-lg); /* 縮小: xl → lg */
   box-shadow: var(--shadow-md);
   border: 1px solid var(--color-border);
 }
@@ -160,7 +160,7 @@
   flex: 1;
   background-color: var(--color-bg-secondary);
   border-radius: var(--radius-lg);
-  padding: var(--space-xl);
+  padding: var(--space-lg); /* 縮小: xl → lg */
   box-shadow: var(--shadow-md);
   overflow-y: auto;
   border: 1px solid var(--color-border);
@@ -275,16 +275,16 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   overflow-y: auto;
-  padding: var(--space-lg);
-  margin-bottom: var(--space-lg);
+  padding: var(--space-md); /* 縮小: lg → md */
+  margin-bottom: var(--space-md); /* 縮小: lg → md */
   background-color: var(--color-bg-secondary);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
   scroll-behavior: smooth;
 }
 
 .message {
-  margin-bottom: var(--space-lg);
-  padding: var(--space-md);
+  margin-bottom: var(--space-md); /* 縮小: lg → md */
+  padding: var(--space-sm); /* 縮小: md → sm */
   border-radius: var(--radius-md);
   max-width: 85%;
   line-height: 1.6;
@@ -469,13 +469,13 @@ h1 {
 .settings-panel {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: var(--space-md); /* 縮小: lg → md */
 }
 
 .setting-group {
   background-color: var(--color-bg-surface);
   border-radius: var(--radius-md);
-  padding: var(--space-lg);
+  padding: var(--space-md); /* 縮小: lg → md */
   border: 1px solid var(--color-border);
   transition: border-color var(--transition-base);
   box-shadow: var(--shadow-sm);
@@ -528,8 +528,8 @@ h1 {
 .voice-controls {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
-  margin-top: var(--space-sm);
+  gap: var(--space-sm); /* 縮小: md → sm */
+  margin-top: var(--space-xs); /* 縮小: sm → xs */
 }
 
 .voice-toggle {
@@ -831,67 +831,130 @@ h1 {
    読み上げ速度コントロール用スタイル
    ============================================================================ */
 
-/* 読み上げ速度情報表示 */
+/* スライダーコンテナ */
+.speed-slider-container {
+  width: 100%;
+  margin-top: var(--space-sm);
+  padding: 0; /* コンテナ内のpaddingを削除 */
+  box-sizing: border-box; /* ボックスサイジングを明示的に設定 */
+}
+
+/* スライダーラベル */
+.speed-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  padding: 0 10px; /* スライダーのつまみの半分の幅 */
+}
+
+.speed-label-min,
+.speed-label-center,
+.speed-label-max {
+  font-weight: var(--font-weight-medium);
+}
+
+/* スライダー本体 */
+.speed-slider {
+  width: calc(100% - 20px); /* つまみの幅分を引く */
+  height: 6px;
+  border-radius: var(--radius-sm);
+  background: var(--color-border);
+  outline: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  margin: var(--space-sm) 10px; /* 左右に適切なマージンを設定 */
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box; /* ボックスサイジングを明示的に設定 */
+}
+
+.speed-slider:focus {
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+}
+
+.speed-slider:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* WebKitブラウザ用スライダーつまみ */
+.speed-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  border: 2px solid var(--color-bg-primary);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+}
+
+.speed-slider::-webkit-slider-thumb:hover {
+  background: var(--color-primary-hover);
+  transform: scale(1.1);
+  box-shadow: var(--shadow-md);
+}
+
+.speed-slider::-webkit-slider-thumb:active {
+  transform: scale(1.2);
+}
+
+/* Firefox用スライダーつまみ */
+.speed-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  border: 2px solid var(--color-bg-primary);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+}
+
+.speed-slider::-moz-range-thumb:hover {
+  background: var(--color-primary-hover);
+  transform: scale(1.1);
+}
+
+/* Firefox用スライダートラック */
+.speed-slider::-moz-range-track {
+  height: 6px;
+  border-radius: var(--radius-sm);
+  background: var(--color-border);
+}
+
+/* 現在の速度表示の改良 */
 .speaking-rate-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: var(--space-sm);
-  padding: var(--space-sm);
+  margin-top: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
   background-color: var(--color-bg-secondary);
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
 }
 
-.speaking-rate-info small {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
+.current-speed {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
 }
 
-.speaking-rate-info strong {
+.current-speed strong {
   color: var(--color-primary);
   font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
 }
 
-.reset-rate-button {
-  padding: var(--space-xs) var(--space-sm);
-  font-size: var(--font-size-xs);
-  background-color: var(--color-primary);
-  color: var(--color-text-on-primary);
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background-color var(--transition-base);
-  font-weight: var(--font-weight-medium);
-}
-
-.reset-rate-button:hover:not(:disabled) {
-  background-color: var(--color-primary-hover);
-}
-
-.reset-rate-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* 速度ラベル */
-.rate-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.75rem;
-  color: #6c757d;
-  margin-top: 0.25rem;
-}
-
-/* レベル別デフォルト値の表示 */
-.level-defaults {
-  text-align: center;
-  margin-top: 0.5rem;
-}
-
-.level-defaults small {
-  color: #6c757d;
-  font-size: 0.7rem;
+.speed-description {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
   font-style: italic;
 }
 
@@ -903,8 +966,8 @@ h1 {
 .learning-controls {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
-  margin-top: var(--space-sm);
+  gap: var(--space-sm); /* 縮小: md → sm */
+  margin-top: var(--space-xs); /* 縮小: sm → xs */
 }
 
 .feature-toggle {
@@ -933,14 +996,14 @@ h1 {
 
 /* 設定セクションヘッダー */
 .settings-section-header {
-  margin-bottom: var(--space-lg);
-  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-md); /* 縮小: lg → md */
+  padding-bottom: var(--space-sm); /* 縮小: md → sm */
   border-bottom: 2px solid var(--color-border);
 }
 
 .settings-section-header h2 {
   color: var(--color-primary);
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base); /* 縮小: lg → base */
   font-weight: var(--font-weight-semibold);
   margin: 0 0 var(--space-xs) 0;
   letter-spacing: -0.01em;
@@ -955,8 +1018,8 @@ h1 {
 
 /* 機能説明のスタイル */
 .feature-description {
-  margin-top: var(--space-md);
-  padding: var(--space-md);
+  margin-top: var(--space-sm); /* 縮小: md → sm */
+  padding: var(--space-sm); /* 縮小: md → sm */
   background-color: var(--color-primary-light);
   border-radius: var(--radius-sm);
   border-left: 4px solid var(--color-primary);
@@ -1064,6 +1127,39 @@ h1 {
   .send-button {
     padding: 0.75rem 1rem;
     font-size: 0.9rem;
+  }
+  
+  /* スピードスライダーのモバイル対応 */
+  .speed-slider {
+    height: 8px;
+    margin: var(--space-md) 0;
+  }
+  
+  .speed-slider::-webkit-slider-thumb {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .speed-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .speed-slider-labels {
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-sm);
+  }
+  
+  .current-speed {
+    font-size: var(--font-size-sm);
+  }
+  
+  .current-speed strong {
+    font-size: var(--font-size-base);
+  }
+  
+  .speed-description {
+    display: none; /* モバイルでは説明テキストを隠す */
   }
   
   .speaking-rate-controls {
