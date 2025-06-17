@@ -38,13 +38,15 @@ function App() {
     isVoiceOutputEnabled,
     isGrammarCheckEnabled,
     speakingRate,
+    voiceInputTimeout,
     updateLevel,
     updatePracticeType,
     toggleVoiceInput,
     toggleVoiceOutput,
     toggleGrammarCheck,
     updateSpeakingRate,
-    resetSpeakingRateToDefault
+    resetSpeakingRateToDefault,
+    updateVoiceInputTimeout
   } = useSettings();
 
   // 音声出力機能（読み上げ速度を含む）
@@ -65,7 +67,7 @@ function App() {
     toggleListening,
     clearTranscript,
     isSupported: isVoiceSupported
-  } = useVoiceInput();
+  } = useVoiceInput(voiceInputTimeout);
 
   // ============================================================================
   // イベントハンドラー
@@ -149,69 +151,82 @@ function App() {
   // ============================================================================
   return (
     <div className="App">
-      <h1>English Communication App</h1>
+      <header className="app-header">
+        <h1>English Communication App</h1>
+      </header>
       
-      {/* 学習設定パネル */}
-      <SettingsPanel
-        level={level}
-        practiceType={practiceType}
-        isVoiceInputEnabled={isVoiceInputEnabled}
-        isVoiceOutputEnabled={isVoiceOutputEnabled}
-        isGrammarCheckEnabled={isGrammarCheckEnabled}
-        speakingRate={speakingRate}
-        isVoiceSupported={isVoiceSupported}
-        isLoading={isLoading}
-        onLevelChange={updateLevel}
-        onPracticeTypeChange={updatePracticeType}
-        onVoiceInputToggle={toggleVoiceInput}
-        onVoiceOutputToggle={toggleVoiceOutput}
-        onGrammarCheckToggle={toggleGrammarCheck}
-        onSpeakingRateChange={updateSpeakingRate}
-        onSpeakingRateReset={resetSpeakingRateToDefault}
-      />
+      <div className="app-layout">
+        {/* 左側：学習設定パネル */}
+        <div className="settings-section">
+          <SettingsPanel
+            level={level}
+            practiceType={practiceType}
+            isVoiceInputEnabled={isVoiceInputEnabled}
+            isVoiceOutputEnabled={isVoiceOutputEnabled}
+            isGrammarCheckEnabled={isGrammarCheckEnabled}
+            speakingRate={speakingRate}
+            voiceInputTimeout={voiceInputTimeout}
+            isVoiceSupported={isVoiceSupported}
+            isLoading={isLoading}
+            onLevelChange={updateLevel}
+            onPracticeTypeChange={updatePracticeType}
+            onVoiceInputToggle={toggleVoiceInput}
+            onVoiceOutputToggle={toggleVoiceOutput}
+            onGrammarCheckToggle={toggleGrammarCheck}
+            onSpeakingRateChange={updateSpeakingRate}
+            onSpeakingRateReset={resetSpeakingRateToDefault}
+            onVoiceInputTimeoutChange={updateVoiceInputTimeout}
+          />
+        </div>
 
-      {/* チャット表示エリア */}
-      <ChatBox 
-        messages={messages}
-        isLoading={isLoading}
-        messagesEndRef={messagesEndRef}
-      />
+        {/* 中央：チャットエリア */}
+        <div className="chat-section">
+          <ChatBox 
+            messages={messages}
+            isLoading={isLoading}
+            messagesEndRef={messagesEndRef}
+          />
+          
+          <InputArea
+            value={input}
+            isListening={isListening}
+            isLoading={isLoading}
+            isVoiceInputEnabled={isVoiceInputEnabled}
+            isVoiceSupported={isVoiceSupported}
+            onChange={handleInputChange}
+            onSend={handleSendMessage}
+            onVoiceToggle={handleVoiceToggle}
+          />
+        </div>
 
-      {/* メッセージ入力エリア */}
-      <InputArea
-        value={input}
-        isListening={isListening}
-        isLoading={isLoading}
-        isVoiceInputEnabled={isVoiceInputEnabled}
-        isVoiceSupported={isVoiceSupported}
-        onChange={handleInputChange}
-        onSend={handleSendMessage}
-        onVoiceToggle={handleVoiceToggle}
-      />
+        {/* 右側：Coming Soon エリア */}
+        <div className="coming-soon-section">
+          <div className="coming-soon-content">
+            <h2>Coming Soon</h2>
+          </div>
+        </div>
+      </div>
 
       {/* デバッグ情報 */}
-      <div className="debug-info">
-        <small>API URL: {API_CONFIG.BASE_URL}</small>
-        {/* 開発時の追加デバッグ情報 */}
-        {process.env.NODE_ENV === 'development' && (
-          <>
-            <br />
-            <small>Voice Supported: {isVoiceSupported ? 'Yes' : 'No'}</small>
-            <br />
-            <small>Listening: {isListening ? 'Yes' : 'No'}</small>
-            <br />
-            <small>Messages Count: {messages.length}</small>
-            <br />
-            <small>Current Input: "{input}"</small>
-            <br />
-            <small>Transcript: "{transcript}"</small>
-            <br />
-            <small>Speaking Rate: {speakingRate.toFixed(1)}x</small>
-            <br />
-            <small>Grammar Check: {isGrammarCheckEnabled ? 'Enabled' : 'Disabled'}</small>
-          </>
-        )}
-      </div>
+      {process.env.NODE_ENV === 'development' && (
+        <div className="debug-info">
+          <small>API URL: {API_CONFIG.BASE_URL}</small>
+          <br />
+          <small>Voice Supported: {isVoiceSupported ? 'Yes' : 'No'}</small>
+          <br />
+          <small>Listening: {isListening ? 'Yes' : 'No'}</small>
+          <br />
+          <small>Messages Count: {messages.length}</small>
+          <br />
+          <small>Current Input: "{input}"</small>
+          <br />
+          <small>Transcript: "{transcript}"</small>
+          <br />
+          <small>Speaking Rate: {speakingRate.toFixed(1)}x</small>
+          <br />
+          <small>Grammar Check: {isGrammarCheckEnabled ? 'Enabled' : 'Disabled'}</small>
+        </div>
+      )}
     </div>
   );
 }

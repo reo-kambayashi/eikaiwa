@@ -4,7 +4,7 @@
 // ============================================================================
 
 import React from 'react';
-import { ENGLISH_LEVELS, PRACTICE_TYPES, KEYBOARD_SHORTCUTS, TTS_CONFIG } from '../../utils/constants';
+import { ENGLISH_LEVELS, PRACTICE_TYPES, KEYBOARD_SHORTCUTS, TTS_CONFIG, SPEECH_RECOGNITION_CONFIG } from '../../utils/constants';
 
 /**
  * 学習設定パネルコンポーネント
@@ -14,6 +14,7 @@ import { ENGLISH_LEVELS, PRACTICE_TYPES, KEYBOARD_SHORTCUTS, TTS_CONFIG } from '
  * @param {boolean} props.isVoiceInputEnabled - 音声入力の有効状態
  * @param {boolean} props.isVoiceOutputEnabled - 音声出力の有効状態
  * @param {number} props.speakingRate - 現在の読み上げ速度
+ * @param {number} props.voiceInputTimeout - 音声認識のタイムアウト時間（秒）
  * @param {boolean} props.isVoiceSupported - 音声認識のサポート状況
  * @param {boolean} props.isLoading - ローディング状態
  * @param {Function} props.onLevelChange - レベル変更ハンドラー
@@ -22,6 +23,7 @@ import { ENGLISH_LEVELS, PRACTICE_TYPES, KEYBOARD_SHORTCUTS, TTS_CONFIG } from '
  * @param {Function} props.onVoiceOutputToggle - 音声出力切り替えハンドラー
  * @param {Function} props.onSpeakingRateChange - 読み上げ速度変更ハンドラー
  * @param {Function} props.onSpeakingRateReset - 読み上げ速度リセットハンドラー
+ * @param {Function} props.onVoiceInputTimeoutChange - 音声認識タイムアウト変更ハンドラー
  */
 const SettingsPanel = ({
   level,
@@ -30,6 +32,7 @@ const SettingsPanel = ({
   isVoiceOutputEnabled,
   isGrammarCheckEnabled,
   speakingRate,
+  voiceInputTimeout,
   isVoiceSupported,
   isLoading,
   onLevelChange,
@@ -38,7 +41,8 @@ const SettingsPanel = ({
   onVoiceOutputToggle,
   onGrammarCheckToggle,
   onSpeakingRateChange,
-  onSpeakingRateReset
+  onSpeakingRateReset,
+  onVoiceInputTimeoutChange
 }) => {
   return (
     <div className="settings-panel">
@@ -106,6 +110,32 @@ const SettingsPanel = ({
         </div>
       </div>
 
+      {/* 音声認識タイムアウト設定（音声入力が有効な場合のみ） */}
+      {isVoiceInputEnabled && isVoiceSupported && (
+        <div className="setting-group">
+          <label htmlFor="voiceInputTimeout">Voice Input Timeout (音声認識タイムアウト):</label>
+          <select 
+            id="voiceInputTimeout" 
+            value={voiceInputTimeout} 
+            onChange={(e) => onVoiceInputTimeoutChange(parseInt(e.target.value, 10))}
+            disabled={isLoading}
+          >
+            {SPEECH_RECOGNITION_CONFIG.TIMEOUT_OPTIONS.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <div className="timeout-description">
+            <small>
+              ⏱️ How long to wait for voice input before automatically stopping.
+              <br/>
+              音声入力を自動的に停止するまでの待機時間です。
+            </small>
+          </div>
+        </div>
+      )}
+
       {/* 文法チェック設定 */}
       <div className="setting-group">
         <label>Learning Features:</label>
@@ -123,7 +153,6 @@ const SettingsPanel = ({
         {isGrammarCheckEnabled && (
           <div className="feature-description">
             <small>
-              💡 <strong>Grammar Check:</strong><br/>
               AIが不自然な表現を検出して改善案を提案します。<br/>
               AI will detect unnatural expressions and suggest improvements.
             </small>

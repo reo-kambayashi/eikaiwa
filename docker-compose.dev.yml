@@ -1,0 +1,70 @@
+# ==============================================================================
+# 日本人向け英会話学習アプリ - 開発環境用Docker Compose設定
+# 
+# この設定ファイルは開発環境でのローカル実行用です
+# ホットリロード機能とボリュームマウントを含みます
+# ==============================================================================
+
+services:
+  # ==============================================================================
+  # バックエンドサービス（Python FastAPI + uv）
+  # ==============================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      # ローカルポート8000 -> コンテナポート8000
+      - "8000:8000"
+    environment:
+      # Gemini AI API キー（環境変数から取得）
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      # Google Cloud認証情報ファイルのパス
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
+    volumes:
+      # ソースコードをマウント（ホットリロード用）
+      - ./backend:/app
+      # __pycache__ディレクトリは除外（コンテナ内のものを優先）
+      - /app/__pycache__
+      # Google Cloud認証情報ファイルをマウント（読み取り専用）
+      - ./backend/credentials.json:/app/credentials.json:ro
+    # 開発モード用コマンド（--reloadでホットリロード有効）
+    command: ["uv", "run", "uvicorn", "main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+    networks:
+      - eikaiwa-network
+
+  # ==============================================================================
+  # フロントエンドサービス（React）
+  # ==============================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      # ローカルポート3000 -> コンテナポート3000
+      - "3000:3000"
+    environment:
+      # バックエンドAPIのURL
+      - REACT_APP_API_URL=http://localhost:8000
+      # ファイル変更監視にポーリングを使用（Dockerボリューム用）
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      # ソースコードをマウント（ホットリロード用）
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      # node_modulesは除外（コンテナ内のものを優先）
+      - /app/node_modules
+    # バックエンドの起動を待つ
+    depends_on:
+      - backend
+    networks:
+      - eikaiwa-network
+
+# ==============================================================================
+# ネットワーク設定
+# ==============================================================================
+networks:
+  eikaiwa-network:
+    # ブリッジドライバーを使用（デフォルト）
+    # フロントエンドとバックエンド間の通信を可能にする
+    driver: bridge

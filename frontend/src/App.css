@@ -1,21 +1,139 @@
 .App {
-  max-width: 600px;
-  margin: 0 auto;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  padding: 1rem;
   background-color: #f5f5f5;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* アプリケーションヘッダー */
+.app-header {
+  background-color: #2c3e50;
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+/* 3分割レイアウト */
+.app-layout {
+  display: flex;
+  flex: 1;
+  gap: 1rem;
+  padding: 1rem;
+  height: calc(100vh - 100px); /* ヘッダーの高さを考慮 */
+}
+
+/* 左側：設定セクション */
+.settings-section {
+  flex: 1; /* 等分 */
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+}
+
+/* 中央：チャットセクション */
+.chat-section {
+  flex: 1; /* 等分 */
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  border: 1px solid #e0e0e0;
+}
+
+/* 右側：Coming Soonセクション */
+.coming-soon-section {
+  flex: 1; /* 等分 */
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Coming Soon コンテンツ */
+.coming-soon-content {
+  text-align: center;
+}
+
+.coming-soon-content h2 {
+  color: #6c757d;
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin: 0;
+  opacity: 0.8;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 1200px) {
+  .app-layout {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .settings-section,
+  .chat-section,
+  .coming-soon-section {
+    flex: none;
+    width: 100%;
+  }
+  
+  .settings-section {
+    order: 1;
+  }
+  
+  .chat-section {
+    order: 2;
+    min-height: 500px;
+  }
+  
+  .coming-soon-section {
+    order: 3;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-layout {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  
+  .settings-section,
+  .chat-section,
+  .coming-soon-section {
+    padding: 1rem;
+  }
+  
+  .app-header h1 {
+    font-size: 1.4rem;
+  }
 }
 
 .chat-box {
-  background-color: white;
+  flex: 1; /* チャットセクション内で使用可能な空間を最大限使用 */
   border: 1px solid #ddd;
-  border-radius: 10px;
-  height: 400px;
+  border-radius: 8px;
   overflow-y: auto;
   padding: 1rem;
   margin-bottom: 1rem;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  background-color: #fafafa;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .message {
@@ -102,12 +220,20 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* デバッグ情報 */
 .debug-info {
-  margin-top: 1rem;
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
   padding: 0.5rem;
-  background-color: rgba(0,0,0,0.05);
+  background-color: rgba(0,0,0,0.8);
+  color: white;
   border-radius: 5px;
   font-family: monospace;
+  font-size: 0.7rem;
+  max-width: 300px;
+  z-index: 1000;
+  opacity: 0.7;
 }
 
 h1 {

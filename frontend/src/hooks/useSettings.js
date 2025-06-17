@@ -4,7 +4,7 @@
 // ============================================================================
 
 import { useState } from 'react';
-import { TTS_CONFIG } from '../utils/constants';
+import { TTS_CONFIG, SPEECH_RECOGNITION_CONFIG } from '../utils/constants';
 
 /**
  * アプリケーション設定を管理するカスタムフック
@@ -18,10 +18,10 @@ export const useSettings = () => {
   const [practiceType, setPracticeType] = useState('conversation');
   
   // 音声入力機能の有効/無効状態
-  const [isVoiceInputEnabled, setIsVoiceInputEnabled] = useState(false);
+  const [isVoiceInputEnabled, setIsVoiceInputEnabled] = useState(true);
   
   // 音声出力機能の有効/無効状態
-  const [isVoiceOutputEnabled, setIsVoiceOutputEnabled] = useState(false);
+  const [isVoiceOutputEnabled, setIsVoiceOutputEnabled] = useState(true);
 
   // 読み上げ速度の状態管理（レベルに応じたデフォルト値）
   const [speakingRate, setSpeakingRate] = useState(
@@ -30,6 +30,11 @@ export const useSettings = () => {
 
   // 文法チェック機能の有効/無効状態
   const [isGrammarCheckEnabled, setIsGrammarCheckEnabled] = useState(true);
+
+  // 音声認識タイムアウト時間の状態管理
+  const [voiceInputTimeout, setVoiceInputTimeout] = useState(
+    SPEECH_RECOGNITION_CONFIG.DEFAULT_TIMEOUT
+  );
 
   /**
    * 英語レベルを変更する関数
@@ -99,6 +104,15 @@ export const useSettings = () => {
   };
 
   /**
+   * 音声認識タイムアウト時間を変更する関数
+   * @param {number} newTimeout - 新しいタイムアウト時間（秒）
+   */
+  const updateVoiceInputTimeout = (newTimeout) => {
+    console.log('Voice input timeout changed to:', newTimeout, 'seconds');
+    setVoiceInputTimeout(newTimeout);
+  };
+
+  /**
    * 現在のレベルのデフォルト速度にリセットする関数
    */
   const resetSpeakingRateToDefault = () => {
@@ -122,6 +136,7 @@ export const useSettings = () => {
     isVoiceOutputEnabled,
     isGrammarCheckEnabled,
     speakingRate,
+    voiceInputTimeout,
     
     // 設定変更関数
     updateLevel,
@@ -131,6 +146,7 @@ export const useSettings = () => {
     toggleGrammarCheck,
     updateSpeakingRate,
     resetSpeakingRateToDefault,
+    updateVoiceInputTimeout,
     
     // ユーティリティ関数
     hasSettingsChanged

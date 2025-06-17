@@ -86,6 +86,76 @@ eikaiwa/
 
 ## 🚀 セットアップ手順
 
+### 🐳 Docker Composeを使用した簡単セットアップ（推奨）
+
+最も簡単な方法でアプリケーションを起動できます：
+
+#### 前提条件
+- Docker & Docker Compose
+- Google Gemini API キー
+
+#### 手順
+
+1. **プロジェクトのクローン**
+```bash
+git clone <repository-url>
+cd eikaiwa
+```
+
+2. **環境変数の設定**
+```bash
+cp .env.example .env
+```
+
+`.env`ファイルを編集してGemini API キーを設定：
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+3. **アプリケーションの起動**
+```bash
+# 基本的な起動
+docker compose up
+
+# またはMakefileを使用（推奨）
+make up
+
+# 開発モード（ホットリロード有効）
+make dev
+```
+
+4. **アクセス**
+- フロントエンド: http://localhost:3000
+- バックエンドAPI: http://localhost:8000
+
+#### 便利なコマンド
+
+```bash
+make help          # 使用可能なコマンドを表示
+make up            # アプリケーション起動（本番モード）
+make dev           # 開発モード起動（ホットリロード）
+make down          # アプリケーション停止
+make logs          # ログを表示
+make build         # イメージを再ビルド
+make clean         # 全てのコンテナ・イメージを削除
+make status        # コンテナ状況を表示
+```
+
+#### Google Cloud TTS（任意）
+高品質な音声合成を使用したい場合：
+
+1. Google Cloud service account JSONファイルを `backend/credentials.json` に配置
+2. アプリケーションを再起動
+
+```bash
+docker compose down
+docker compose up
+```
+
+---
+
+### 🛠️ 手動セットアップ（開発者向け）
+
 ### 前提条件
 
 - Python 3.11以上

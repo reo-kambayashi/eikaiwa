@@ -2,7 +2,7 @@
 name = "eikaiwa-backend"
 version = "0.1.0"
 description = "FastAPI backend for English Communication App - AI-powered English learning for Japanese speakers"
-readme = "../README.md"
+# readme = "../README.md"  # コメントアウト: Dockerビルド時にREADMEが見つからない問題を回避
 requires-python = ">=3.11"
 authors = [
     { name = "Eikaiwa App Team" }
