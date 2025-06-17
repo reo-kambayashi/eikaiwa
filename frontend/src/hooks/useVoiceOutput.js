@@ -27,17 +27,28 @@ export const useVoiceOutput = (isEnabled, speakingRate = 1.0) => {
       return false;
     }
 
-    // 空のテキストは音声にしない
-    if (!text || text.trim() === '') {
-      console.log('Empty text provided, skipping TTS');
+    // 厳密な型チェック
+    if (!text) {
+      console.log('No text provided, skipping TTS');
+      return false;
+    }
+
+    if (typeof text !== 'string') {
+      console.log('Text is not a string, skipping TTS:', typeof text, text);
+      return false;
+    }
+
+    const trimmedText = text.trim();
+    if (!trimmedText) {
+      console.log('Empty text after trim, skipping TTS');
       return false;
     }
 
     try {
-      console.log('Attempting to speak text:', text.substring(0, 50) + '...', 'at rate:', speakingRate);
+      console.log('Attempting to speak text:', trimmedText.substring(0, 50) + '...', 'at rate:', speakingRate);
       
       // Google Cloud TTSを試行（読み上げ速度を含める）
-      const audioElement = await convertTextToSpeech(text, speakingRate);
+      const audioElement = await convertTextToSpeech(trimmedText, speakingRate);
       
       if (audioElement) {
         // Google TTSが成功した場合
@@ -53,7 +64,7 @@ export const useVoiceOutput = (isEnabled, speakingRate = 1.0) => {
             console.error('Google TTS playback error:', error);
             // フォールバックを実行
             console.log('Falling back to browser TTS');
-            fallbackTextToSpeech(text);
+            fallbackTextToSpeech(trimmedText);
             resolve(false);
           };
           
@@ -62,7 +73,7 @@ export const useVoiceOutput = (isEnabled, speakingRate = 1.0) => {
       } else {
         // Google TTSが失敗した場合はブラウザTTSにフォールバック
         console.log('Google TTS failed, using browser TTS fallback');
-        fallbackTextToSpeech(text, speakingRate);
+        fallbackTextToSpeech(trimmedText, speakingRate);
         return true; // ブラウザTTSは同期的なので即座にtrueを返す
       }
       
@@ -71,7 +82,7 @@ export const useVoiceOutput = (isEnabled, speakingRate = 1.0) => {
       
       // 全てが失敗した場合もブラウザTTSを試行
       console.log('All TTS methods failed, attempting final browser TTS fallback');
-      fallbackTextToSpeech(text, speakingRate);
+      fallbackTextToSpeech(trimmedText, speakingRate);
       return false;
     }
   }, [isEnabled, speakingRate]);

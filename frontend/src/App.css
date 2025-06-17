@@ -138,7 +138,7 @@
 
 .settings-section-header p {
   color: var(--color-text-secondary);
-  font-size: var(--font-size-xs); /* 縮小: sm → xs */
+  font-size: var(--font-size-sm);
   margin: 0;
   line-height: 1.5;
 }
@@ -233,17 +233,6 @@
     font-size: var(--font-size-xl);
   }
   
-  .voice-button {
-    width: 48px;
-    height: 48px;
-    font-size: var(--font-size-base);
-  }
-  
-  .send-button {
-    padding: var(--space-sm) var(--space-md);
-    font-size: var(--font-size-sm);
-  }
-  
   .message {
     max-width: 95%;
     padding: var(--space-sm);
@@ -257,12 +246,6 @@
   
   .setting-group {
     padding: var(--space-md);
-  }
-  
-  .voice-button {
-    width: 44px;
-    height: 44px;
-    margin: 0 var(--space-xs);
   }
 }
 
@@ -340,19 +323,19 @@
 /* メッセージがない場合の表示 */
 .no-messages {
   text-align: center;
-  padding: var(--space-2xl);
-  color: var(--color-text-secondary);
+  padding: 2rem;
+  color: #6c757d;
   font-style: italic;
 }
 
 .no-messages p {
-  margin: 0 0 var(--space-sm) 0;
-  font-size: var(--font-size-lg);
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
 }
 
 .no-messages small {
   display: block;
-  font-size: var(--font-size-base);
+  font-size: 0.9rem;
   opacity: 0.8;
 }
 
@@ -438,6 +421,57 @@ button.secondary:hover:not(:disabled) {
   box-shadow: var(--shadow-sm);
 }
 
+/* Speaking Speed ボタン選択式 */
+.speed-button-container {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.speed-button {
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  min-width: 48px;
+  text-align: center;
+}
+
+.speed-button:hover:not(:disabled) {
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-border-hover);
+}
+
+.speed-button:focus {
+  border-color: var(--color-border-focus);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+.speed-button.active {
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+  border-color: var(--color-primary);
+}
+
+.speed-button.active:hover {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.speed-button:disabled {
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 /* デバッグ情報 */
 .debug-info {
   position: fixed;
@@ -463,40 +497,109 @@ h1 {
 }
 
 /* ============================================================================
-   設定パネルの改良版スタイル
+   シンプルな設定パネル
    ============================================================================ */
 
+/* 設定パネル全体 */
 .settings-panel {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md); /* 縮小: lg → md */
+  gap: var(--space-lg);
+  max-width: 100%;
 }
 
+/* 個別設定項目のコンテナ */
 .setting-group {
   background-color: var(--color-bg-surface);
-  border-radius: var(--radius-md);
-  padding: var(--space-md); /* 縮小: lg → md */
   border: 1px solid var(--color-border);
-  transition: border-color var(--transition-base);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
   box-shadow: var(--shadow-sm);
 }
 
-.setting-group:hover {
-  border-color: var(--color-border-hover);
-}
-
-.setting-group > label {
+/* 設定ラベル */
+.setting-label {
   display: block;
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-  margin-bottom: var(--space-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  margin-bottom: var(--space-md);
+  text-align: center;
+  padding: var(--space-sm);
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
 }
 
-.setting-group select {
+/* 選択ボックス */
+.setting-select {
   width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+}
+
+.setting-select:focus {
+  border-color: var(--color-border-focus);
+  outline: none;
+}
+
+/* Voice Controlsコンテナ */
+.voice-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* チェックボックス項目 */
+.voice-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-primary);
+  cursor: pointer;
+  transition: background-color var(--transition-base);
+}
+
+.voice-toggle:hover {
+  background-color: var(--color-bg-secondary);
+}
+
+.voice-toggle input[type="checkbox"] {
+  margin: 0;
+}
+
+.toggle-text {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+/* ============================================================================
+   入力エリアとメッセージ送信部分のスタイル
+   ============================================================================ */
+
+/* 入力エリア全体のコンテナ */
+.input-area {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  padding: var(--space-md);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  margin-top: var(--space-md);
+}
+
+/* メッセージ入力フィールド */
+.message-input {
+  flex: 1;
   padding: var(--space-sm) var(--space-md);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -505,90 +608,48 @@ h1 {
   font-size: var(--font-size-base);
   outline: none;
   transition: all var(--transition-base);
-  cursor: pointer;
+  min-height: 44px;
 }
 
-.setting-group select:focus {
+.message-input:focus {
   border-color: var(--color-border-focus);
-  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
 }
 
-.setting-group select:hover:not(:disabled) {
-  border-color: var(--color-border-hover);
-}
-
-.setting-group select:disabled {
+.message-input:disabled {
   background-color: var(--color-bg-surface);
   color: var(--color-text-disabled);
   cursor: not-allowed;
   opacity: 0.6;
 }
 
-/* 音声コントロール */
-.voice-controls {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm); /* 縮小: md → sm */
-  margin-top: var(--space-xs); /* 縮小: sm → xs */
+.message-input.listening {
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 2px rgba(56, 142, 60, 0.2);
+  background-color: rgba(56, 142, 60, 0.05);
 }
 
-.voice-toggle {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  font-size: var(--font-size-base);
-  cursor: pointer;
-  color: var(--color-text-primary);
-  padding: var(--space-sm);
-  border-radius: var(--radius-sm);
-  transition: background-color var(--transition-base);
-}
-
-.voice-toggle:hover {
-  background-color: var(--color-primary-light);
-}
-
-.voice-toggle input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  cursor: pointer;
-  accent-color: var(--color-primary);
-}
-
+/* 音声入力ボタン */
 .voice-button {
-  position: relative;
-  border: 2px solid #1976d2;
-  background-color: #1976d2;
-  color: white;
-  padding: 0.5rem;
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--color-secondary);
   border-radius: 50%;
+  background-color: var(--color-bg-primary);
+  color: var(--color-secondary);
   cursor: pointer;
-  font-size: 1.2rem;
-  transition: all 0.3s ease;
-  margin: 0 0.5rem;
-  width: 50px;
-  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all var(--transition-base);
+  position: relative;
+  flex-shrink: 0;
 }
 
-.voice-button:hover {
-  background-color: #1565c0;
-  border-color: #1565c0;
+.voice-button:hover:not(:disabled) {
+  background-color: var(--color-secondary);
+  color: var(--color-text-on-primary);
   transform: scale(1.05);
-}
-
-.voice-button.listening {
-  background-color: #d32f2f;
-  border-color: #d32f2f;
-  animation: pulse 2s infinite;
-}
-
-.voice-button.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .voice-button:disabled {
@@ -596,118 +657,71 @@ h1 {
   cursor: not-allowed;
 }
 
-/* リスニング中のパルスアニメーション */
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7);
-  }
-  70% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 10px rgba(211, 47, 47, 0);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0);
-  }
+.voice-button.listening {
+  background-color: var(--color-secondary);
+  color: var(--color-text-on-primary);
+  box-shadow: 0 0 0 4px rgba(56, 142, 60, 0.3);
+  animation: pulse 1.5s infinite;
 }
 
-/* リスニングインジケーター */
+.microphone-icon {
+  font-size: var(--font-size-lg);
+  line-height: 1;
+}
+
 .listening-indicator {
   position: absolute;
-  top: -2px;
-  right: -2px;
+  top: -4px;
+  right: -4px;
 }
 
 .pulse-dot {
-  width: 8px;
-  height: 8px;
-  background-color: #ff0000;
+  width: 12px;
+  height: 12px;
+  background-color: var(--color-accent);
   border-radius: 50%;
-  animation: blink 1s infinite;
+  display: block;
+  animation: pulse 1s infinite;
 }
 
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
-}
-
-/* ============================================================================
-   入力エリアのスタイル
-   ============================================================================ */
-
-.input-area {
-  display: flex;
-  gap: var(--space-sm);
-  align-items: center;
-  background-color: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-sm);
-  box-shadow: var(--shadow-sm);
-  transition: border-color var(--transition-base);
-}
-
-.input-area:focus-within {
-  border-color: var(--color-border-focus);
-  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
-}
-
-.message-input {
-  flex: 1;
-  padding: var(--space-md);
-  border: none;
-  outline: none;
-  font-size: var(--font-size-base);
-  background-color: transparent;
-  color: var(--color-text-primary);
-  min-height: 24px;
-}
-
-.message-input::placeholder {
-  color: var(--color-text-secondary);
-}
-
-.message-input.listening {
-  background-color: var(--color-primary-light);
-  border-radius: var(--radius-sm);
-}
-
+/* 送信ボタン */
 .send-button {
   padding: var(--space-sm) var(--space-lg);
   background-color: var(--color-primary);
   color: var(--color-text-on-primary);
   border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
+  border-radius: var(--radius-sm);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
+  cursor: pointer;
   transition: all var(--transition-base);
+  min-height: 48px;
   display: flex;
   align-items: center;
   gap: var(--space-xs);
-  min-height: 44px;
+  flex-shrink: 0;
 }
 
 .send-button:hover:not(:disabled) {
   background-color: var(--color-primary-hover);
   transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .send-button:disabled {
   background-color: var(--color-text-disabled);
   cursor: not-allowed;
+  opacity: 0.6;
   transform: none;
 }
 
 .send-button.loading {
-  opacity: 0.8;
+  cursor: not-allowed;
 }
 
-/* ローディングスピナー */
 .loading-spinner {
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   border: 2px solid transparent;
   border-top: 2px solid currentColor;
   border-radius: 50%;
@@ -719,480 +733,50 @@ h1 {
   100% { transform: rotate(360deg); }
 }
 
-/* ============================================================================
-   アニメーションとインジケータ
-   ============================================================================ */
-
-/* タイピングインジケータ */
-.typing-indicator {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-}
-
-.typing-indicator .dot {
-  width: 8px;
-  height: 8px;
-  background-color: var(--color-text-secondary);
-  border-radius: 50%;
-  animation: typing 1.4s infinite ease-in-out;
-}
-
-.typing-indicator .dot:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.typing-indicator .dot:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes typing {
-  0%, 60%, 100% {
-    transform: translateY(0);
-    opacity: 0.4;
-  }
-  30% {
-    transform: translateY(-8px);
-    opacity: 1;
-  }
-}
-
-/* ============================================================================
-   音声コントロールボタンのスタイル
-   ============================================================================ */
-
-.voice-button {
-  position: relative;
-  width: 52px;
-  height: 52px;
-  border: 2px solid var(--color-primary);
-  background-color: var(--color-primary);
-  color: var(--color-text-on-primary);
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: var(--font-size-lg);
-  transition: all var(--transition-base);
-  margin: 0 var(--space-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-sm);
-}
-
-.voice-button:hover:not(:disabled) {
-  background-color: var(--color-primary-hover);
-  border-color: var(--color-primary-hover);
-  transform: scale(1.05);
-  box-shadow: var(--shadow-md);
-}
-
-.voice-button.listening {
-  background-color: var(--color-accent);
-  border-color: var(--color-accent);
-  animation: pulse 2s infinite;
-}
-
-.voice-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* リスニングインジケーター */
-.listening-indicator {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-}
-
-.pulse-dot {
-  width: 10px;
-  height: 10px;
-  background-color: var(--color-accent);
-  border-radius: 50%;
-  animation: blink 1s infinite;
-}
-
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
-}
-
-/* デバッグ情報のスタイル改良 */
-.debug-info {
-  margin-top: 1rem;
-  padding: 0.5rem;
-  background-color: rgba(0,0,0,0.05);
-  border-radius: 5px;
-  font-family: monospace;
-}
-
-/* ============================================================================
-   Speaking Speed コントロール（新規実装）
-   ============================================================================ */
-
-/* Speaking Speed 全体コンテナ */
-.speaking-speed-control {
-  width: 100%;
-  margin-top: var(--space-md);
-}
-
-/* スピード値とリセットボタンのヘッダー */
-.speed-control-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-sm);
-}
-
-.current-speed-display {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-primary);
-}
-
-.speed-reset-btn {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: var(--space-xs) var(--space-sm);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all var(--transition-base);
-}
-
-.speed-reset-btn:hover {
-  background: var(--color-border);
-  color: var(--color-text-primary);
-}
-
-/* スライダーのメインコンテナ */
-.speed-slider-wrapper {
-  position: relative;
-  width: 100%;
-  padding: var(--space-sm) 0;
-}
-
-/* スライダー本体 */
-.speaking-speed-slider {
-  width: 100%;
-  height: 8px;
-  background: var(--color-border);
-  border-radius: 4px;
-  outline: none;
-  cursor: pointer;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-/* WebKit スライダー つまみ */
-.speaking-speed-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  background: var(--color-primary);
-  border-radius: 50%;
-  cursor: pointer;
-  border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: all var(--transition-base);
-}
-
-.speaking-speed-slider::-webkit-slider-thumb:hover {
-  background: var(--color-primary-hover);
-  transform: scale(1.05);
-}
-
-/* Firefox スライダー つまみ */
-.speaking-speed-slider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  background: var(--color-primary);
-  border-radius: 50%;
-  cursor: pointer;
-  border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: all var(--transition-base);
-}
-
-.speaking-speed-slider::-moz-range-thumb:hover {
-  background: var(--color-primary-hover);
-  transform: scale(1.05);
-}
-
-/* Firefox スライダー トラック */
-.speaking-speed-slider::-moz-range-track {
-  height: 8px;
-  background: var(--color-border);
-  border-radius: 4px;
-  border: none;
-}
-
-/* スピード範囲ラベル */
-.speed-range-labels {
-  display: flex;
-  justify-content: space-between;
-  margin-top: var(--space-xs);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-}
-
-/* スピード説明テキスト */
-.speed-description-text {
-  text-align: center;
-  margin-top: var(--space-xs);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  font-style: italic;
-}
-
-/* モバイル対応 */
-@media (max-width: 768px) {
-  .speaking-speed-slider {
-    height: 10px;
-  }
-  
-  .speaking-speed-slider::-webkit-slider-thumb {
-    width: 24px;
-    height: 24px;
-  }
-  
-  .speaking-speed-slider::-moz-range-thumb {
-    width: 24px;
-    height: 24px;
-  }
-  
-  .speed-description-text {
-    display: none;
-  }
-}
-
-/* ============================================================================
-   学習機能コントロール用スタイル
-   ============================================================================ */
-
-/* 学習機能コントロール */
-.learning-controls {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm); /* 縮小: md → sm */
-  margin-top: var(--space-xs); /* 縮小: sm → xs */
-}
-
-.feature-toggle {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  cursor: pointer;
-  padding: var(--space-sm);
-  border-radius: var(--radius-sm);
-  transition: background-color var(--transition-base);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-base);
-}
-
-.feature-toggle:hover {
-  background-color: var(--color-primary-light);
-}
-
-.feature-toggle input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  cursor: pointer;
-  accent-color: var(--color-primary);
-}
-
-/* 設定セクションヘッダー */
-.settings-section-header {
-  margin-bottom: var(--space-md); /* 縮小: lg → md */
-  padding-bottom: var(--space-sm); /* 縮小: md → sm */
-  border-bottom: 2px solid var(--color-border);
-}
-
-.settings-section-header h2 {
-  color: var(--color-primary);
-  font-size: var(--font-size-base); /* 縮小: lg → base */
-  font-weight: var(--font-weight-semibold);
-  margin: 0 0 var(--space-xs) 0;
-  letter-spacing: -0.01em;
-}
-
-.settings-section-header p {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  margin: 0;
-  line-height: 1.5;
-}
-
-/* 機能説明のスタイル */
-.feature-description {
-  margin-top: var(--space-sm); /* 縮小: md → sm */
-  padding: var(--space-sm); /* 縮小: md → sm */
-  background-color: var(--color-primary-light);
-  border-radius: var(--radius-sm);
-  border-left: 4px solid var(--color-primary);
-}
-
-.feature-description small {
-  color: var(--color-text-primary);
-  line-height: 1.5;
-  display: block;
-}
-
-.feature-description strong {
-  color: var(--color-primary);
-  font-weight: var(--font-weight-semibold);
-}
-
-/* 文法チェック関連のメッセージスタイル */
-.grammar-suggestion {
-  background-color: #fff3cd;
-  border: 1px solid #ffeaa7;
-  border-radius: 8px;
-  padding: 1rem;
-  margin: 0.5rem 0;
-}
-
-.grammar-suggestion.correction {
-  background-color: #d1ecf1;
-  border-color: #bee5eb;
-}
-
-.suggestion-header {
-  font-weight: bold;
-  color: #856404;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.suggestion-header.correction {
-  color: #0c5460;
-}
-
-.original-text {
-  background-color: #f8f9fa;
-  padding: 0.5rem;
-  border-radius: 4px;
-  margin: 0.5rem 0;
-  border-left: 3px solid #dc3545;
-}
-
-.improved-text {
-  background-color: #d4edda;
-  padding: 0.5rem;
-  border-radius: 4px;
-  margin: 0.5rem 0;
-  border-left: 3px solid #28a745;
-}
-
-.suggestion-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-}
-
-.suggestion-button {
-  padding: 0.375rem 0.75rem;
-  font-size: 0.875rem;
-  border-radius: 4px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.suggestion-button.primary {
-  background-color: #007bff;
-  color: white;
-}
-
-.suggestion-button.primary:hover {
-  background-color: #0056b3;
-}
-
-.suggestion-button.secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.suggestion-button.secondary:hover {
-  background-color: #545b62;
-}
-
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
-  .App {
-    padding: 0.5rem;
+  .input-area {
+    gap: var(--space-xs);
+    padding: var(--space-sm);
   }
   
   .voice-button {
-    width: 45px;
-    height: 45px;
-    font-size: 1rem;
+    width: 44px;
+    height: 44px;
   }
   
   .send-button {
-    padding: 0.75rem 1rem;
-    font-size: 0.9rem;
-  }
-  
-  .current-speed {
+    padding: var(--space-sm) var(--space-md);
     font-size: var(--font-size-sm);
+    min-height: 44px;
   }
   
-  .current-speed strong {
-    font-size: var(--font-size-base);
-  }
-  
-  .speed-description {
-    display: none; /* モバイルでは説明テキストを隠す */
-  }
-  
-  .speaking-rate-controls {
-    gap: 0.25rem;
-  }
-  
-  .rate-labels {
-    font-size: 0.7rem;
-  }
-  
-  .level-defaults small {
-    font-size: 0.65rem;
-  }
-  
-  .feature-description {
-    padding: 0.5rem;
-  }
-  
-  .suggestion-actions {
-    flex-direction: column;
-  }
-  
-  .suggestion-button {
-    font-size: 0.8rem;
-    padding: 0.3rem 0.6rem;
+  .message-input {
+    min-height: 40px;
   }
 }
 
-/* 空のメッセージエリアのスタイル */
-.no-messages {
-  text-align: center;
-  padding: 2rem;
-  color: #6c757d;
-  font-style: italic;
+@media (max-width: 480px) {
+  .input-area {
+    flex-wrap: wrap;
+  }
+  
+  .message-input {
+    min-width: 0;
+    flex-basis: 100%;
+    margin-bottom: var(--space-xs);
+  }
+  
+  .voice-button,
+  .send-button {
+    flex: 1;
+    min-width: 80px;
+  }
+  
+  .voice-button {
+    border-radius: var(--radius-sm);
+    width: auto;
+  }
 }
 
-.no-messages p {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.1rem;
-}
 
-.no-messages small {
-  display: block;
-  font-size: 0.9rem;
-  opacity: 0.8;
-}
