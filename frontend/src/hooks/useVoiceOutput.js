@@ -27,28 +27,17 @@ export const useVoiceOutput = (isEnabled, speakingRate = 1.0) => {
       return false;
     }
 
-    // 厳密な型チェック
-    if (!text) {
-      console.log('No text provided, skipping TTS');
-      return false;
-    }
-
-    if (typeof text !== 'string') {
-      console.log('Text is not a string, skipping TTS:', typeof text, text);
-      return false;
-    }
-
-    const trimmedText = text.trim();
-    if (!trimmedText) {
-      console.log('Empty text after trim, skipping TTS');
+    // 基本的な型チェック（詳細なチェックはapi.jsで実行）
+    if (!text || typeof text !== 'string' || !text.trim()) {
+      console.log('Invalid text provided for TTS:', typeof text, text?.substring(0, 50));
       return false;
     }
 
     try {
-      console.log('Attempting to speak text:', trimmedText.substring(0, 50) + '...', 'at rate:', speakingRate);
+      console.log('🎵 Attempting to speak text:', text.substring(0, 50) + '...', 'at rate:', speakingRate);
       
       // Google Cloud TTSを試行（読み上げ速度を含める）
-      const audioElement = await convertTextToSpeech(trimmedText, speakingRate);
+      const audioElement = await convertTextToSpeech(text, speakingRate);
       
       if (audioElement) {
         // Google TTSが成功した場合
@@ -64,17 +53,23 @@ export const useVoiceOutput = (isEnabled, speakingRate = 1.0) => {
             console.error('Google TTS playback error:', error);
             // フォールバックを実行
             console.log('Falling back to browser TTS');
-            fallbackTextToSpeech(trimmedText);
+            fallbackTextToSpeech(text, speakingRate);
             resolve(false);
           };
           
-          audioElement.play();
+          audioElement.play().catch(playError => {
+            console.error('Failed to play audio:', playError);
+            // フォールバックを実行
+            console.log('Audio play failed, falling back to browser TTS');
+            fallbackTextToSpeech(text, speakingRate);
+            resolve(false);
+          });
         });
       } else {
         // Google TTSが失敗した場合はブラウザTTSにフォールバック
         console.log('Google TTS failed, using browser TTS fallback');
-        fallbackTextToSpeech(trimmedText, speakingRate);
-        return true; // ブラウザTTSは同期的なので即座にtrueを返す
+        const success = await fallbackTextToSpeech(text, speakingRate);
+        return success;
       }
       
     } catch (error) {
@@ -82,8 +77,13 @@ export const useVoiceOutput = (isEnabled, speakingRate = 1.0) => {
       
       // 全てが失敗した場合もブラウザTTSを試行
       console.log('All TTS methods failed, attempting final browser TTS fallback');
-      fallbackTextToSpeech(trimmedText, speakingRate);
-      return false;
+      try {
+        const success = await fallbackTextToSpeech(text, speakingRate);
+        return success;
+      } catch (fallbackError) {
+        console.error('Final fallback TTS also failed:', fallbackError);
+        return false;
+      }
     }
   }, [isEnabled, speakingRate]);
 

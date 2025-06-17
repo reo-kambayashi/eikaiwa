@@ -84,24 +84,16 @@ class TestConversationEndpoints:
         assert isinstance(data["reply"], str)
         assert len(data["reply"]) > 0
 
-    def test_welcome_endpoint_with_parameters(self):
+    def test_welcome_endpoint_simple(self):
         """
-        Test the welcome endpoint with different level and practice type parameters.
+        Test the welcome endpoint without parameters.
         """
-        # Test with different parameters
-        params = [
-            {"level": "beginner", "practice_type": "conversation"},
-            {"level": "intermediate", "practice_type": "grammar"},
-            {"level": "advanced", "practice_type": "vocabulary"},
-        ]
+        response = client.get("/api/welcome")
+        assert response.status_code == 200
 
-        for param in params:
-            response = client.get("/api/welcome", params=param)
-            assert response.status_code == 200
-
-            data = response.json()
-            assert "reply" in data
-            assert isinstance(data["reply"], str)
+        data = response.json()
+        assert "reply" in data
+        assert isinstance(data["reply"], str)
 
     def test_respond_endpoint_structure(self):
         """
@@ -113,8 +105,6 @@ class TestConversationEndpoints:
         # Prepare test data
         test_request = {
             "text": "Hello, how are you?",
-            "level": "beginner",
-            "practice_type": "conversation",
         }
 
         response = client.post("/api/respond", json=test_request)

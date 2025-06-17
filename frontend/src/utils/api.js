@@ -129,7 +129,7 @@ const generateFallbackWelcomeMessage = () => {
 };
 
 /**
- * 音声出力用のテキストクリーニング
+ * 音声出力用のテキストクリーニング（改善版）
  */
 const cleanTextForSpeech = (text) => {
   // 厳密な入力チェック
@@ -143,24 +143,66 @@ const cleanTextForSpeech = (text) => {
 
   let cleaned = text;
 
-  // 絵文字を除去（ES5互換の方法）
-  cleaned = cleaned.replace(/[\u{1F600}-\u{1F64F}]/gu, ''); // 顔文字
-  cleaned = cleaned.replace(/[\u{1F300}-\u{1F5FF}]/gu, ''); // その他のシンボル
-  cleaned = cleaned.replace(/[\u{1F680}-\u{1F6FF}]/gu, ''); // 交通機関とマップ
-  cleaned = cleaned.replace(/[\u{2600}-\u{26FF}]/gu, '');   // その他のシンボル
-  cleaned = cleaned.replace(/[\u{2700}-\u{27BF}]/gu, '');   // Dingbats
+  // 1. 絵文字を包括的に除去
+  // 基本的な絵文字 (U+1F600-U+1F64F)
+  cleaned = cleaned.replace(/[\u{1F600}-\u{1F64F}]/gu, '');
+  // その他の絵文字・記号 (U+1F300-U+1F5FF)
+  cleaned = cleaned.replace(/[\u{1F300}-\u{1F5FF}]/gu, '');
+  // 交通機関とマップ (U+1F680-U+1F6FF)
+  cleaned = cleaned.replace(/[\u{1F680}-\u{1F6FF}]/gu, '');
+  // 補助記号・絵文字 (U+1F700-U+1F77F)
+  cleaned = cleaned.replace(/[\u{1F700}-\u{1F77F}]/gu, '');
+  // 幾何学図形拡張 (U+1F780-U+1F7FF)
+  cleaned = cleaned.replace(/[\u{1F780}-\u{1F7FF}]/gu, '');
+  // 補助絵文字 (U+1F800-U+1F8FF)
+  cleaned = cleaned.replace(/[\u{1F800}-\u{1F8FF}]/gu, '');
+  // 追加の絵文字 (U+1F900-U+1F9FF)
+  cleaned = cleaned.replace(/[\u{1F900}-\u{1F9FF}]/gu, '');
+  // 追加記号と絵文字 (U+1FA00-U+1FA6F)
+  cleaned = cleaned.replace(/[\u{1FA00}-\u{1FA6F}]/gu, '');
+  // 旧来の絵文字記号
+  cleaned = cleaned.replace(/[\u{2600}-\u{26FF}]/gu, '');
+  cleaned = cleaned.replace(/[\u{2700}-\u{27BF}]/gu, '');
+  // Variation Selectors (絵文字の変形)
+  cleaned = cleaned.replace(/[\u{FE00}-\u{FE0F}]/gu, '');
+  // Zero Width Joiner（絵文字の結合文字）
+  cleaned = cleaned.replace(/\u{200D}/gu, '');
+  // Regional Indicator Symbols（国旗絵文字）
+  cleaned = cleaned.replace(/[\u{1F1E6}-\u{1F1FF}]/gu, '');
   
-  // マークダウン記法を除去
+  // 2. マークダウン記法を包括的に除去
+  cleaned = cleaned.replace(/#{1,6}\s+/g, '');        // ヘッダー記号 (#, ##, ###...)
   cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, '$1'); // **太字**
   cleaned = cleaned.replace(/\*(.*?)\*/g, '$1');     // *斜体*
-  cleaned = cleaned.replace(/`(.*?)`/g, '$1');       // `コード`
+  cleaned = cleaned.replace(/_(.*?)_/g, '$1');       // _アンダースコア斜体_
+  cleaned = cleaned.replace(/`{3}[\s\S]*?`{3}/g, ''); // ```コードブロック```
+  cleaned = cleaned.replace(/`(.*?)`/g, '$1');       // `インラインコード`
   cleaned = cleaned.replace(/~~(.*?)~~/g, '$1');     // ~~取り消し線~~
+  cleaned = cleaned.replace(/\[(.*?)\]\(.*?\)/g, '$1'); // [リンクテキスト](URL)
+  cleaned = cleaned.replace(/!\[.*?\]\(.*?\)/g, ''); // ![画像](URL)
+  cleaned = cleaned.replace(/^>\s+/gm, '');          // > 引用
+  cleaned = cleaned.replace(/^[-*+]\s+/gm, '');      // リスト記号
+  cleaned = cleaned.replace(/^\d+\.\s+/gm, '');      // 番号付きリスト
+  cleaned = cleaned.replace(/^---+$/gm, '');         // 水平線
+  cleaned = cleaned.replace(/^\*{3,}$/gm, '');       // アスタリスク水平線
   
-  // HTMLタグを除去
-  cleaned = cleaned.replace(/<[^>]*>/g, '');
+  // 3. HTMLタグを除去
+  cleaned = cleaned.replace(/<[^>]*>/g, ' ');
   
-  // 余分な空白を整理
-  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+  // 4. 特殊文字・記号を処理
+  cleaned = cleaned.replace(/&[a-zA-Z]+;/g, ' ');    // HTMLエンティティ
+  cleaned = cleaned.replace(/[\u{2000}-\u{206F}]/gu, ' '); // 一般句読点
+  cleaned = cleaned.replace(/[\u{2E00}-\u{2E7F}]/gu, ' '); // 補助句読点
+  
+  // 5. 余分な改行・空白を整理
+  cleaned = cleaned.replace(/\n{3,}/g, '\n\n');     // 3つ以上の改行を2つに
+  cleaned = cleaned.replace(/\s{2,}/g, ' ');        // 2つ以上の空白を1つに
+  cleaned = cleaned.replace(/^\s+|\s+$/g, '');      // 先頭・末尾の空白を除去
+  
+  // 6. 最終的な空文字チェック
+  if (!cleaned || cleaned.length === 0) {
+    return '';
+  }
 
   return cleaned;
 };
@@ -291,9 +333,18 @@ export const textToSpeech = async (text, speakingRate = 1.0) => {
     // テキストをクリーニング
     const cleanedText = cleanTextForSpeech(trimmedText);
     
-    if (!cleanedText.trim()) {
-      throw new AppError('No valid text found for speech synthesis', ERROR_TYPES.VALIDATION);
+    // クリーニング後に有効なテキストがあるかチェック
+    if (!cleanedText || !cleanedText.trim()) {
+      console.warn('No valid text after cleaning:', trimmedText);
+      throw new AppError('No valid text found after cleaning for speech synthesis', ERROR_TYPES.VALIDATION);
     }
+
+    console.log('🧹 Text cleaned for TTS:', {
+      original: trimmedText.substring(0, 100),
+      cleaned: cleanedText.substring(0, 100),
+      originalLength: trimmedText.length,
+      cleanedLength: cleanedText.length
+    });
 
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.TTS}`;
     
@@ -301,46 +352,84 @@ export const textToSpeech = async (text, speakingRate = 1.0) => {
       text: cleanedText,
       voice_config: {
         language_code: TTS_CONFIG.LANG || 'en-US',
-        speaking_rate: Math.max(0.5, Math.min(2.0, speakingRate)),
-        pitch: TTS_CONFIG.PITCH || 1.0,
+        speaking_rate: Math.max(0.25, Math.min(4.0, speakingRate)), // Google TTSの許可範囲
+        pitch: TTS_CONFIG.PITCH || 0.0,  // Google TTSのデフォルトは0.0
         volume: TTS_CONFIG.VOLUME || 1.0
       }
     };
 
     console.log('🔗 Converting text to speech:', { 
       text: cleanedText.substring(0, 100), 
-      speakingRate
+      speakingRate,
+      textLength: cleanedText.length
     });
 
-    const response = await withTimeout(
-      fetch(url, {
-        ...defaultFetchOptions,
-        method: 'POST',
-        body: JSON.stringify(requestBody)
-      }),
-      API_CONFIG.TIMEOUT * 2 // TTS は時間がかかるので2倍のタイムアウト
+    // リトライ機能付きでTTS APIを呼び出し
+    const response = await withRetry(
+      () => withTimeout(
+        fetch(url, {
+          ...defaultFetchOptions,
+          method: 'POST',
+          body: JSON.stringify(requestBody)
+        }),
+        API_CONFIG.TIMEOUT * 3 // TTS は時間がかかるので3倍のタイムアウト
+      ),
+      2, // 最大2回リトライ
+      1500 // 1.5秒間隔
     );
 
     if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error');
       throw new AppError(
-        `TTS API failed: ${response.status}`,
+        `TTS API failed: ${response.status} - ${errorText}`,
+        response.status >= 500 ? ERROR_TYPES.API : ERROR_TYPES.NETWORK,
+        { status: response.status, responseText: errorText }
+      );
+    }
+
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('audio')) {
+      throw new AppError(
+        `Invalid response content type: ${contentType}`,
         ERROR_TYPES.API,
-        { status: response.status }
+        { contentType }
       );
     }
 
     const audioBlob = await response.blob();
-    console.log('✅ Text-to-speech conversion completed');
+    
+    if (audioBlob.size === 0) {
+      throw new AppError('Received empty audio data', ERROR_TYPES.API);
+    }
+
+    console.log('✅ Text-to-speech conversion completed', {
+      audioSize: audioBlob.size,
+      audioType: audioBlob.type
+    });
     
     return audioBlob;
 
   } catch (error) {
+    // より詳細なエラーログ
+    console.error('❌ TTS conversion failed:', {
+      originalText: text?.substring(0, 100),
+      speakingRate,
+      error: error.message,
+      stack: error.stack
+    });
+    
     logError(error, context);
-    throw error instanceof AppError ? error : new AppError(
-      'Text-to-speech conversion failed',
-      ERROR_TYPES.SPEECH_SYNTHESIS,
-      { originalError: error }
-    );
+    
+    // エラータイプに応じて適切にラップ
+    if (error instanceof AppError) {
+      throw error;
+    } else {
+      throw new AppError(
+        'Text-to-speech conversion failed',
+        ERROR_TYPES.SPEECH_SYNTHESIS,
+        { originalError: error.message, stack: error.stack }
+      );
+    }
   }
 };
 
@@ -351,25 +440,8 @@ export const textToSpeech = async (text, speakingRate = 1.0) => {
  * @returns {Promise<HTMLAudioElement>} 音声要素
  */
 export const convertTextToSpeech = async (text, speakingRate = 1.0) => {
-  // 厳密な入力チェック
-  if (!text) {
-    console.error('convertTextToSpeech: No text provided');
-    return null;
-  }
-  
-  if (typeof text !== 'string') {
-    console.error('convertTextToSpeech: Text must be a string, got:', typeof text);
-    return null;
-  }
-  
-  const trimmedText = text.trim();
-  if (!trimmedText) {
-    console.error('convertTextToSpeech: Text is empty after trim');
-    return null;
-  }
-
   try {
-    const audioBlob = await textToSpeech(trimmedText, speakingRate);
+    const audioBlob = await textToSpeech(text, speakingRate);
     const audioUrl = URL.createObjectURL(audioBlob);
     const audioElement = new Audio(audioUrl);
     
@@ -378,8 +450,14 @@ export const convertTextToSpeech = async (text, speakingRate = 1.0) => {
       URL.revokeObjectURL(audioUrl);
     });
     
+    // エラーが発生した場合もURLを開放
+    audioElement.addEventListener('error', () => {
+      URL.revokeObjectURL(audioUrl);
+    });
+    
     return audioElement;
   } catch (error) {
+    console.error('convertTextToSpeech failed:', error.message);
     logError(error, 'convertTextToSpeech');
     return null;
   }
@@ -399,28 +477,36 @@ export const fallbackTextToSpeech = (text, rate = 1.0) => {
       return;
     }
 
-    // 厳密な入力チェック
-    if (!text) {
-      console.warn('fallbackTextToSpeech: No text provided');
-      resolve(false);
-      return;
-    }
-    
-    if (typeof text !== 'string') {
-      console.warn('fallbackTextToSpeech: Text must be a string, got:', typeof text);
+    // 基本的な入力チェック
+    if (!text || typeof text !== 'string') {
+      console.warn('fallbackTextToSpeech: Invalid text input:', typeof text);
       resolve(false);
       return;
     }
     
     const trimmedText = text.trim();
     if (!trimmedText) {
-      console.warn('fallbackTextToSpeech: Text is empty after trim');
+      console.warn('fallbackTextToSpeech: Empty text after trim');
       resolve(false);
       return;
     }
 
     try {
-      const utterance = new SpeechSynthesisUtterance(trimmedText);
+      // テキストをクリーニング（ブラウザTTSでも絵文字・マークアップを除去）
+      const cleanedText = cleanTextForSpeech(trimmedText);
+      
+      if (!cleanedText || !cleanedText.trim()) {
+        console.warn('fallbackTextToSpeech: No valid text after cleaning');
+        resolve(false);
+        return;
+      }
+
+      console.log('🧹 Using cleaned text for fallback TTS:', {
+        original: trimmedText.substring(0, 50),
+        cleaned: cleanedText.substring(0, 50)
+      });
+
+      const utterance = new SpeechSynthesisUtterance(cleanedText);
       utterance.lang = 'en-US';
       utterance.rate = Math.max(0.1, Math.min(10, rate)); // ブラウザの範囲制限
       utterance.pitch = 1.0;
@@ -436,7 +522,10 @@ export const fallbackTextToSpeech = (text, rate = 1.0) => {
         resolve(false);
       };
 
+      // 既存の音声を停止してから新しい音声を開始
+      window.speechSynthesis.cancel();
       window.speechSynthesis.speak(utterance);
+      
     } catch (error) {
       console.error('Fallback TTS failed:', error);
       resolve(false);
