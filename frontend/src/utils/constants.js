@@ -60,12 +60,12 @@ export const TTS_CONFIG = {
   LANGUAGE_CODE: "en-US",
   // レベル別のデフォルト読み上げ速度
   DEFAULT_SPEAKING_RATES: {
-    beginner: 1.0,      // 初級者：ゆっくり（現在の速度）
-    intermediate: 1.2,  // 中級者：少し早め
-    advanced: 1.4       // 上級者：ネイティブに近い速度
+    beginner: 1.0,      // 初級者：標準速度
+    intermediate: 1.3,  // 中級者：少し早め
+    advanced: 1.6       // 上級者：ネイティブに近い速度
   },
   // 速度調整の範囲
-  MIN_SPEAKING_RATE: 0.5,  // 最低速度（半分の速度）
+  MIN_SPEAKING_RATE: 1.0,  // 最低速度（標準速度）
   MAX_SPEAKING_RATE: 2.0   // 最高速度（2倍の速度）
 };
 

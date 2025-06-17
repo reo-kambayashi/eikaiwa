@@ -206,27 +206,6 @@ function App() {
           </div>
         </div>
       </div>
-
-      {/* デバッグ情報 */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="debug-info">
-          <small>API URL: {API_CONFIG.BASE_URL}</small>
-          <br />
-          <small>Voice Supported: {isVoiceSupported ? 'Yes' : 'No'}</small>
-          <br />
-          <small>Listening: {isListening ? 'Yes' : 'No'}</small>
-          <br />
-          <small>Messages Count: {messages.length}</small>
-          <br />
-          <small>Current Input: "{input}"</small>
-          <br />
-          <small>Transcript: "{transcript}"</small>
-          <br />
-          <small>Speaking Rate: {speakingRate.toFixed(1)}x</small>
-          <br />
-          <small>Grammar Check: {isGrammarCheckEnabled ? 'Enabled' : 'Disabled'}</small>
-        </div>
-      )}
     </div>
   );
 }
