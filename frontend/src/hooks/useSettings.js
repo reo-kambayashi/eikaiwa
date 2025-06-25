@@ -5,15 +5,7 @@
 // ============================================================================
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { TTS_CONFIG, SPEECH_RECOGNITION_CONFIG, DEFAULT_SETTINGS } from '../utils/constants';
-
-// ローカルストレージのキー
-const STORAGE_KEYS = {
-  VOICE_INPUT: 'eikaiwa_voice_input',
-  VOICE_OUTPUT: 'eikaiwa_voice_output',
-  SPEAKING_RATE: 'eikaiwa_speaking_rate',
-  VOICE_TIMEOUT: 'eikaiwa_voice_timeout'
-};
+import { TTS_CONFIG, SPEECH_RECOGNITION_CONFIG, DEFAULT_SETTINGS, STORAGE_KEYS } from '../utils/constants';
 
 /**
  * ローカルストレージから値を取得するヘルパー関数
@@ -138,7 +130,7 @@ export const useSettings = () => {
         voiceInputTimeout
       });
     }
-  }, [isVoiceInputEnabled, isVoiceOutputEnabled, speakingRate, voiceInputTimeout]);
+  }, [isVoiceInputEnabled, isVoiceOutputEnabled, isGrammarCheckEnabled, speakingRate, voiceInputTimeout]);
 
   // 設定を全てリセットする関数
   const resetAllSettings = useCallback(() => {
@@ -167,7 +159,7 @@ export const useSettings = () => {
     isGrammarCheckEnabled, // 常にtrue
     speakingRate,
     voiceInputTimeout
-  }), [isVoiceInputEnabled, isVoiceOutputEnabled, speakingRate, voiceInputTimeout]);
+  }), [isVoiceInputEnabled, isVoiceOutputEnabled, isGrammarCheckEnabled, speakingRate, voiceInputTimeout]);
 
   return {
     // 現在の設定値

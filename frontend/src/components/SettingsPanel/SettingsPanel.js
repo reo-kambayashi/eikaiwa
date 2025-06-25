@@ -28,16 +28,14 @@ const SettingsPanel = memo(({
   onSpeakingRateReset,
   onVoiceInputTimeoutChange
 }) => {
-  /**
-   * スピード説明テキストを取得
-   */
-  const getSpeedDescription = (rate) => {
-    if (rate <= 1.2) return 'Normal speed';
-    if (rate <= 1.4) return 'Slightly fast';
-    if (rate <= 1.7) return 'Fast';
-    if (rate <= 1.9) return 'Very fast';
-    return 'Maximum speed';
-  };
+  // スピード説明テキストを取得（現在未使用）
+  // const getSpeedDescription = (rate) => {
+  //   if (rate <= 1.2) return 'Normal speed';
+  //   if (rate <= 1.4) return 'Slightly fast';
+  //   if (rate <= 1.7) return 'Fast';
+  //   if (rate <= 1.9) return 'Very fast';
+  //   return 'Maximum speed';
+  // };
 
   return (
     <div className="settings-panel" role="form" aria-label="Application Settings">

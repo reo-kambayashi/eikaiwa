@@ -3,7 +3,7 @@
 // 日本語の文章を英語に瞬間翻訳する練習モード
 // ============================================================================
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import './InstantTranslation.css';
 import { useVoiceInput } from '../../hooks/useVoiceInput';
 
@@ -34,6 +34,9 @@ const InstantTranslation = ({
   const [isLoading, setIsLoading] = useState(false); // ローディング状態
   const [problemHistory, setProblemHistory] = useState([]); // 問題履歴
   const [score, setScore] = useState({ correct: 0, total: 0 }); // スコア
+  const [difficulty, setDifficulty] = useState('all'); // 難易度設定
+  const [category, setCategory] = useState('all'); // カテゴリ設定
+  const [showSettings, setShowSettings] = useState(false); // 設定パネル表示フラグ
 
   const inputRef = useRef(null);
 
@@ -52,7 +55,7 @@ const InstantTranslation = ({
   /**
    * 新しい瞬間英作文の問題を取得
    */
-  const fetchNewProblem = async () => {
+  const fetchNewProblem = useCallback(async () => {
     setIsLoading(true);
     setShowAnswer(false);
     setUserAnswer('');
@@ -64,7 +67,22 @@ const InstantTranslation = ({
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/instant-translation/problem');
+      // 過去10問のIDを除外リストに追加（重複回避）
+      const excludeProblems = problemHistory.slice(-10).map(p => p.problemId).filter(Boolean);
+      
+      const requestBody = {
+        difficulty: difficulty,
+        category: category,
+        exclude_problems: excludeProblems
+      };
+
+      const response = await fetch('http://localhost:8000/api/instant-translation/problem', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      });
       
       if (!response.ok) {
         throw new Error('問題の取得に失敗しました');
@@ -84,7 +102,7 @@ const InstantTranslation = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isListening, clearTranscript, problemHistory, category, difficulty]);
 
   // ============================================================================
   // 回答チェック機能
@@ -128,11 +146,14 @@ const InstantTranslation = ({
 
       // 問題履歴に追加
       setProblemHistory(prev => [...prev, {
+        problemId: currentProblem.id, // 重複回避用のID
         japanese: currentProblem.japanese,
         correctAnswer: currentProblem.english,
         userAnswer: userAnswer,
         isCorrect: result.isCorrect,
         feedback: result.feedback,
+        difficulty: currentProblem.difficulty,
+        category: currentProblem.category,
         timestamp: new Date().toISOString()
       }]);
 
@@ -190,14 +211,44 @@ const InstantTranslation = ({
   };
 
   /**
+   * 難易度変更処理
+   */
+  const handleDifficultyChange = (e) => {
+    setDifficulty(e.target.value);
+  };
+
+  /**
+   * カテゴリ変更処理
+   */
+  const handleCategoryChange = (e) => {
+    setCategory(e.target.value);
+  };
+
+  /**
+   * 設定変更後の新しい問題取得
+   */
+  const applySettings = () => {
+    setShowSettings(false);
+    fetchNewProblem();
+  };
+
+  /**
+   * 履歴クリア処理
+   */
+  const clearHistory = () => {
+    setProblemHistory([]);
+    setScore({ correct: 0, total: 0 });
+  };
+
+  /**
    * 正解を音声で読み上げ（瞬間英作文モードでは無効化）
    */
-  const speakCorrectAnswer = () => {
-    // 瞬間英作文モードでは音声読み上げを無効化
-    // if (isVoiceOutputEnabled && speak && currentProblem?.english) {
-    //   speak(currentProblem.english);
-    // }
-  };
+  // const speakCorrectAnswer = () => {
+  //   // 瞬間英作文モードでは音声読み上げを無効化
+  //   // if (isVoiceOutputEnabled && speak && currentProblem?.english) {
+  //   //   speak(currentProblem.english);
+  //   // }
+  // };
 
   // ============================================================================
   // 初期化
@@ -205,7 +256,7 @@ const InstantTranslation = ({
   
   useEffect(() => {
     fetchNewProblem();
-  }, []);
+  }, [fetchNewProblem]);
 
   // フォーカス管理
   useEffect(() => {
@@ -230,11 +281,98 @@ const InstantTranslation = ({
       {/* ヘッダー部分 */}
       <div className="translation-header">
         <h2>瞬間英作文モード</h2>
-        <div className="score-display">
-          正解率: {score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0}% 
-          ({score.correct}/{score.total})
+        <div className="header-controls">
+          <div className="score-display">
+            正解率: {score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0}% 
+            ({score.correct}/{score.total})
+          </div>
+          <div className="header-buttons">
+            <button 
+              onClick={() => setShowSettings(!showSettings)}
+              className="settings-button"
+              title="設定を開く"
+            >
+              ⚙️ 設定
+            </button>
+            {problemHistory.length > 0 && (
+              <button 
+                onClick={clearHistory}
+                className="clear-button"
+                title="履歴をクリア"
+              >
+                🗑️ クリア
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* 設定パネル */}
+      {showSettings && (
+        <div className="settings-panel">
+          <h3>問題設定</h3>
+          <div className="settings-grid">
+            <div className="setting-group">
+              <label htmlFor="difficulty-select">難易度:</label>
+              <select 
+                id="difficulty-select"
+                value={difficulty} 
+                onChange={handleDifficultyChange}
+                className="setting-select"
+              >
+                <option value="all">すべて</option>
+                <option value="easy">初級 (Easy)</option>
+                <option value="medium">中級 (Medium)</option>
+                <option value="hard">上級 (Hard)</option>
+              </select>
+            </div>
+            
+            <div className="setting-group">
+              <label htmlFor="category-select">カテゴリ:</label>
+              <select 
+                id="category-select"
+                value={category} 
+                onChange={handleCategoryChange}
+                className="setting-select"
+              >
+                <option value="all">すべて</option>
+                <option value="weather">天気</option>
+                <option value="daily_life">日常生活</option>
+                <option value="business">ビジネス</option>
+                <option value="travel">旅行</option>
+                <option value="food">食べ物</option>
+                <option value="family">家族</option>
+                <option value="work">仕事</option>
+                <option value="hobbies">趣味</option>
+                <option value="learning">学習</option>
+                <option value="preferences">好み</option>
+                <option value="greetings">挨拶</option>
+                <option value="directions">道案内</option>
+              </select>
+            </div>
+          </div>
+          
+          <div className="settings-actions">
+            <button 
+              onClick={applySettings}
+              className="apply-settings-button"
+            >
+              設定を適用して新しい問題を開始
+            </button>
+            <button 
+              onClick={() => setShowSettings(false)}
+              className="cancel-settings-button"
+            >
+              キャンセル
+            </button>
+          </div>
+          
+          <div className="settings-info">
+            <p>💡 <strong>重複回避機能:</strong> 過去10問と同じ問題は出題されません</p>
+            <p>🤖 <strong>AI生成:</strong> 指定条件に合う問題がない場合、AIが新しい問題を生成します</p>
+          </div>
+        </div>
+      )}
 
       {/* 問題表示エリア */}
       <div className="problem-area">
@@ -245,6 +383,16 @@ const InstantTranslation = ({
             <div className="japanese-text">
               <h3>次の日本語を英語に翻訳してください：</h3>
               <p className="problem-text">{currentProblem.japanese}</p>
+              <div className="problem-info">
+                <span className={`difficulty-badge ${currentProblem.difficulty}`}>
+                  {currentProblem.difficulty === 'easy' ? '初級' : 
+                   currentProblem.difficulty === 'medium' ? '中級' : 
+                   currentProblem.difficulty === 'hard' ? '上級' : currentProblem.difficulty}
+                </span>
+                <span className="category-badge">
+                  {currentProblem.category}
+                </span>
+              </div>
             </div>
 
             {/* 入力エリア */}
@@ -332,9 +480,11 @@ const InstantTranslation = ({
       <div className="hints">
         <h4>💡 使い方のヒント:</h4>
         <ul>
+          <li>⚙️設定ボタンで難易度とカテゴリを選択できます</li>
           <li>Enterキーで回答チェック、または次の問題に進みます</li>
           <li>🎤ボタンで音声入力が可能です（英語で回答してください）</li>
           <li>完璧な翻訳でなくても、意味が通じれば正解です</li>
+          <li>過去10問と同じ問題は自動的に避けられます</li>
           <li>瞬間英作文モードでは、集中力向上のため音声読み上げは無効になっています</li>
         </ul>
       </div>
