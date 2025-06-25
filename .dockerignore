@@ -1,0 +1,38 @@
+# Git関連
+.git
+.gitignore
+
+# Docker関連
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# ドキュメント
+README.md
+AGENTS.md
+instructions.md
+
+# 環境変数ファイル
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# ログファイル
+*.log
+logs/
+
+# OSファイル
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 一時ファイル
+tmp/
+temp/

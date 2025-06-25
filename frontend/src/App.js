@@ -1,57 +1,197 @@
-import { useState } from 'react';
+// ============================================================================
+// メインアプリケーションコンポーネント
+// 日本人向け英語会話練習アプリのメインファイルです
+// リファクタリング後：機能別にコンポーネントとフックに分離
+// ============================================================================
+
+import React, { useState } from 'react';
 import './App.css';
 
+// カスタムフック
+import { useSettings } from './hooks/useSettings';
+import { useVoiceInput } from './hooks/useVoiceInput';
+import { useVoiceOutput } from './hooks/useVoiceOutput';
+import { useChat } from './hooks/useChat';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+
+// UIコンポーネント
+import SettingsPanel from './components/SettingsPanel';
+import ChatBox from './components/ChatBox';
+import InputArea from './components/InputArea';
+
 function App() {
-  // Text currently entered by the user
+  // ユーザー入力テキストの状態
   const [input, setInput] = useState('');
-  // List of chat messages to display
-  const [messages, setMessages] = useState([]);
 
-  // Base URL for the backend. React reads environment variables starting with
-  // REACT_APP_. We provide a fallback so the app works out of the box.
-  const API_URL = process.env.REACT_APP_API_URL || '';
+  // ============================================================================
+  // カスタムフックによる状態管理
+  // ============================================================================
+  
+  // 設定管理（音声機能）
+  const {
+    isVoiceInputEnabled,
+    isVoiceOutputEnabled,
+    isGrammarCheckEnabled, // 常にtrue
+    speakingRate,
+    voiceInputTimeout,
+    toggleVoiceInput,
+    toggleVoiceOutput,
+    updateSpeakingRate,
+    resetSpeakingRateToDefault,
+    updateVoiceInputTimeout
+  } = useSettings();
 
-  // Send the message to the backend and handle the response
-  const sendMessage = async () => {
-    if (!input) return;
-    const userMsg = { sender: 'You', text: input };
-    setMessages((msgs) => [...msgs, userMsg]);
+  // 音声出力機能（読み上げ速度を含む）
+  const { speak } = useVoiceOutput(isVoiceOutputEnabled, speakingRate);
+
+  // チャット機能（AI応答時に音声出力）
+  const {
+    messages,
+    isLoading,
+    messagesEndRef,
+    sendMessage
+  } = useChat(isGrammarCheckEnabled, speak);
+
+  // 音声入力機能
+  const {
+    isListening,
+    transcript,
+    toggleListening,
+    clearTranscript,
+    isSupported: isVoiceSupported
+  } = useVoiceInput(voiceInputTimeout);
+
+  // ============================================================================
+  // イベントハンドラー
+  // ============================================================================
+
+  /**
+   * メッセージ送信の処理
+   * 音声認識の結果またはテキスト入力を送信します
+   */
+  const handleSendMessage = async () => {
+    const messageToSend = isListening ? transcript : input;
+    
+    // 型安全性チェックを追加
+    if (!messageToSend || typeof messageToSend !== 'string' || !messageToSend.trim()) {
+      console.log('No valid message to send');
+      return;
+    }
+
+    console.log('Sending message:', messageToSend);
+
+    // 先に入力をクリア（送信前にクリア）
+    if (isListening) {
+      clearTranscript();
+    }
     setInput('');
-    try {
-      const res = await fetch(`${API_URL}/api/respond`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: input }),
-      });
-      const data = await res.json();
-      setMessages((msgs) => [...msgs, { sender: 'Bot', text: data.reply }]);
-    } catch (err) {
-      setMessages((msgs) => [
-        ...msgs,
-        { sender: 'Bot', text: 'Error contacting server.' },
-      ]);
+
+    // メッセージを送信
+    const success = await sendMessage(messageToSend);
+    
+    if (success) {
+      console.log('Message sent successfully');
+    } else {
+      console.error('Failed to send message');
+      // 送信に失敗した場合は入力値を復元
+      setInput(messageToSend);
     }
   };
 
-  // Render chat UI
+  /**
+   * 音声入力の切り替え処理
+   */
+  const handleVoiceToggle = () => {
+    const success = toggleListening();
+    
+    if (!success) {
+      console.error('Failed to toggle voice input');
+    }
+  };
+
+  /**
+   * 入力値の変更処理
+   * @param {string} value - 新しい入力値
+   */
+  const handleInputChange = (value) => {
+    setInput(value);
+  };
+
+  // ============================================================================
+  // キーボードショートカット
+  // ============================================================================
+  
+  useKeyboardShortcuts({
+    isVoiceInputEnabled,
+    isListening,
+    isLoading,
+    onVoiceInputStart: handleVoiceToggle
+  });
+
+  // ============================================================================
+  // 音声認識結果の入力への反映
+  // ============================================================================
+  
+  // 音声認識の結果を入力フィールドに反映
+  React.useEffect(() => {
+    if (isListening && transcript) {
+      setInput(transcript);
+    }
+  }, [transcript, isListening]);
+
+  // ============================================================================
+  // UIレンダリング
+  // ============================================================================
   return (
     <div className="App">
-      <h1>English Communication App</h1>
-      <div className="chat-box">
-        {messages.map((m, idx) => (
-          <div key={idx} className="message">
-            <strong>{m.sender}: </strong>
-            {m.text}
+      <header className="app-header">
+        <h1>English Communication App</h1>
+      </header>
+      
+      <div className="app-layout">
+        {/* 左側：学習設定パネル */}
+        <div className="settings-section">
+          <SettingsPanel
+            isVoiceInputEnabled={isVoiceInputEnabled}
+            isVoiceOutputEnabled={isVoiceOutputEnabled}
+            speakingRate={speakingRate}
+            voiceInputTimeout={voiceInputTimeout}
+            isVoiceSupported={isVoiceSupported}
+            isLoading={isLoading}
+            onVoiceInputToggle={toggleVoiceInput}
+            onVoiceOutputToggle={toggleVoiceOutput}
+            onSpeakingRateChange={updateSpeakingRate}
+            onSpeakingRateReset={resetSpeakingRateToDefault}
+            onVoiceInputTimeoutChange={updateVoiceInputTimeout}
+          />
+        </div>
+
+        {/* 中央：チャットエリア */}
+        <div className="chat-section">
+          <ChatBox 
+            messages={messages}
+            isLoading={isLoading}
+            messagesEndRef={messagesEndRef}
+          />
+          
+          <InputArea
+            value={input}
+            isListening={isListening}
+            isLoading={isLoading}
+            isVoiceInputEnabled={isVoiceInputEnabled}
+            isVoiceSupported={isVoiceSupported}
+            onChange={handleInputChange}
+            onSend={handleSendMessage}
+            onVoiceToggle={handleVoiceToggle}
+          />
+        </div>
+
+        {/* 右側：Coming Soon エリア */}
+        <div className="coming-soon-section">
+          <div className="coming-soon-content">
+            <h2>Coming Soon</h2>
           </div>
-        ))}
-      </div>
-      <div className="input-area">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a message"
-        />
-        <button onClick={sendMessage}>Send</button>
+        </div>
       </div>
     </div>
   );
