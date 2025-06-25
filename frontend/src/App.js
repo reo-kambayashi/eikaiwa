@@ -18,6 +18,7 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import SettingsPanel from './components/SettingsPanel';
 import ChatBox from './components/ChatBox';
 import InputArea from './components/InputArea';
+import GeminiChat from './components/GeminiChat';
 
 function App() {
   // ユーザー入力テキストの状態
@@ -186,11 +187,9 @@ function App() {
           />
         </div>
 
-        {/* 右側：Coming Soon エリア */}
-        <div className="coming-soon-section">
-          <div className="coming-soon-content">
-            <h2>Coming Soon</h2>
-          </div>
+        {/* 右側：Geminiチャットエリア */}
+        <div className="gemini-chat-section">
+          <GeminiChat />
         </div>
       </div>
     </div>
