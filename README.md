@@ -20,7 +20,16 @@
 - **音声**: Web Speech API, Google Cloud Text-to-Speech
 - **パッケージ管理**: uv (Python), npm (JavaScript)
 
-## 📁 プロジェクト構造
+
+   Run this command from the project root so Python can locate the
+   `backend` package. If you run it inside the `backend` directory, use:
+
+   ```bash
+   uvicorn main:app --reload
+   ```
+
+## Environment Variables
+
 
 ```
 eikaiwa/
