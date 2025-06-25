@@ -91,6 +91,30 @@ eikaiwa/
 
 ## 🚀 セットアップ手順
 
+### 📋 事前準備
+
+#### Google認証情報のセットアップ
+
+1. **Google Cloud Console**で新しいプロジェクトを作成
+2. **Google Gemini API**を有効化
+3. **OAuth 2.0 認証情報**を作成
+4. 認証情報JSONファイルを取得
+
+#### 認証情報ファイルの設定
+
+```bash
+# backend/credentials.json.example をコピー
+cp backend/credentials.json.example backend/credentials.json
+
+# credentials.json に実際の認証情報を入力
+# - client_id: GoogleクライアントID
+# - client_secret: Googleクライアントシークレット
+# - refresh_token: リフレッシュトークン
+# - quota_project_id: プロジェクトID
+```
+
+⚠️ **重要**: `backend/credentials.json`には機密情報が含まれるため、このファイルはGitリポジトリにコミットしないでください。
+
 ### 🐳 Docker Composeを使用した簡単セットアップ（推奨）
 
 最も簡単な方法でアプリケーションを起動できます：
