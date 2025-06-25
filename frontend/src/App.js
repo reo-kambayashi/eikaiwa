@@ -15,14 +15,23 @@ import { useChat } from './hooks/useChat';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
 // UIコンポーネント
+import Header from './components/Header';
 import SettingsPanel from './components/SettingsPanel';
 import ChatBox from './components/ChatBox';
 import InputArea from './components/InputArea';
 import GeminiChat from './components/GeminiChat';
+import InstantTranslation from './components/InstantTranslation';
 
 function App() {
+  // ============================================================================
+  // アプリケーション状態管理
+  // ============================================================================
+  
   // ユーザー入力テキストの状態
   const [input, setInput] = useState('');
+  
+  // モード切り替えの状態（'chat' または 'translation'）
+  const [currentMode, setCurrentMode] = useState('chat');
 
   // ============================================================================
   // カスタムフックによる状態管理
@@ -118,6 +127,22 @@ function App() {
     setInput(value);
   };
 
+  /**
+   * モード切り替えの処理
+   * @param {string} mode - 切り替え先のモード（'chat' または 'translation'）
+   */
+  const handleModeChange = (mode) => {
+    setCurrentMode(mode);
+    
+    // モード切り替え時に入力をクリア
+    setInput('');
+    if (isListening) {
+      clearTranscript();
+    }
+    
+    console.log(`Mode changed to: ${mode}`);
+  };
+
   // ============================================================================
   // キーボードショートカット
   // ============================================================================
@@ -145,53 +170,70 @@ function App() {
   // ============================================================================
   return (
     <div className="App">
-      <header className="app-header">
-        <h1>English Communication App</h1>
-      </header>
+      {/* ヘッダー：モード切り替えメニュー */}
+      <Header 
+        currentMode={currentMode}
+        onModeChange={handleModeChange}
+      />
       
-      <div className="app-layout">
-        {/* 左側：学習設定パネル */}
-        <div className="settings-section">
-          <SettingsPanel
-            isVoiceInputEnabled={isVoiceInputEnabled}
+      {/* モードに応じたコンテンツ表示 */}
+      {currentMode === 'chat' ? (
+        // チャットモード
+        <div className="app-layout">
+          {/* 左側：学習設定パネル */}
+          <div className="settings-section">
+            <SettingsPanel
+              isVoiceInputEnabled={isVoiceInputEnabled}
+              isVoiceOutputEnabled={isVoiceOutputEnabled}
+              speakingRate={speakingRate}
+              voiceInputTimeout={voiceInputTimeout}
+              isVoiceSupported={isVoiceSupported}
+              isLoading={isLoading}
+              onVoiceInputToggle={toggleVoiceInput}
+              onVoiceOutputToggle={toggleVoiceOutput}
+              onSpeakingRateChange={updateSpeakingRate}
+              onSpeakingRateReset={resetSpeakingRateToDefault}
+              onVoiceInputTimeoutChange={updateVoiceInputTimeout}
+            />
+          </div>
+
+          {/* 中央：チャットエリア */}
+          <div className="chat-section">
+            <ChatBox 
+              messages={messages}
+              isLoading={isLoading}
+              messagesEndRef={messagesEndRef}
+            />
+            
+            <InputArea
+              value={input}
+              isListening={isListening}
+              isLoading={isLoading}
+              isVoiceInputEnabled={isVoiceInputEnabled}
+              isVoiceSupported={isVoiceSupported}
+              onChange={handleInputChange}
+              onSend={handleSendMessage}
+              onVoiceToggle={handleVoiceToggle}
+            />
+          </div>
+
+          {/* 右側：Geminiチャットエリア */}
+          <div className="gemini-chat-section">
+            <GeminiChat />
+          </div>
+        </div>
+      ) : (
+        // 瞬間英作文モード
+        <div className="instant-translation-layout">
+          <InstantTranslation 
             isVoiceOutputEnabled={isVoiceOutputEnabled}
-            speakingRate={speakingRate}
-            voiceInputTimeout={voiceInputTimeout}
-            isVoiceSupported={isVoiceSupported}
-            isLoading={isLoading}
-            onVoiceInputToggle={toggleVoiceInput}
-            onVoiceOutputToggle={toggleVoiceOutput}
-            onSpeakingRateChange={updateSpeakingRate}
-            onSpeakingRateReset={resetSpeakingRateToDefault}
-            onVoiceInputTimeoutChange={updateVoiceInputTimeout}
-          />
-        </div>
-
-        {/* 中央：チャットエリア */}
-        <div className="chat-section">
-          <ChatBox 
-            messages={messages}
-            isLoading={isLoading}
-            messagesEndRef={messagesEndRef}
-          />
-          
-          <InputArea
-            value={input}
-            isListening={isListening}
-            isLoading={isLoading}
+            speak={speak}
             isVoiceInputEnabled={isVoiceInputEnabled}
             isVoiceSupported={isVoiceSupported}
-            onChange={handleInputChange}
-            onSend={handleSendMessage}
-            onVoiceToggle={handleVoiceToggle}
+            voiceInputTimeout={voiceInputTimeout}
           />
         </div>
-
-        {/* 右側：Geminiチャットエリア */}
-        <div className="gemini-chat-section">
-          <GeminiChat />
-        </div>
-      </div>
+      )}
     </div>
   );
 }

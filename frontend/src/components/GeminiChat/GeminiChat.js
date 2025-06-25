@@ -83,70 +83,65 @@ const GeminiChat = () => {
 
   return (
     <div className="gemini-chat-container">
-      {/* ヘッダー */}
-      <div className="gemini-header">
-        <h3>Gemini Chat</h3>
-        <div className="gemini-status">Ready</div>
-      </div>
-
-      {/* メッセージエリア */}
-      <div className="gemini-messages">
-        {messages.length === 0 && (
-          <div className="welcome-msg">
-            <div className="welcome-icon">🤖</div>
-            <p>Hello! I'm Gemini. Ask me anything!</p>
+      {/* メッセージエリア - ChatBoxと同じスタイル */}
+      <div className="chat-box" style={{ flex: 1, marginBottom: 'var(--space-md)' }}>
+        {messages.length === 0 ? (
+          <div className="no-messages">
+            <p>Geminiとのチャットを開始してください</p>
+            <small>Start typing a message to chat with Gemini</small>
           </div>
+        ) : (
+          messages.map((message, index) => (
+            <div 
+              key={index} 
+              className={`message ${message.type === 'user' ? 'you' : message.type === 'assistant' ? 'ai-tutor' : 'error'}`}
+            >
+              <strong>{message.type === 'user' ? 'You' : message.type === 'assistant' ? 'Gemini' : 'Error'}: </strong>
+              <span className="message-text">{message.content}</span>
+              <small className="timestamp">
+                {message.timestamp.toLocaleTimeString()}
+              </small>
+            </div>
+          ))
         )}
         
-        {messages.map((message, index) => (
-          <div key={index} className={`msg-wrapper msg-${message.type}`}>
-            <div className="msg-bubble">
-              {message.content}
-            </div>
-            <div className="msg-time">
-              {message.timestamp.toLocaleTimeString([], { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-              })}
-            </div>
-          </div>
-        ))}
-        
         {isLoading && (
-          <div className="msg-wrapper msg-assistant">
-            <div className="msg-bubble typing">
-              <div className="typing-dots">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-            </div>
+          <div className="message ai-tutor loading">
+            <strong>Gemini: </strong>
+            <span className="typing-indicator">
+              <span className="dot"></span>
+              <span className="dot"></span>
+              <span className="dot"></span>
+              Typing...
+            </span>
           </div>
         )}
         
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 入力エリア */}
-      <div className="gemini-input">
-        <div className="input-wrapper">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Type your message..."
-            disabled={isLoading}
-            rows={1}
-            className="input-field"
-          />
-          <button 
-            onClick={handleSendMessage}
-            disabled={!input.trim() || isLoading}
-            className="send-btn"
-          >
-            ▶
-          </button>
-        </div>
+      {/* 入力エリア - InputAreaと同じスタイル */}
+      <div className="input-area">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Type your message to Gemini..."
+          disabled={isLoading}
+          className="message-input"
+        />
+        <button 
+          onClick={handleSendMessage}
+          disabled={!input.trim() || isLoading}
+          className={`send-button ${isLoading ? 'loading' : ''}`}
+        >
+          {isLoading ? (
+            <div className="loading-spinner"></div>
+          ) : (
+            '送信'
+          )}
+        </button>
       </div>
     </div>
   );

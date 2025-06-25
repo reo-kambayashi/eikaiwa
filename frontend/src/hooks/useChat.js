@@ -93,20 +93,17 @@ export const useChat = (isGrammarCheckEnabled, onAIResponse) => {
       timestamp: new Date().toISOString()
     };
 
-    setMessages(prevMessages => {
-      const updatedMessages = [...prevMessages, userMessage];
-      console.log('Updated messages with user message:', updatedMessages.length);
-      return updatedMessages;
-    });
+    // 最新の会話履歴を作成（ユーザーメッセージを含む）
+    const updatedMessagesWithUser = [...messages, userMessage];
     
+    setMessages(updatedMessagesWithUser);
     setIsLoading(true);
 
     try {
-      // AIに現在のメッセージと会話履歴を送信
-      // 注意: ここでは現在のmessages状態を使用（ユーザーメッセージ追加前の状態）
+      // AIに現在のメッセージと最新の会話履歴を送信
       const aiResponse = await sendMessageToAI(
         trimmedMessage,
-        messages, // 現在の会話履歴を使用
+        updatedMessagesWithUser, // 最新の会話履歴を使用
         isGrammarCheckEnabled // 文法チェック設定を含める
       );
 
@@ -135,11 +132,10 @@ export const useChat = (isGrammarCheckEnabled, onAIResponse) => {
         confidence: aiResponse?.confidence || 0
       };
 
-      setMessages(prevMessages => {
-        const finalMessages = [...prevMessages, aiMessage];
-        console.log('Final messages with AI response:', finalMessages.length);
-        return finalMessages;
-      });
+      // 最新の会話履歴にAIメッセージを追加
+      const finalMessages = [...updatedMessagesWithUser, aiMessage];
+      setMessages(finalMessages);
+      console.log('Final messages with AI response:', finalMessages.length);
 
       // AI応答コールバックがある場合は実行（安全な文字列を渡す）
       if (onAIResponse && typeof onAIResponse === 'function') {
@@ -160,7 +156,9 @@ export const useChat = (isGrammarCheckEnabled, onAIResponse) => {
         isError: true
       };
 
-      setMessages(prevMessages => [...prevMessages, errorMessage]);
+      // エラーメッセージも最新の会話履歴に追加
+      const messagesWithError = [...updatedMessagesWithUser, errorMessage];
+      setMessages(messagesWithError);
       return false;
 
     } finally {

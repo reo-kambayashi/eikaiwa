@@ -3,61 +3,69 @@
    ============================================================================ */
 
 :root {
-  /* カラーパレット */
-  --color-primary: #1976d2;
-  --color-primary-hover: #1565c0;
-  --color-primary-light: rgba(25, 118, 210, 0.08);
+  /* モダン配色パレット */
+  --color-primary: #6366f1;
+  --color-primary-hover: #4f46e5;
+  --color-primary-light: rgba(99, 102, 241, 0.08);
+  --color-primary-dark: #4338ca;
   
-  --color-secondary: #388e3c;
-  --color-secondary-hover: #2e7d32;
+  --color-secondary: #f59e0b;
+  --color-secondary-hover: #d97706;
   
-  --color-accent: #d32f2f;
-  --color-accent-hover: #c62828;
-  --color-primary-dark: #1565c0;
+  --color-accent: #10b981;
+  --color-accent-hover: #059669;
   
-  --color-warning: #f57c00;
-  --color-warning-hover: #ef6c00;
+  --color-warning: #f59e0b;
+  --color-warning-hover: #d97706;
   
-  --color-error: #d32f2f;
-  --color-success: #388e3c;
+  --color-error: #ef4444;
+  --color-success: #10b981;
   
-  /* 背景色 */
+  /* 洗練された背景色 */
   --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f8f9fa;
-  --color-bg-surface: #ffffff;
+  --color-bg-secondary: #f9fafb;
+  --color-bg-surface: #f3f4f6;
   --color-bg-elevated: #ffffff;
   
-  /* テキスト色 */
-  --color-text-primary: #212529;
-  --color-text-secondary: #6c757d;
-  --color-text-disabled: #adb5bd;
+  /* 上品なテキスト色 */
+  --color-text-primary: #1f2937;
+  --color-text-secondary: #6b7280;
+  --color-text-disabled: #9ca3af;
   --color-text-on-primary: #ffffff;
   
-  /* ボーダー色 */
-  --color-border: #dee2e6;
-  --color-border-focus: #1976d2;
-  --color-border-hover: #ced4da;
+  /* 洗練されたボーダー色 */
+  --color-border: #e5e7eb;
+  --color-border-focus: var(--color-primary);
+  --color-border-hover: #d1d5db;
   
-  /* シャドウ */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.15);
-  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.2);
+  /* ミニマルなシャドウ */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   
-  /* ボーダー半径 */
-  --radius-sm: 4px;
+  /* モダンなボーダー半径 */
+  --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 16px;
+  --radius-2xl: 20px;
   
-  /* 間隔 */
+  /* 洗練された間隔 */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
   --space-md: 1rem;
   --space-lg: 1.5rem;
   --space-xl: 2rem;
   --space-2xl: 3rem;
+  --space-3xl: 4rem;
   
-  /* フォントサイズ */
+  /* 新しいアニメーション変数 */
+  --animation-duration-fast: 0.2s;
+  --animation-duration-normal: 0.3s;
+  --animation-duration-slow: 0.5s;
+  
+  /* タイポグラフィスケール */
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
@@ -66,7 +74,8 @@
   --font-size-2xl: 1.5rem;
   --font-size-3xl: 1.875rem;
   
-  /* フォントウェイト */
+  /* 洗練されたフォントウェイト */
+  --font-weight-light: 300;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
@@ -88,41 +97,49 @@
   line-height: 1.6;
 }
 
-/* アプリケーションヘッダー */
+/* アプリケーションヘッダー - シンプル&エレガント */
 .app-header {
-  background-color: var(--color-bg-secondary);
-  color: var(--color-primary);
-  padding: var(--space-md); /* 縮小: lg → md */
+  background: var(--color-bg-primary);
+  padding: var(--space-xl) var(--space-lg);
   text-align: center;
-  box-shadow: var(--shadow-md);
   border-bottom: 1px solid var(--color-border);
 }
 
 .app-header h1 {
   margin: 0;
-  font-size: var(--font-size-xl); /* 縮小: 2xl → xl */
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-light);
   letter-spacing: -0.02em;
+  color: var(--color-text-primary);
 }
 
-/* 3分割レイアウト */
+/* 3分割レイアウト - クリーン&モダン */
 .app-layout {
   display: flex;
   flex: 1;
-  gap: var(--space-md); /* 縮小: lg → md */
-  padding: var(--space-md); /* 縮小: lg → md */
-  height: calc(100vh - 70px); /* ヘッダーの高さを調整 */
+  gap: var(--space-lg);
+  padding: var(--space-xl);
+  height: calc(100vh - 120px);
+  background: linear-gradient(135deg, var(--color-bg-secondary) 0%, #f8fafc 100%);
+  animation: fadeIn var(--animation-duration-slow) ease-out;
 }
 
-/* 左側：設定セクション */
+/* 左側：設定セクション - ミニマル */
 .settings-section {
   flex: 1;
-  background-color: var(--color-bg-secondary);
-  border-radius: var(--radius-lg);
-  padding: var(--space-lg); /* 縮小: xl → lg */
-  box-shadow: var(--shadow-md);
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-lg);
   overflow-y: auto;
   border: 1px solid var(--color-border);
+  transition: all var(--animation-duration-normal) ease-out;
+  backdrop-filter: blur(10px);
+}
+
+.settings-section:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-2px);
 }
 
 /* 設定セクションヘッダー */
@@ -147,28 +164,42 @@
   line-height: 1.5;
 }
 
-/* 中央：チャットセクション */
+/* 中央：チャットセクション - ミニマル */
 .chat-section {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: var(--color-bg-secondary);
-  border-radius: var(--radius-lg);
-  padding: var(--space-lg); /* 縮小: xl → lg */
-  box-shadow: var(--shadow-md);
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-lg);
   border: 1px solid var(--color-border);
+  transition: all var(--animation-duration-normal) ease-out;
+  backdrop-filter: blur(10px);
 }
 
-/* 右側：Geminiチャットセクション */
+.chat-section:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-2px);
+}
+
+/* 右側：Geminiチャットセクション - ミニマル */
 .gemini-chat-section {
   flex: 1;
-  background-color: var(--color-bg-secondary);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
   border: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
+  transition: all var(--animation-duration-normal) ease-out;
+  backdrop-filter: blur(10px);
+}
+
+.gemini-chat-section:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-2px);
 }
 
 /* ============================================================================
@@ -252,6 +283,8 @@
   background-color: var(--color-bg-secondary);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
   scroll-behavior: smooth;
+  max-height: 400px; /* 最大高さを制限してスクロール可能に */
+  min-height: 200px; /* 最小高さを確保 */
 }
 
 .message {
@@ -332,6 +365,43 @@
   animation: pulse 1.5s infinite;
 }
 
+.typing-indicator .dot {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: currentColor;
+  margin: 0 1px;
+  animation: typing-bounce 1.4s infinite ease-in-out;
+}
+
+.typing-indicator .dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator .dot:nth-child(2) { animation-delay: -0.16s; }
+.typing-indicator .dot:nth-child(3) { animation-delay: 0s; }
+
+@keyframes typing-bounce {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 
 
 /* ============================================================================
@@ -382,8 +452,8 @@ button {
 
 button:hover:not(:disabled) {
   background-color: var(--color-primary-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 button:active:not(:disabled) {
@@ -504,6 +574,14 @@ h1 {
   border-radius: var(--radius-md);
   padding: var(--space-lg);
   box-shadow: var(--shadow-sm);
+  transition: all var(--animation-duration-fast) ease-out;
+}
+
+.setting-group:hover {
+  background-color: var(--color-bg-primary);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 /* 設定ラベル */
@@ -765,6 +843,33 @@ h1 {
   .voice-button {
     border-radius: var(--radius-sm);
     width: auto;
+  }
+}
+
+/* ============================================================================
+   瞬間英作文モード用レイアウト
+   ============================================================================ */
+
+.instant-translation-layout {
+  flex: 1;
+  padding: var(--space-xl);
+  background: linear-gradient(135deg, var(--color-bg-secondary) 0%, #f8fafc 100%);
+  min-height: calc(100vh - 120px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  animation: fadeIn var(--animation-duration-slow) ease-out;
+}
+
+@media (max-width: 768px) {
+  .instant-translation-layout {
+    padding: var(--space-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .instant-translation-layout {
+    padding: var(--space-md);
   }
 }
 

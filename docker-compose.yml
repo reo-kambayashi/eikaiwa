@@ -13,7 +13,7 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
     volumes:
       # Google Cloud認証情報ファイルをマウント（存在する場合）
-      - ./backend/credentials.json:/app/credentials.json:ro
+      - /Users/reo/.config/gcloud/application_default_credentials.json:/app/credentials.json:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/"]
       interval: 30s

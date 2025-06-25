@@ -282,6 +282,8 @@ export const sendMessageToAI = async (
     );
 
     console.log('✅ AI response received:', data);
+    console.log('✅ Data type:', typeof data, 'Keys:', Object.keys(data || {}));
+    console.log('✅ Reply field:', data?.reply, 'Type:', typeof data?.reply);
     
     return {
       reply: data.reply || 'I apologize, but I cannot respond right now. Please try again.',
@@ -364,13 +366,21 @@ export const textToSpeech = async (text, speakingRate = 1.0) => {
       textLength: cleanedText.length
     });
 
+    // バックエンドのレスポンス形式に合わせてリクエストボディを修正
+    const modifiedRequestBody = {
+      text: cleanedText,
+      voice_name: TTS_CONFIG.VOICE_NAME || "en-US-Neural2-D",
+      language_code: TTS_CONFIG.LANG || 'en-US',
+      speaking_rate: Math.max(0.25, Math.min(4.0, speakingRate))
+    };
+
     // リトライ機能付きでTTS APIを呼び出し
     const response = await withRetry(
       () => withTimeout(
         fetch(url, {
           ...defaultFetchOptions,
           method: 'POST',
-          body: JSON.stringify(requestBody)
+          body: JSON.stringify(modifiedRequestBody)
         }),
         API_CONFIG.TIMEOUT * 3 // TTS は時間がかかるので3倍のタイムアウト
       ),
@@ -387,16 +397,21 @@ export const textToSpeech = async (text, speakingRate = 1.0) => {
       );
     }
 
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('audio')) {
-      throw new AppError(
-        `Invalid response content type: ${contentType}`,
-        ERROR_TYPES.API,
-        { contentType }
-      );
+    // バックエンドはJSONレスポンスでbase64エンコードされた音声データを返す
+    const jsonResponse = await response.json();
+    
+    if (!jsonResponse.audio_data) {
+      throw new AppError('No audio data in response', ERROR_TYPES.API);
     }
 
-    const audioBlob = await response.blob();
+    // base64デコードしてBlobに変換
+    const binaryString = atob(jsonResponse.audio_data);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    
+    const audioBlob = new Blob([bytes], { type: jsonResponse.content_type || 'audio/mpeg' });
     
     if (audioBlob.size === 0) {
       throw new AppError('Received empty audio data', ERROR_TYPES.API);

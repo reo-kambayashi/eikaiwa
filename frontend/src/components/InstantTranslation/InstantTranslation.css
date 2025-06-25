@@ -1,0 +1,382 @@
+/* ============================================================================ */
+/* 瞬間英作文モードコンポーネントのスタイル */
+/* ============================================================================ */
+
+.instant-translation {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* ヘッダー部分 */
+.translation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.translation-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.score-display {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* 問題表示エリア */
+.problem-area {
+  margin-bottom: 2rem;
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.error {
+  color: #e74c3c;
+  background: #fdf2f2;
+  border-radius: 10px;
+}
+
+.japanese-text {
+  margin-bottom: 2rem;
+}
+
+.japanese-text h3 {
+  margin: 0 0 1rem 0;
+  color: #555;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.problem-text {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  font-size: 1.3rem;
+  line-height: 1.6;
+  color: #333;
+  margin: 0;
+  border-left: 4px solid #667eea;
+  font-weight: 500;
+}
+
+/* 回答エリア */
+.answer-area {
+  margin-bottom: 2rem;
+}
+
+/* 入力コンテナ */
+.input-container {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.answer-input {
+  flex: 1;
+  min-height: 100px;
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  resize: vertical;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.answer-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.answer-input:disabled {
+  background: #f8f9fa;
+  cursor: not-allowed;
+}
+
+.answer-input.listening {
+  border-color: #28a745;
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+  background-color: rgba(40, 167, 69, 0.05);
+}
+
+/* 音声入力ボタン */
+.voice-button {
+  width: 56px;
+  height: 56px;
+  border: 2px solid #28a745;
+  border-radius: 50%;
+  background-color: white;
+  color: #28a745;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  position: relative;
+  flex-shrink: 0;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+}
+
+.voice-button:hover:not(:disabled) {
+  background-color: #28a745;
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.voice-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.voice-button.listening {
+  background-color: #28a745;
+  color: white;
+  box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.3);
+  animation: pulse 1.5s infinite;
+}
+
+.listening-indicator {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 12px;
+  height: 12px;
+  background-color: #dc3545;
+  border-radius: 50%;
+  font-size: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 1s infinite;
+}
+
+/* ボタングループ */
+.button-group {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.check-button,
+.next-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.check-button:hover,
+.next-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.check-button:disabled,
+.next-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+/* 結果表示エリア */
+.result-area {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-top: 1.5rem;
+}
+
+.correct-answer {
+  margin-bottom: 1.5rem;
+}
+
+.correct-answer h4 {
+  margin: 0 0 0.5rem 0;
+  color: #27ae60;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.answer-text {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  color: #333;
+  margin: 0.5rem 0;
+  border-left: 4px solid #27ae60;
+}
+
+.speak-button {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.speak-button:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.feedback h4 {
+  margin: 0 0 0.5rem 0;
+  color: #3498db;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.feedback p {
+  margin: 0;
+  line-height: 1.6;
+  color: #555;
+}
+
+/* ヒントセクション */
+.hints {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-top: 2rem;
+}
+
+.hints h4 {
+  margin: 0 0 1rem 0;
+  color: #667eea;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.hints ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: #666;
+}
+
+.hints li {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+  .instant-translation {
+    padding: 1rem;
+    margin: 1rem;
+  }
+
+  .translation-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .translation-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .problem-text {
+    font-size: 1.1rem;
+    padding: 1rem;
+  }
+
+  .input-container {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+
+  .answer-input {
+    font-size: 1rem;
+    min-height: 80px;
+  }
+
+  .voice-button {
+    width: 48px;
+    height: 48px;
+    align-self: center;
+  }
+
+  .check-button,
+  .next-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .instant-translation {
+    padding: 0.75rem;
+    margin: 0.5rem;
+  }
+
+  .translation-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .problem-text {
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
+
+  .answer-input {
+    min-height: 80px;
+    padding: 0.75rem;
+  }
+
+  .score-display {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+/* アニメーション */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
