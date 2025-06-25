@@ -13,9 +13,13 @@
   
   --color-accent: #d32f2f;
   --color-accent-hover: #c62828;
+  --color-primary-dark: #1565c0;
   
   --color-warning: #f57c00;
   --color-warning-hover: #ef6c00;
+  
+  --color-error: #d32f2f;
+  --color-success: #388e3c;
   
   /* 背景色 */
   --color-bg-primary: #ffffff;
@@ -155,31 +159,16 @@
   border: 1px solid var(--color-border);
 }
 
-/* 右側：Coming Soonセクション */
-.coming-soon-section {
+/* 右側：Geminiチャットセクション */
+.gemini-chat-section {
   flex: 1;
   background-color: var(--color-bg-secondary);
   border-radius: var(--radius-lg);
-  padding: var(--space-lg); /* 縮小: xl → lg */
   box-shadow: var(--shadow-md);
-  overflow-y: auto;
+  overflow: hidden;
   border: 1px solid var(--color-border);
   display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Coming Soon コンテンツ */
-.coming-soon-content {
-  text-align: center;
-}
-
-.coming-soon-content h2 {
-  color: var(--color-primary);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-medium);
-  margin: 0;
-  opacity: 0.9;
+  flex-direction: column;
 }
 
 /* ============================================================================
@@ -194,7 +183,7 @@
   
   .settings-section,
   .chat-section,
-  .coming-soon-section {
+  .gemini-chat-section {
     flex: none;
     width: 100%;
   }
@@ -208,7 +197,7 @@
     min-height: 500px;
   }
   
-  .coming-soon-section {
+  .gemini-chat-section {
     order: 3;
   }
 }

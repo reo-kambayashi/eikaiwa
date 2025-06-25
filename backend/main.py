@@ -36,10 +36,10 @@ GOOGLE_APPLICATION_CREDENTIALS = os.getenv(
 )
 
 # Configure Gemini AI model for conversation generation
-# The gemini-1.5-flash model provides fast, high-quality responses
+# The gemini-2.5-flash model provides fast, high-quality responses
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel("gemini-2.5-flash-preview-05-20")
+    model = genai.GenerativeModel("gemini-2.5-flash")
 else:
     model = None
 
