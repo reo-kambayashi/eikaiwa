@@ -31,13 +31,11 @@ const VoiceControls = ({
       className={`voice-button ${isListening ? 'listening' : ''} ${isLoading ? 'disabled' : ''}`}
       onClick={onToggle}
       disabled={isLoading}
-      title={isListening ? "Stop listening (音声停止)" : "Start voice input (音声入力開始)"}
-      aria-label={isListening ? "音声認識を停止" : "音声認識を開始"}
+      title={isListening ? "Stop Voice" : "Start Voice Input"}
+      aria-label={isListening ? "Stop voice recognition" : "Start voice recognition"}
     >
       {/* マイクアイコン - リスニング中は視覚的に区別 */}
-      <span className="microphone-icon">
-        🎤
-      </span>
+      <span className="microphone-icon"></span>
       
       {/* リスニング状態の視覚的インジケーター */}
       {isListening && (

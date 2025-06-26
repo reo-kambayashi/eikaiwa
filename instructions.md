@@ -157,6 +157,14 @@ Examples: 'went swimming', 'went walking' - no 'to' needed for activities."
 2. `npm start`でフロントエンドを再起動
 3. コンソールエラーを確認（F12 > Console）
 
+### ログの確認
+Docker 環境でアプリの状況を確認したい場合は、以下のコマンドで
+リアルタイムのログを表示できます。
+
+```bash
+make logs
+```
+
 ## 📈 効果的な学習方法
 
 ### 🎯 日々の練習ルーチン

@@ -33,6 +33,7 @@ export const TTS_CONFIG = {
   // 音声設定
   VOICE_LANGUAGE: 'en-US',
   VOICE_GENDER: 'female',
+  VOICE_NAME: "en-US-Neural2-D", // Google Cloud TTS使用時の音声名
   
   // 読み上げ速度の設定
   SPEAKING_RATE: {
@@ -40,6 +41,9 @@ export const TTS_CONFIG = {
     MAX: 2.0,
     STEP: 0.05
   },
+  
+  // デフォルト読み上げ速度
+  DEFAULT_SPEAKING_RATE: 1.0,
   
   // レベル別デフォルト読み上げ速度
   DEFAULT_SPEAKING_RATES: {
@@ -54,5 +58,5 @@ export const TTS_CONFIG = {
   
   // その他の設定
   LANG: 'en-US',
-  VOICE_NAME: null // ブラウザのデフォルト音声を使用
+  LANGUAGE_CODE: 'en-US'
 };

@@ -350,23 +350,13 @@ export const textToSpeech = async (text, speakingRate = 1.0) => {
 
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.TTS}`;
     
-    const requestBody = {
-      text: cleanedText,
-      voice_config: {
-        language_code: TTS_CONFIG.LANG || 'en-US',
-        speaking_rate: Math.max(0.25, Math.min(4.0, speakingRate)), // Google TTSの許可範囲
-        pitch: TTS_CONFIG.PITCH || 0.0,  // Google TTSのデフォルトは0.0
-        volume: TTS_CONFIG.VOLUME || 1.0
-      }
-    };
-
     console.log('🔗 Converting text to speech:', { 
       text: cleanedText.substring(0, 100), 
       speakingRate,
       textLength: cleanedText.length
     });
 
-    // バックエンドのレスポンス形式に合わせてリクエストボディを修正
+    // バックエンドのレスポンス形式に合わせたリクエストボディ
     const modifiedRequestBody = {
       text: cleanedText,
       voice_name: TTS_CONFIG.VOICE_NAME || "en-US-Neural2-D",

@@ -35,14 +35,33 @@ export const UI_MESSAGES = {
   
   // プレースホルダー
   PLACEHOLDER_INPUT: 'Type your message here or use voice input...',
-  PLACEHOLDER_LISTENING: 'Listening... Please speak',
+  PLACEHOLDER_LISTENING: 'Voice input active... Please speak',
   
   // ボタンテキスト
   BUTTON_SEND: 'Send',
   BUTTON_CLEAR: 'Clear',
   BUTTON_RESET: 'Reset',
   BUTTON_START_VOICE: 'Start Voice',
-  BUTTON_STOP_VOICE: 'Stop Voice'
+  BUTTON_STOP_VOICE: 'Stop Voice',
+  
+  // エラー詳細
+  ERRORS: {
+    NO_SPEECH: 'No speech detected - user may need to speak louder',
+    AUDIO_CAPTURE: 'Microphone access denied. Please allow microphone access to use voice input.',
+    NOT_ALLOWED: 'Microphone access not allowed. Please check your browser settings.',
+    SPEECH_RECOGNITION_NOT_SUPPORTED: 'Speech recognition is not supported in this browser.',
+    SERVER_ERROR: 'Error contacting server'
+  },
+  
+  // プレースホルダーバリエーション
+  PLACEHOLDER: {
+    DEFAULT: "Type a message and press Enter",
+    VOICE_ENABLED: "Type a message or press Space to start voice input",
+    LISTENING: "Voice input active... (Press Enter to stop and send)"
+  },
+  
+  // フォールバック
+  FALLBACK_WELCOME: "Hello! Welcome to English Communication App! I'm your English practice partner. How are you today?"
 };
 
 // アニメーション設定
