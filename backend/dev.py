@@ -28,19 +28,19 @@ def run_command(command, description):
         command (list): Command and arguments to run
         description (str): Human-readable description of the command
     """
-    print(f"🚀 {description}...")
+    print(f" {description}...")
     try:
         result = subprocess.run(
             command, check=True, cwd=os.path.dirname(__file__)
         )
-        print(f"✅ {description} completed successfully!")
+        print(f" {description} completed successfully!")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"❌ {description} failed with exit code {e.returncode}")
+        print(f" {description} failed with exit code {e.returncode}")
         return False
     except FileNotFoundError:
-        print(f"❌ Command not found: {' '.join(command)}")
-        print("💡 Make sure you have activated the virtual environment:")
+        print(f" Command not found: {' '.join(command)}")
+        print(" Make sure you have activated the virtual environment:")
         print("   cd backend && uv venv .venv && source .venv/bin/activate")
         return False
 
@@ -130,7 +130,7 @@ Examples:
     if not success:
         sys.exit(1)
 
-    print(f"🎉 Command '{args.command}' completed successfully!")
+    print(f" Command '{args.command}' completed successfully!")
 
 
 if __name__ == "__main__":

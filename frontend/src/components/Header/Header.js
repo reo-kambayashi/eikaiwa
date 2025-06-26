@@ -33,16 +33,16 @@ const Header = ({ currentMode, onModeChange }) => {
           <button
             className={`mode-button ${currentMode === 'chat' ? 'active' : ''}`}
             onClick={() => handleModeClick('chat')}
-            aria-label="チャットモードに切り替え"
+            aria-label="Switch to Chat Mode"
           >
-            チャットモード
+            Chat Mode
           </button>
           <button
             className={`mode-button ${currentMode === 'translation' ? 'active' : ''}`}
             onClick={() => handleModeClick('translation')}
-            aria-label="瞬間英作文モードに切り替え"
+            aria-label="Switch to Instant Translation Mode"
           >
-            瞬間英作文モード
+            Instant Translation
           </button>
         </nav>
       </div>

@@ -127,7 +127,7 @@ const GeminiChat = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="Type your message to Gemini..."
+          placeholder="Geminiにメッセージを入力してください..."
           disabled={isLoading}
           className="message-input"
         />

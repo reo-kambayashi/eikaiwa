@@ -59,6 +59,11 @@ export const useSettings = () => {
     getStoredValue(STORAGE_KEYS.VOICE_OUTPUT, DEFAULT_SETTINGS.isVoiceOutputEnabled)
   );
 
+  // 瞬間英作文モード専用の音声出力設定
+  const [isTranslationVoiceOutputEnabled, setIsTranslationVoiceOutputEnabled] = useState(() => 
+    getStoredValue(STORAGE_KEYS.TRANSLATION_VOICE_OUTPUT, false) // デフォルトはオフ
+  );
+
   // Grammar Check は常にオンに固定
   const isGrammarCheckEnabled = true;
 
@@ -86,6 +91,12 @@ export const useSettings = () => {
     console.log('Voice output toggled:', enabled);
     setIsVoiceOutputEnabled(enabled);
     setStoredValue(STORAGE_KEYS.VOICE_OUTPUT, enabled);
+  }, []);
+
+  const toggleTranslationVoiceOutput = useCallback((enabled) => {
+    console.log('Translation voice output toggled:', enabled);
+    setIsTranslationVoiceOutputEnabled(enabled);
+    setStoredValue(STORAGE_KEYS.TRANSLATION_VOICE_OUTPUT, enabled);
   }, []);
 
   const updateSpeakingRate = useCallback((newRate) => {
@@ -125,12 +136,13 @@ export const useSettings = () => {
       console.log('🔧 Settings state:', {
         isVoiceInputEnabled,
         isVoiceOutputEnabled,
+        isTranslationVoiceOutputEnabled,
         isGrammarCheckEnabled, // 常にtrue
         speakingRate,
         voiceInputTimeout
       });
     }
-  }, [isVoiceInputEnabled, isVoiceOutputEnabled, isGrammarCheckEnabled, speakingRate, voiceInputTimeout]);
+  }, [isVoiceInputEnabled, isVoiceOutputEnabled, isTranslationVoiceOutputEnabled, isGrammarCheckEnabled, speakingRate, voiceInputTimeout]);
 
   // 設定を全てリセットする関数
   const resetAllSettings = useCallback(() => {
@@ -138,6 +150,7 @@ export const useSettings = () => {
     
     setIsVoiceInputEnabled(DEFAULT_SETTINGS.isVoiceInputEnabled);
     setIsVoiceOutputEnabled(DEFAULT_SETTINGS.isVoiceOutputEnabled);
+    setIsTranslationVoiceOutputEnabled(false); // デフォルトはオフ
     // Grammar Check は常にtrue（リセットなし）
     setSpeakingRate(TTS_CONFIG.DEFAULT_SPEAKING_RATE || 1.0);
     setVoiceInputTimeout(SPEECH_RECOGNITION_CONFIG.DEFAULT_TIMEOUT);
@@ -156,15 +169,17 @@ export const useSettings = () => {
   const settingsExport = useMemo(() => ({
     isVoiceInputEnabled,
     isVoiceOutputEnabled,
+    isTranslationVoiceOutputEnabled,
     isGrammarCheckEnabled, // 常にtrue
     speakingRate,
     voiceInputTimeout
-  }), [isVoiceInputEnabled, isVoiceOutputEnabled, isGrammarCheckEnabled, speakingRate, voiceInputTimeout]);
+  }), [isVoiceInputEnabled, isVoiceOutputEnabled, isTranslationVoiceOutputEnabled, isGrammarCheckEnabled, speakingRate, voiceInputTimeout]);
 
   return {
     // 現在の設定値
     isVoiceInputEnabled,
     isVoiceOutputEnabled,
+    isTranslationVoiceOutputEnabled,
     isGrammarCheckEnabled, // 常にtrue
     speakingRate,
     voiceInputTimeout,
@@ -172,6 +187,7 @@ export const useSettings = () => {
     // 設定更新関数
     toggleVoiceInput,
     toggleVoiceOutput,
+    toggleTranslationVoiceOutput,
     updateSpeakingRate,
     resetSpeakingRateToDefault,
     updateVoiceInputTimeout,
