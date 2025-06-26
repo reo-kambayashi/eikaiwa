@@ -289,6 +289,9 @@ curl http://localhost:8000/api/status
 ### ログの確認
 
 ```bash
+# Docker Compose を使用している場合
+make logs
+
 # バックエンドログ
 cd backend
 uv run uvicorn main:app --reload --log-level debug

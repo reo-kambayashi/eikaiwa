@@ -14,8 +14,6 @@ Key features:
 import base64
 import io
 import os
-import re
-import time
 
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -24,9 +22,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response as FastAPIResponse
 from google.cloud import texttospeech
 from pydantic import BaseModel
-
-# プロンプトテンプレートシステムのインポート
-from prompts import EikenLevel, create_eiken_problem_generation_prompt
 
 # Load environment variables from the `.env` file located at the project root.
 # This allows developers to keep API keys outside of the source code for security.
@@ -155,32 +150,6 @@ class InstantTranslationCheckResponse(BaseModel):
     suggestions: list = []  # Alternative translations or improvements
 
 
-class EikenProblemRequest(BaseModel):
-    """
-    Request model for generating Eiken-level problems.
-
-    Specifies the English proficiency level for problem generation.
-    """
-
-    eiken_level: str  # Eiken level: "3", "pre_2", "2", "pre_1", "1"
-    category: str = "daily"  # Problem category (optional)
-
-
-class EikenProblem(BaseModel):
-    """
-    Response model for Eiken-level problems.
-
-    Contains a Japanese sentence to be translated at the specified Eiken level.
-    """
-
-    japanese: str  # Japanese sentence to translate
-    english: str  # Correct English translation
-    eiken_level: str  # Eiken level (3, pre_2, 2, pre_1, 1)
-    difficulty_description: str  # Description of the difficulty level
-    category: str = "general"  # Grammar or topic category
-    suggestions: list = []  # Alternative translations or improvements
-
-
 # API Endpoints
 # These endpoints handle communication between the frontend and backend
 
@@ -233,11 +202,12 @@ async def api_status():
 async def text_to_speech(request: TTSRequest):
     """Convert text to speech using Google Cloud TTS."""
 
+    if not tts_client:
+        raise HTTPException(
+            status_code=503, detail="TTS service not available"
+        )
+
     try:
-        if not tts_client:
-            raise HTTPException(
-                status_code=503, detail="TTS service not available"
-            )
 
         # Create synthesis input
         synthesis_input = texttospeech.SynthesisInput(text=request.text)
@@ -263,17 +233,13 @@ async def text_to_speech(request: TTSRequest):
 
         return {"audio_data": audio_base64, "content_type": "audio/mpeg"}
 
+    except HTTPException:
+        # Propagate HTTP errors such as 503 without modification
+        raise
     except Exception as e:
-        log_error(
-            "TTS generation",
-            e,
-            {
-                "text_length": len(request.text),
-                "language": request.language_code,
-            },
-        )
-        raise create_error_response(
-            ErrorType.TTS_ERROR, f"TTS generation failed: {str(e)}", 500
+        print(f"TTS Error: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"TTS generation failed: {str(e)}"
         )
 
 
@@ -281,7 +247,7 @@ async def text_to_speech(request: TTSRequest):
 async def get_welcome_message():
     """Generate a personalized welcome message."""
 
-    print(f" Welcome request received")
+    print("🔔 Welcome request received")
 
     try:
         if not model:
@@ -310,7 +276,7 @@ async def get_welcome_message():
 async def respond(req: Request):
     """Generate a response using Gemini API for English conversation practice."""
 
-    print(f" Response request received: text='{req.text[:50]}...'")
+    print(f"🔔 Response request received: text='{req.text[:50]}...'")
 
     try:
         if not model:
@@ -496,7 +462,7 @@ async def get_instant_translation_problem():
     将来的にはAIで動的に問題を生成することも可能です。
     """
 
-    print(f" Instant translation problem request received")
+    print("🔔 Instant translation problem request received")
 
     try:
         import random
@@ -531,13 +497,25 @@ async def check_instant_translation_answer(
 
     ユーザーの回答を正解と比較し、AIを使って詳細なフィードバックを提供します。
     """
-    print(f" Instant translation check request: '{req.userAnswer[:30]}...'")
+
+    print(f"🔔 Instant translation check request: '{req.userAnswer[:30]}...'")
 
     try:
         if not model:
             # Gemini APIが利用できない場合のシンプルな比較
-            return create_fallback_check_response(
-                req.userAnswer, req.correctAnswer
+            is_correct = (
+                req.userAnswer.lower().strip()
+                == req.correctAnswer.lower().strip()
+            )
+            return InstantTranslationCheckResponse(
+                isCorrect=is_correct,
+                feedback=(
+                    "Good try! Keep practicing."
+                    if is_correct
+                    else "Close, but not quite right. Try again!"
+                ),
+                score=100 if is_correct else 50,
+                suggestions=[],
             )
 
         # AIを使って詳細な回答チェック
@@ -548,11 +526,32 @@ async def check_instant_translation_answer(
         response = model.generate_content(check_prompt)
 
         if response.text:
-            # AI応答から情報を抽出してレスポンス作成
-            return create_ai_check_response(response.text)
+            # AI応答から情報を抽出
+            ai_feedback = response.text
+
+            # 簡単な正解判定（AIの応答に基づく）
+            is_correct = any(
+                word in ai_feedback.lower()
+                for word in ["correct", "good", "excellent", "right"]
+            )
+
+            # スコア計算（簡単な実装）
+            score = 100 if is_correct else 70
+
+            return InstantTranslationCheckResponse(
+                isCorrect=is_correct,
+                feedback=ai_feedback,
+                score=score,
+                suggestions=[],
+            )
         else:
-            # AI応答がない場合のフォールバック
-            return create_error_check_response()
+            # フォールバック応答
+            return InstantTranslationCheckResponse(
+                isCorrect=False,
+                feedback="Sorry, I couldn't evaluate your answer properly. Please try again.",
+                score=50,
+                suggestions=[],
+            )
 
     except Exception as e:
         print(f"Error checking instant translation answer: {str(e)}")
@@ -597,370 +596,8 @@ def create_translation_check_prompt(
 - 具体的な改善点やアドバイスを含める
 - 励ましの言葉を含める
 - 2-3文で簡潔にまとめる
-- フィードバックは簡単な英語で行ってください（中学生レベルの英語）
 
 日本人学習者にとって理解しやすく、学習意欲を高めるような評価をお願いします。
 """
 
     return prompt
-
-
-# ============================================================================
-# 定数定義
-# ============================================================================
-
-
-class ScoreConstants:
-    """スコア計算用の定数"""
-
-    PERFECT_SCORE = 100
-    GOOD_SCORE = 70
-    FALLBACK_SCORE = 50
-
-
-class TTSConstants:
-    """TTS関連の定数"""
-
-    DEFAULT_SPEAKING_RATE = 1.0
-    DEFAULT_LANGUAGE_CODE = "en-US"
-    DEFAULT_VOICE_NAME = "en-US-Standard-D"
-
-
-# ============================================================================
-# エラーハンドリング用ヘルパー関数
-# ============================================================================
-
-
-class ErrorType:
-    """エラータイプの定数"""
-
-    API_UNAVAILABLE = "API_UNAVAILABLE"
-    MODEL_ERROR = "MODEL_ERROR"
-    VALIDATION_ERROR = "VALIDATION_ERROR"
-    TTS_ERROR = "TTS_ERROR"
-    UNKNOWN_ERROR = "UNKNOWN_ERROR"
-
-
-def create_error_response(
-    error_type: str, message: str, status_code: int = 500
-) -> HTTPException:
-    """
-    統一されたエラーレスポンスを作成
-
-    Args:
-        error_type: エラータイプ
-        message: エラーメッセージ
-        status_code: HTTPステータスコード
-
-    Returns:
-        HTTPException: エラーレスポンス
-    """
-    return HTTPException(
-        status_code=status_code,
-        detail={
-            "error_type": error_type,
-            "message": message,
-            "timestamp": (
-                str(int(time.time())) if "time" in globals() else "unknown"
-            ),
-        },
-    )
-
-
-def log_error(operation: str, error: Exception, context: dict = None):
-    """
-    統一されたエラーログ出力
-
-    Args:
-        operation: 実行していた操作名
-        error: 発生したエラー
-        context: 追加のコンテキスト情報
-    """
-    context_str = f" | Context: {context}" if context else ""
-    print(f" Error in {operation}: {str(error)}{context_str}")
-
-
-# ============================================================================
-# 瞬間英作文チェック用ヘルパー関数
-# ============================================================================
-
-
-def create_fallback_check_response(
-    user_answer: str, correct_answer: str
-) -> InstantTranslationCheckResponse:
-    """
-    AI未使用時のシンプルな回答チェック
-
-    Args:
-        user_answer: ユーザーの回答
-        correct_answer: 正解
-
-    Returns:
-        InstantTranslationCheckResponse: チェック結果
-    """
-    is_correct = user_answer.lower().strip() == correct_answer.lower().strip()
-    return InstantTranslationCheckResponse(
-        isCorrect=is_correct,
-        feedback=(
-            "Good try! Keep practicing."
-            if is_correct
-            else "Close, but not quite right. Try again!"
-        ),
-        score=(
-            ScoreConstants.PERFECT_SCORE
-            if is_correct
-            else ScoreConstants.FALLBACK_SCORE
-        ),
-        suggestions=[],
-    )
-
-
-def evaluate_ai_feedback(ai_feedback: str) -> tuple[bool, int]:
-    """
-    AI応答から正解判定とスコアを算出
-
-    Args:
-        ai_feedback: AIからのフィードバック
-
-    Returns:
-        tuple: (正解かどうか, スコア)
-    """
-    # 簡単な正解判定（AIの応答に基づく）
-    is_correct = any(
-        word in ai_feedback.lower()
-        for word in [
-            "correct",
-            "good",
-            "excellent",
-            "right",
-            "正解",
-            "素晴らしい",
-        ]
-    )
-
-    # スコア計算
-    score = (
-        ScoreConstants.PERFECT_SCORE
-        if is_correct
-        else ScoreConstants.GOOD_SCORE
-    )
-
-    return is_correct, score
-
-
-def create_ai_check_response(
-    ai_feedback: str,
-) -> InstantTranslationCheckResponse:
-    """
-    AI応答からチェック結果を作成
-
-    Args:
-        ai_feedback: AIからのフィードバック
-
-    Returns:
-        InstantTranslationCheckResponse: チェック結果
-    """
-    is_correct, score = evaluate_ai_feedback(ai_feedback)
-
-    return InstantTranslationCheckResponse(
-        isCorrect=is_correct,
-        feedback=ai_feedback,
-        score=score,
-        suggestions=[],
-    )
-
-
-def create_error_check_response() -> InstantTranslationCheckResponse:
-    """
-    エラー時のフォールバック応答を作成
-
-    Returns:
-        InstantTranslationCheckResponse: エラー応答
-    """
-    return InstantTranslationCheckResponse(
-        isCorrect=False,
-        feedback="Sorry, I couldn't evaluate your answer properly. Please try again.",
-        score=ScoreConstants.FALLBACK_SCORE,
-        suggestions=[],
-    )
-
-
-# ============================================================================
-# 英検レベル対応問題生成ヘルパー関数
-# ============================================================================
-
-
-def extract_japanese_english_text(ai_response: str) -> tuple[str, str]:
-    """
-    AI応答から日本語と英語のテキストを抽出する
-
-    Args:
-        ai_response: AIからの応答テキスト
-
-    Returns:
-        tuple: (日本語テキスト, 英語テキスト)
-    """
-    japanese_text = ""
-    english_text = ""
-
-    # 行ごとに処理
-    lines = ai_response.split("\n")
-    for line in lines:
-        line = line.strip()
-        if line.startswith("日本語:") or line.startswith("日本語："):
-            japanese_text = (
-                line.split(":", 1)[1].strip()
-                if ":" in line
-                else line.split("：", 1)[1].strip()
-            )
-        elif line.startswith("英語:") or line.startswith("英語："):
-            english_text = (
-                line.split(":", 1)[1].strip()
-                if ":" in line
-                else line.split("：", 1)[1].strip()
-            )
-
-    # フォールバック: 正規表現でより柔軟に抽出
-    if not japanese_text or not english_text:
-        japanese_match = re.search(r"日本語[：:]\s*(.+)", ai_response)
-        english_match = re.search(r"英語[：:]\s*(.+)", ai_response)
-
-        if japanese_match:
-            japanese_text = japanese_match.group(1).strip()
-        if english_match:
-            english_text = english_match.group(1).strip()
-
-    return japanese_text, english_text
-
-
-def get_level_description(eiken_level: str) -> str:
-    """
-    英検レベルの説明を取得する
-
-    Args:
-        eiken_level: 英検レベル
-
-    Returns:
-        str: レベルの説明
-    """
-    level_descriptions = {
-        "3": "英検3級レベル（中学校卒業程度）",
-        "pre_2": "英検準2級レベル（高校中級程度）",
-        "2": "英検2級レベル（高校卒業程度）",
-        "pre_1": "英検準1級レベル（大学中級程度）",
-        "1": "英検1級レベル（大学上級程度）",
-    }
-    return level_descriptions.get(eiken_level, "一般レベル")
-
-
-def create_eiken_problem_response(
-    japanese_text: str, english_text: str, eiken_level: str, category: str
-) -> EikenProblem:
-    """
-    英検問題のレスポンスを作成する
-
-    Args:
-        japanese_text: 日本語テキスト
-        english_text: 英語テキスト
-        eiken_level: 英検レベル
-        category: カテゴリ
-
-    Returns:
-        EikenProblem: 問題データ
-    """
-    return EikenProblem(
-        japanese=japanese_text,
-        english=english_text,
-        eiken_level=eiken_level,
-        difficulty_description=get_level_description(eiken_level),
-        category=category,
-        suggestions=[],
-    )
-
-
-def create_fallback_eiken_problem(
-    eiken_level: str, category: str
-) -> EikenProblem:
-    """
-    フォールバック用の英検問題を作成する
-
-    Args:
-        eiken_level: 英検レベル
-        category: カテゴリ
-
-    Returns:
-        EikenProblem: フォールバック問題データ
-    """
-    return EikenProblem(
-        japanese="AIで問題を生成できませんでした。もう一度お試しください。",
-        english="Could not generate a problem. Please try again.",
-        eiken_level=eiken_level,
-        difficulty_description=get_level_description(eiken_level),
-        category=category,
-        suggestions=[],
-    )
-
-
-# ============================================================================
-# 英検レベル対応英作文API エンドポイント
-# ============================================================================
-
-
-@app.post("/api/eiken-translation/problem", response_model=EikenProblem)
-async def get_eiken_translation_problem(request: EikenProblemRequest):
-    """
-    英検レベル対応瞬間英作文の問題を生成するAPIエンドポイント
-
-    指定された英検レベル（3級〜1級）に応じて適切な難易度の問題を生成します。
-    AIを使って動的に問題を作成し、学習者のレベルに最適化された内容を提供します。
-    """
-    print(f" Eiken {request.eiken_level} level problem request received")
-
-    if not model:
-        raise HTTPException(
-            status_code=503,
-            detail="AI model is not configured. Please check your API keys.",
-        )
-
-    try:
-        # 英検レベルに対応するプロンプトを生成
-        problem_prompt = create_eiken_problem_generation_prompt(
-            eiken_level=request.eiken_level, category=request.category
-        )
-
-        # AIで問題を生成
-        response = model.generate_content(problem_prompt)
-
-        if not response.text:
-            raise HTTPException(
-                status_code=500, detail="Failed to generate problem content"
-            )
-
-        ai_response = response.text.strip()
-
-        # AI応答から日本語と英語を抽出
-        japanese_text, english_text = extract_japanese_english_text(
-            ai_response
-        )
-
-        if japanese_text and english_text:
-            return create_eiken_problem_response(
-                japanese_text,
-                english_text,
-                request.eiken_level,
-                request.category,
-            )
-        else:
-            # 解析に失敗した場合のフォールバック
-            return create_fallback_eiken_problem(
-                request.eiken_level, request.category
-            )
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"Error generating Eiken problem: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to generate Eiken-level problem: {str(e)}",
-        )
