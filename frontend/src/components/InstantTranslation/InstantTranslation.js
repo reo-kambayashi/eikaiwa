@@ -6,6 +6,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import './InstantTranslation.css';
 import { useVoiceInput } from '../../hooks/useVoiceInput';
+import { API_CONFIG } from '../../utils/constants/apiConstants';
 
 /**
  * 瞬間英作文モードのメインコンポーネント
@@ -67,22 +68,7 @@ const InstantTranslation = ({
     }
 
     try {
-      // 過去10問のIDを除外リストに追加（重複回避）
-      const excludeProblems = problemHistory.slice(-10).map(p => p.problemId).filter(Boolean);
-      
-      const requestBody = {
-        difficulty: difficulty,
-        category: category,
-        exclude_problems: excludeProblems
-      };
-
-      const response = await fetch('http://localhost:8000/api/instant-translation/problem', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
-      });
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/instant-translation/problem`);
       
       if (!response.ok) {
         throw new Error('問題の取得に失敗しました');
@@ -102,7 +88,7 @@ const InstantTranslation = ({
     } finally {
       setIsLoading(false);
     }
-  }, [isListening, clearTranscript, problemHistory, category, difficulty]);
+  }, [isListening, clearTranscript]);
 
   // ============================================================================
   // 回答チェック機能
@@ -120,7 +106,7 @@ const InstantTranslation = ({
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/instant-translation/check', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/instant-translation/check`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
