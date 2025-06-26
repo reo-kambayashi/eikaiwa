@@ -13,8 +13,14 @@ Or manually:
     uv run pytest tests/
 """
 
+import os
+import sys
 import pytest
 from fastapi.testclient import TestClient
+
+# Add project root to Python path for imports
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 from main import app
 
 # Create a test client for our FastAPI app

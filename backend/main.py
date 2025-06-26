@@ -114,11 +114,11 @@ class TTSRequest(BaseModel):
 class InstantTranslationCheckRequest(BaseModel):
     """
     Request model for instant translation answer checking.
-    
+
     Defines the structure for checking user answers against correct translations
     in the instant translation mode.
     """
-    
+
     japanese: str  # Original Japanese text
     correctAnswer: str  # Correct English translation
     userAnswer: str  # User's English translation attempt
@@ -127,10 +127,10 @@ class InstantTranslationCheckRequest(BaseModel):
 class InstantTranslationProblem(BaseModel):
     """
     Response model for instant translation problems.
-    
+
     Contains a Japanese sentence to be translated to English.
     """
-    
+
     japanese: str  # Japanese sentence to translate
     english: str  # Correct English translation
     difficulty: str = "medium"  # Problem difficulty level
@@ -140,10 +140,10 @@ class InstantTranslationProblem(BaseModel):
 class InstantTranslationCheckResponse(BaseModel):
     """
     Response model for instant translation answer checking.
-    
+
     Contains evaluation results and feedback for the user's translation attempt.
     """
-    
+
     isCorrect: bool  # Whether the answer is correct
     feedback: str  # Detailed feedback on the translation
     score: int  # Numerical score (0-100)
@@ -202,11 +202,12 @@ async def api_status():
 async def text_to_speech(request: TTSRequest):
     """Convert text to speech using Google Cloud TTS."""
 
+    if not tts_client:
+        raise HTTPException(
+            status_code=503, detail="TTS service not available"
+        )
+
     try:
-        if not tts_client:
-            raise HTTPException(
-                status_code=503, detail="TTS service not available"
-            )
 
         # Create synthesis input
         synthesis_input = texttospeech.SynthesisInput(text=request.text)
@@ -232,6 +233,9 @@ async def text_to_speech(request: TTSRequest):
 
         return {"audio_data": audio_base64, "content_type": "audio/mpeg"}
 
+    except HTTPException:
+        # Propagate HTTP errors such as 503 without modification
+        raise
     except Exception as e:
         print(f"TTS Error: {str(e)}")
         raise HTTPException(
@@ -387,142 +391,158 @@ TRANSLATION_PROBLEMS = [
         "japanese": "今日は天気がいいですね。",
         "english": "It's nice weather today.",
         "difficulty": "easy",
-        "category": "weather"
+        "category": "weather",
     },
     {
         "japanese": "昨日、友達と映画を見に行きました。",
         "english": "I went to see a movie with my friend yesterday.",
         "difficulty": "medium",
-        "category": "daily_life"
+        "category": "daily_life",
     },
     {
         "japanese": "来週の金曜日に会議があります。",
         "english": "There will be a meeting next Friday.",
         "difficulty": "medium",
-        "category": "business"
+        "category": "business",
     },
     {
         "japanese": "もしも時間があれば、一緒に買い物に行きませんか？",
         "english": "If you have time, would you like to go shopping together?",
         "difficulty": "hard",
-        "category": "invitation"
+        "category": "invitation",
     },
     {
         "japanese": "彼女は毎朝7時に起きます。",
         "english": "She gets up at 7 o'clock every morning.",
         "difficulty": "easy",
-        "category": "daily_routine"
+        "category": "daily_routine",
     },
     {
         "japanese": "この本は私にとって難しすぎます。",
         "english": "This book is too difficult for me.",
         "difficulty": "medium",
-        "category": "opinion"
+        "category": "opinion",
     },
     {
         "japanese": "電車が遅れているので、少し遅れるかもしれません。",
         "english": "The train is delayed, so I might be a little late.",
         "difficulty": "hard",
-        "category": "transportation"
+        "category": "transportation",
     },
     {
         "japanese": "夏休みに家族と北海道に行く予定です。",
         "english": "I'm planning to go to Hokkaido with my family during summer vacation.",
         "difficulty": "medium",
-        "category": "travel"
+        "category": "travel",
     },
     {
         "japanese": "日本語を勉強するのは楽しいです。",
         "english": "Studying Japanese is fun.",
         "difficulty": "easy",
-        "category": "learning"
+        "category": "learning",
     },
     {
         "japanese": "もし雨が降ったら、家にいるつもりです。",
         "english": "If it rains, I intend to stay home.",
         "difficulty": "hard",
-        "category": "conditional"
-    }
+        "category": "conditional",
+    },
 ]
 
 
-@app.get("/api/instant-translation/problem", response_model=InstantTranslationProblem)
+@app.get(
+    "/api/instant-translation/problem",
+    response_model=InstantTranslationProblem,
+)
 async def get_instant_translation_problem():
     """
     瞬間英作文の問題を取得するAPIエンドポイント
-    
+
     ランダムに問題を選択して返します。
     将来的にはAIで動的に問題を生成することも可能です。
     """
-    
+
     print("🔔 Instant translation problem request received")
-    
+
     try:
         import random
-        
+
         # ランダムに問題を選択
         problem = random.choice(TRANSLATION_PROBLEMS)
-        
+
         return InstantTranslationProblem(
             japanese=problem["japanese"],
             english=problem["english"],
             difficulty=problem["difficulty"],
-            category=problem["category"]
+            category=problem["category"],
         )
-        
+
     except Exception as e:
         print(f"Error generating instant translation problem: {str(e)}")
         raise HTTPException(
             status_code=500,
-            detail="Failed to generate instant translation problem"
+            detail="Failed to generate instant translation problem",
         )
 
 
-@app.post("/api/instant-translation/check", response_model=InstantTranslationCheckResponse)
-async def check_instant_translation_answer(req: InstantTranslationCheckRequest):
+@app.post(
+    "/api/instant-translation/check",
+    response_model=InstantTranslationCheckResponse,
+)
+async def check_instant_translation_answer(
+    req: InstantTranslationCheckRequest,
+):
     """
     瞬間英作文の回答をチェックするAPIエンドポイント
-    
+
     ユーザーの回答を正解と比較し、AIを使って詳細なフィードバックを提供します。
     """
-    
+
     print(f"🔔 Instant translation check request: '{req.userAnswer[:30]}...'")
-    
+
     try:
         if not model:
             # Gemini APIが利用できない場合のシンプルな比較
-            is_correct = req.userAnswer.lower().strip() == req.correctAnswer.lower().strip()
+            is_correct = (
+                req.userAnswer.lower().strip()
+                == req.correctAnswer.lower().strip()
+            )
             return InstantTranslationCheckResponse(
                 isCorrect=is_correct,
-                feedback="Good try! Keep practicing." if is_correct else "Close, but not quite right. Try again!",
+                feedback=(
+                    "Good try! Keep practicing."
+                    if is_correct
+                    else "Close, but not quite right. Try again!"
+                ),
                 score=100 if is_correct else 50,
-                suggestions=[]
+                suggestions=[],
             )
-        
+
         # AIを使って詳細な回答チェック
         check_prompt = create_translation_check_prompt(
-            req.japanese, 
-            req.correctAnswer, 
-            req.userAnswer
+            req.japanese, req.correctAnswer, req.userAnswer
         )
-        
+
         response = model.generate_content(check_prompt)
-        
+
         if response.text:
             # AI応答から情報を抽出
             ai_feedback = response.text
-            
+
             # 簡単な正解判定（AIの応答に基づく）
-            is_correct = any(word in ai_feedback.lower() for word in ["correct", "good", "excellent", "right"])
-            
+            is_correct = any(
+                word in ai_feedback.lower()
+                for word in ["correct", "good", "excellent", "right"]
+            )
+
             # スコア計算（簡単な実装）
             score = 100 if is_correct else 70
-            
+
             return InstantTranslationCheckResponse(
                 isCorrect=is_correct,
                 feedback=ai_feedback,
                 score=score,
-                suggestions=[]
+                suggestions=[],
             )
         else:
             # フォールバック応答
@@ -530,30 +550,32 @@ async def check_instant_translation_answer(req: InstantTranslationCheckRequest):
                 isCorrect=False,
                 feedback="Sorry, I couldn't evaluate your answer properly. Please try again.",
                 score=50,
-                suggestions=[]
+                suggestions=[],
             )
-            
+
     except Exception as e:
         print(f"Error checking instant translation answer: {str(e)}")
         raise HTTPException(
             status_code=500,
-            detail="Failed to check instant translation answer"
+            detail="Failed to check instant translation answer",
         )
 
 
-def create_translation_check_prompt(japanese: str, correct_answer: str, user_answer: str) -> str:
+def create_translation_check_prompt(
+    japanese: str, correct_answer: str, user_answer: str
+) -> str:
     """
     瞬間英作文の回答チェック用プロンプトを作成
-    
+
     Args:
         japanese: 日本語の原文
         correct_answer: 正解の英語
         user_answer: ユーザーの回答
-    
+
     Returns:
         AIが回答を評価するためのプロンプト
     """
-    
+
     prompt = f"""
 あなたは経験豊富な英語教師です。日本人学習者の瞬間英作文の回答を評価してください。
 
@@ -577,5 +599,5 @@ def create_translation_check_prompt(japanese: str, correct_answer: str, user_ans
 
 日本人学習者にとって理解しやすく、学習意欲を高めるような評価をお願いします。
 """
-    
+
     return prompt
