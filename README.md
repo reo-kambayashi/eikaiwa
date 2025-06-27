@@ -4,13 +4,67 @@
 
 このプロジェクトは、日本人の英語学習者がAIと対話しながら英語を練習するためのWebアプリケーションです。Google Gemini AIを活用し、音声認識・音声合成機能を備えた包括的な学習環境を提供します。
 
+## ✨ 最新のUI改善
+
+### 🎨 モダンで使いやすいインターフェース
+- **レスポンシブデザイン**: デスクトップ、タブレット、モバイル対応
+- **直感的なレイアウト**: 3カラムレイアウト（設定・チャット・Geminiパネル）
+- **日本語UI**: 分かりやすい日本語インターフェース
+- **アクセシビリティ対応**: キーボードナビゲーション、ARIA属性
+
+### ⚡ 改善された音声機能
+- **リアルタイム視覚フィードバック**: 音声認識中の波形アニメーション
+- **キーボードショートカット**: Enter送信、Space音声入力
+- **状態表示**: 明確な音声入力・ローディング・準備完了状態
+- **エラーハンドリング**: 優雅な失敗処理とフィードバック
+
+詳細は [UI_IMPROVEMENTS.md](./UI_IMPROVEMENTS.md) をご覧ください。
+
 ## 主な機能
 
-- **AI会話パートナー**: Google Gemini AIによる自然な英語会話
-- **音声認識**: Web Speech APIを使った音声入力
-- **音声合成**: Google Cloud TTSによる自然な音声出力
-- **文法チェック**: AI による文法の確認とフィードバック
-- **音声設定**: 読み上げ速度や音声入力タイムアウトの調整
+- **🤖 AI会話パートナー**: Google Gemini AIによる自然な英語会話
+- **🎤 音声認識**: Web Speech APIを使った音声入力
+- **🔊 音声合成**: Google Cloud TTSによる自然な音声出力  
+- **📝 文法チェック**: AI による文法の確認とフィードバック
+- **⚙️ 音声設定**: 読み上げ速度や音声入力タイムアウトの調整
+- **📱 瞬間英作文モード**: 日英翻訳練習機能
+
+## 🚀 クイックスタート
+
+### 前提条件
+- Docker & Docker Compose
+- Google Gemini API キー
+- （オプション）Google Cloud Text-to-Speech 認証情報
+
+### 1. 環境設定
+```bash
+# リポジトリをクローン
+git clone <this-repository>
+cd eikaiwa
+
+# 環境変数を設定
+cp .env.example .env
+# .envファイルを編集してAPIキーを設定
+```
+
+### 2. 開発環境起動
+```bash
+# Docker Composeで開発環境を起動
+make dev
+
+# または手動起動
+docker compose -f docker-compose.dev.yml up
+```
+
+### 3. アプリケーションアクセス
+- **フロントエンド**: http://localhost:3000
+- **バックエンドAPI**: http://localhost:8000
+
+### ⌨️ キーボードショートカット
+- **Enter**: メッセージ送信
+- **Space**: 音声入力開始/停止  
+- **Shift + Enter**: 改行
+- **Tab**: 要素間のナビゲーション
 
 ## 技術スタック
 
@@ -19,15 +73,6 @@
 - **AI**: Google Gemini AI
 - **音声**: Web Speech API, Google Cloud Text-to-Speech
 - **パッケージ管理**: uv (Python), npm (JavaScript)
-
-## Environment Variables
-
-   Run this command from the project root so Python can locate the
-   `backend` package. If you run it inside the `backend` directory, use:
-
-   ```bash
-   uvicorn main:app --reload
-   ```
 
 ## プロジェクト構造
 
@@ -91,31 +136,7 @@ eikaiwa/
 
 ## セットアップ手順
 
-### 📋 事前準備
-
-#### Google認証情報のセットアップ
-
-1. **Google Cloud Console**で新しいプロジェクトを作成
-2. **Google Gemini API**を有効化
-3. **OAuth 2.0 認証情報**を作成
-4. 認証情報JSONファイルを取得
-
-#### 認証情報ファイルの設定
-
-```bash
-# backend/credentials.json.example をコピー
-cp backend/credentials.json.example backend/credentials.json
-
-# credentials.json に実際の認証情報を入力
-# - client_id: GoogleクライアントID
-# - client_secret: Googleクライアントシークレット
-# - refresh_token: リフレッシュトークン
-# - quota_project_id: プロジェクトID
-```
-
-⚠️ **重要**: `backend/credentials.json`には機密情報が含まれるため、このファイルはGitリポジトリにコミットしないでください。
-
-### 🐳 Docker Composeを使用した簡単セットアップ（推奨）
+### Docker Composeを使用した簡単セットアップ（推奨）
 
 最も簡単な方法でアプリケーションを起動できます：
 

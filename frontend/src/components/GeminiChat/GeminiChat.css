@@ -3,17 +3,18 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: white;
+  background: #000000;
   overflow: hidden;
 }
 
 .gemini-header {
   padding: 16px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #000000 0%, #333333 100%);
+  color: #ffffff;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .gemini-title {
@@ -50,7 +51,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #10b981;
+  background: #ffffff;
   animation: pulse 2s infinite;
 }
 
@@ -62,7 +63,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: #f8fafc;
+  background: #111111;
 }
 
 /* Message Bubbles */
@@ -91,8 +92,8 @@
 /* User Messages */
 .gemini-message.user {
   align-self: flex-end;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  background: #ffffff;
+  color: #000000;
   border-bottom-right-radius: 6px;
 }
 
@@ -104,18 +105,18 @@
   width: 0;
   height: 0;
   border: 8px solid transparent;
-  border-left-color: #764ba2;
-  border-bottom-color: #764ba2;
+  border-left-color: #ffffff;
+  border-bottom-color: #ffffff;
 }
 
 /* Assistant Messages */
 .gemini-message.assistant {
   align-self: flex-start;
-  background: white;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  background: #222222;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-bottom-left-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .gemini-message.assistant::after {
@@ -126,21 +127,21 @@
   width: 0;
   height: 0;
   border: 8px solid transparent;
-  border-right-color: white;
-  border-bottom-color: white;
+  border-right-color: #222222;
+  border-bottom-color: #222222;
 }
 
 /* System Messages */
 .gemini-message.system {
   align-self: center;
-  background: rgba(59, 130, 246, 0.1);
-  color: #1e40af;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
   font-style: italic;
   font-size: 13px;
   border-radius: 12px;
   max-width: 90%;
   text-align: center;
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Message Enhancements */
@@ -184,11 +185,11 @@
 }
 
 .message-action:hover {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .gemini-message.user .message-action:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 /* Audio Features */

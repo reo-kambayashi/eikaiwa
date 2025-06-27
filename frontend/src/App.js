@@ -42,13 +42,11 @@ function App() {
   const {
     isVoiceInputEnabled,
     isVoiceOutputEnabled,
-    isTranslationVoiceOutputEnabled,
     isGrammarCheckEnabled, // 常にtrue
     speakingRate,
     voiceInputTimeout,
     toggleVoiceInput,
     toggleVoiceOutput,
-    toggleTranslationVoiceOutput,
     updateSpeakingRate,
     resetSpeakingRateToDefault,
     updateVoiceInputTimeout
@@ -170,34 +168,24 @@ function App() {
   }, [transcript, isListening]);
 
   // ============================================================================
-  // UIレンダリング
+  // UIレンダリング - 改善されたレイアウト
   // ============================================================================
   return (
     <div className="App">
-      {/* モダンヘッダー：モード切り替えメニュー */}
-      <header className="app-header">
-        <div className="header-content">
-          <div>
-            <h1 className="app-title">Eikaiwa Practice</h1>
-            <p className="app-subtitle">AI-Powered English Conversation Learning</p>
-          </div>
-          <div className="header-controls">
-            <Header 
-              currentMode={currentMode}
-              onModeChange={handleModeChange}
-            />
-          </div>
-        </div>
-      </header>
-      
-      {/* メインコンテンツエリア */}
-      <main className="app-main">
+      {/* 改善されたヘッダー - より明確なナビゲーション */}
+      <Header 
+        currentMode={currentMode}
+        onModeChange={handleModeChange}
+      />
+
+      {/* メインコンテナ - 改善されたレスポンシブレイアウト */}
+      <div className="main-container">
         {/* モードに応じたコンテンツ表示 */}
         {currentMode === 'chat' ? (
-          // チャットモード - モダンな3カラムレイアウト
-          <div className="app-layout">
-            {/* 左側：設定パネル */}
-            <section className="settings-section glass-card">
+          // チャットモード - 改善されたレイアウト
+          <div className="chat-mode-layout">
+            {/* 左側：折りたたみ可能な設定パネル */}
+            <aside className="settings-sidebar">
               <SettingsPanel
                 isVoiceInputEnabled={isVoiceInputEnabled}
                 isVoiceOutputEnabled={isVoiceOutputEnabled}
@@ -211,48 +199,50 @@ function App() {
                 onSpeakingRateReset={resetSpeakingRateToDefault}
                 onVoiceInputTimeoutChange={updateVoiceInputTimeout}
               />
-            </section>
+            </aside>
 
             {/* 中央：メインチャットエリア */}
-            <section className="chat-section glass-card">
-              <ChatBox 
-                messages={messages}
-                isLoading={isLoading}
-                messagesEndRef={messagesEndRef}
-              />
-              
-              <InputArea
-                value={input}
-                isListening={isListening}
-                isLoading={isLoading}
-                isVoiceInputEnabled={isVoiceInputEnabled}
-                isVoiceSupported={isVoiceSupported}
-                onChange={handleInputChange}
-                onSend={handleSendMessage}
-                onVoiceToggle={handleVoiceToggle}
-              />
-            </section>
+            <main className="chat-main">
+              <div className="chat-container">
+                <ChatBox 
+                  messages={messages}
+                  isLoading={isLoading}
+                  messagesEndRef={messagesEndRef}
+                />
+                
+                <InputArea
+                  value={input}
+                  isListening={isListening}
+                  isLoading={isLoading}
+                  isVoiceInputEnabled={isVoiceInputEnabled}
+                  isVoiceSupported={isVoiceSupported}
+                  onChange={handleInputChange}
+                  onSend={handleSendMessage}
+                  onVoiceToggle={handleVoiceToggle}
+                />
+              </div>
+            </main>
 
-            {/* 右側：Geminiアシスタント */}
-            <section className="gemini-chat-section glass-card">
+            {/* 右側：Geminiチャット - オプショナルパネル */}
+            <aside className="gemini-sidebar">
               <GeminiChat />
-            </section>
+            </aside>
           </div>
         ) : (
-          // 瞬間英作文モード - モダンレイアウト
-          <div className="instant-translation-layout">
-            <InstantTranslation 
-              isVoiceOutputEnabled={isTranslationVoiceOutputEnabled}
-              isVoiceOutputEnabledForChat={isVoiceOutputEnabled}
-              toggleTranslationVoiceOutput={toggleTranslationVoiceOutput}
-              speak={speak}
-              isVoiceInputEnabled={isVoiceInputEnabled}
-              isVoiceSupported={isVoiceSupported}
-              voiceInputTimeout={voiceInputTimeout}
-            />
+          // 瞬間英作文モード - フルワイドレイアウト
+          <div className="translation-mode-layout">
+            <main className="translation-main">
+              <InstantTranslation 
+                isVoiceOutputEnabled={isVoiceOutputEnabled}
+                speak={speak}
+                isVoiceInputEnabled={isVoiceInputEnabled}
+                isVoiceSupported={isVoiceSupported}
+                voiceInputTimeout={voiceInputTimeout}
+              />
+            </main>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

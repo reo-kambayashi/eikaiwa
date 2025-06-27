@@ -1,62 +1,66 @@
-/* Header Container */
-.header {
-  background: #000000;
-  border-bottom: 2px solid #ffffff;
+/* ============================================================================
+   改善されたヘッダースタイル - モダンで直感的なデザイン
+   ============================================================================ */
+
+.app-header {
+  background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+  color: #ffffff;
+  padding: var(--space-md) 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid #333333;
   position: sticky;
   top: 0;
-  z-index: 1000;
-  color: #ffffff;
+  z-index: 100;
 }
 
-.header-content {
-  max-width: 1200px;
+.header-container {
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 16px 24px;
+  padding: 0 var(--space-lg);
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
+  gap: var(--space-lg);
 }
 
-/* Logo and Title */
-.header-brand {
+/* ブランドセクション */
+.brand-section {
   display: flex;
   align-items: center;
-  gap: 12px;
-  text-decoration: none;
-  color: inherit;
-}
-
-.header-logo {
-  width: 36px;
-  height: 36px;
-  background: #ffffff;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #000000;
-  font-size: 18px;
-  font-weight: 700;
+  gap: var(--space-md);
   flex-shrink: 0;
 }
 
-.header-title-group {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.app-logo {
+  font-size: 2rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
-.header-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #1f2937;
+.app-title-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.app-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
   margin: 0;
-  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.app-subtitle {
+  font-size: var(--font-size-sm);
+  margin: 0;
+  opacity: 0.8;
+  font-weight: var(--font-weight-normal);
+  color: #cccccc;
 }
 
 .header-subtitle {
   font-size: 12px;
-  color: #6b7280;
+  color: #cccccc;
   margin: 0;
   line-height: 1;
 }
@@ -71,7 +75,7 @@
 .nav-link {
   font-size: 14px;
   font-weight: 500;
-  color: #4b5563;
+  color: #ffffff;
   text-decoration: none;
   padding: 8px 12px;
   border-radius: 6px;
@@ -80,13 +84,13 @@
 }
 
 .nav-link:hover {
-  color: #3b82f6;
-  background: rgba(59, 130, 246, 0.1);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .nav-link.active {
-  color: #3b82f6;
-  background: rgba(59, 130, 246, 0.1);
+  color: #000000;
+  background: #ffffff;
 }
 
 .nav-link.active::after {
@@ -97,7 +101,7 @@
   transform: translateX(-50%);
   width: 4px;
   height: 4px;
-  background: #3b82f6;
+  background: #ffffff;
   border-radius: 50%;
 }
 
@@ -111,10 +115,10 @@
 .header-action-btn {
   width: 36px;
   height: 36px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
-  background: white;
-  color: #6b7280;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -125,15 +129,15 @@
 }
 
 .header-action-btn:hover {
-  border-color: #3b82f6;
-  color: #3b82f6;
-  background: rgba(59, 130, 246, 0.05);
+  border-color: #ffffff;
+  color: #000000;
+  background: #ffffff;
 }
 
 .header-action-btn.active {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  color: white;
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #000000;
 }
 
 /* Notification Badge */
@@ -143,15 +147,15 @@
   right: -4px;
   width: 16px;
   height: 16px;
-  background: #ef4444;
-  color: white;
+  background: #ffffff;
+  color: #000000;
   border-radius: 50%;
   font-size: 10px;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid white;
+  border: 2px solid #000000;
 }
 
 /* Status Indicator */
@@ -160,18 +164,18 @@
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
   font-size: 12px;
-  color: #065f46;
+  color: #ffffff;
 }
 
 .status-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #10b981;
+  background: #ffffff;
   animation: statusPulse 2s infinite;
 }
 
@@ -185,13 +189,13 @@
 }
 
 .header-status.disconnected {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.2);
-  color: #991b1b;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #cccccc;
 }
 
 .header-status.disconnected .status-dot {
-  background: #ef4444;
+  background: #cccccc;
 }
 
 /* Mobile Menu Toggle */
@@ -199,10 +203,10 @@
   display: none;
   width: 36px;
   height: 36px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
-  background: white;
-  color: #6b7280;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
   cursor: pointer;
   align-items: center;
   justify-content: center;
@@ -211,8 +215,9 @@
 }
 
 .mobile-menu-toggle:hover {
-  border-color: #3b82f6;
-  color: #3b82f6;
+  border-color: #ffffff;
+  color: #000000;
+  background: #ffffff;
 }
 
 /* Mobile Menu */
@@ -222,9 +227,9 @@
   top: 100%;
   left: 0;
   right: 0;
-  background: white;
-  border-top: 1px solid #e5e7eb;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: #000000;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   z-index: 999;
 }
 
@@ -247,10 +252,115 @@
 
 .mobile-actions {
   padding: 16px 24px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+/* 改善されたモードナビゲーション - 黒ベースデザイン */
+.mode-navigation {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xs);
+  gap: var(--space-xs);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mode-button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: var(--transition-base);
+  position: relative;
+  min-width: 140px;
+  justify-content: flex-start;
+}
+
+.mode-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.mode-button.active {
+  background: #ffffff;
+  color: #000000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.mode-button.active:hover {
+  background: #ffffff;
+  transform: none;
+}
+
+.mode-icon {
+  font-size: var(--font-size-lg);
+  flex-shrink: 0;
+}
+
+.mode-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.mode-title {
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.2;
+}
+
+.mode-description {
+  font-size: var(--font-size-xs);
+  opacity: 0.7;
+  line-height: 1.2;
+  color: #cccccc;
+}
+
+.mode-button.active .mode-description {
+  opacity: 0.6;
+  color: #666666;
+}
+
+/* ヘッダーアクション */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+.help-button {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-on-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: var(--transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.help-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
 }
 
 /* Responsive Design */
@@ -281,6 +391,49 @@
     height: 32px;
     font-size: 16px;
   }
+  
+  .app-header {
+    padding: var(--space-sm) 0;
+  }
+  
+  .header-container {
+    padding: 0 var(--space-md);
+    gap: var(--space-md);
+  }
+  
+  .app-title {
+    font-size: var(--font-size-lg);
+  }
+  
+  .app-subtitle {
+    display: none;
+  }
+  
+  .mode-navigation {
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .mode-button {
+    min-width: 0;
+    flex: 1;
+    justify-content: center;
+    padding: var(--space-sm);
+  }
+  
+  .mode-text {
+    align-items: center;
+  }
+  
+  .mode-description {
+    display: none;
+  }
+  
+  .help-button {
+    width: 32px;
+    height: 32px;
+    font-size: var(--font-size-base);
+  }
 }
 
 @media (max-width: 480px) {
@@ -306,6 +459,22 @@
   
   .mobile-actions {
     padding: 12px 16px;
+  }
+  
+  .brand-section {
+    gap: var(--space-sm);
+  }
+  
+  .app-title {
+    font-size: var(--font-size-base);
+  }
+  
+  .mode-button {
+    padding: var(--space-xs) var(--space-sm);
+  }
+  
+  .mode-icon {
+    font-size: var(--font-size-base);
   }
 }
 
@@ -338,7 +507,7 @@
 .nav-link:focus,
 .header-action-btn:focus,
 .mobile-menu-toggle:focus {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid #ffffff;
   outline-offset: 2px;
 }
 

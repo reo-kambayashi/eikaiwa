@@ -4,7 +4,6 @@
 // ============================================================================
 
 import React, { useState, useRef, useEffect } from 'react';
-import VoiceControls from '../VoiceControls';
 import './InputArea.css';
 
 /**
@@ -86,11 +85,36 @@ const InputArea = ({
    */
   const getPlaceholder = () => {
     if (isListening) {
-      return 'Please speak...';
+      return '🎤 音声を認識中... (Spaceキーで停止)';
     } else if (isVoiceInputEnabled) {
-      return 'Enter a message (voice input available)';
+      return 'メッセージを入力 (Spaceキーで音声入力、Enterで送信)';
     } else {
-      return 'Enter a message';
+      return 'メッセージを入力してください (Enterで送信)';
+    }
+  };
+
+  /**
+   * 入力エリアの状態表示テキスト
+   */
+  const getStatusText = () => {
+    if (isListening) {
+      return {
+        icon: '🎤',
+        text: '音声入力中',
+        status: 'active'
+      };
+    } else if (isLoading) {
+      return {
+        icon: '⏳',
+        text: 'AI応答待ち',
+        status: 'loading'
+      };
+    } else {
+      return {
+        icon: '✏️',
+        text: 'メッセージ入力',
+        status: 'ready'
+      };
     }
   };
 
@@ -113,30 +137,28 @@ const InputArea = ({
 
   return (
     <div className="enhanced-input-area">
-      {/* 入力エリアヘッダー */}
+      {/* 改善された入力エリアヘッダー */}
       <div className="input-header">
-        <div className="input-status">
-          {isListening ? (
-            <>
-              <span>Voice Input Active</span>
-            </>
-          ) : (
-            <>
-              <span>Enter Message</span>
-            </>
+        <div className={`input-status status-${getStatusText().status}`}>
+          <span className="status-icon">{getStatusText().icon}</span>
+          <span className="status-text">{getStatusText().text}</span>
+          {isVoiceInputEnabled && !isListening && (
+            <span className="voice-hint">Spaceキーで音声入力</span>
           )}
         </div>
-        <div className="char-counter">
-          <span className={charCount > maxChars * 0.8 ? 'warning' : ''}>
-            {charCount}/{maxChars}
-          </span>
+        <div className="input-controls">
+          <div className="char-counter">
+            <span className={charCount > maxChars * 0.8 ? 'warning' : ''}>
+              {charCount}/{maxChars}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* メイン入力エリア */}
+      {/* 改善されたメイン入力エリア */}
       <div className="main-input-container">
-        {/* テキスト入力フィールド */}
         <div className="input-wrapper">
+          {/* テキスト入力フィールド */}
           <textarea
             ref={inputRef}
             value={value}
@@ -148,69 +170,73 @@ const InputArea = ({
             rows={2}
             className={`enhanced-message-input ${
               isListening ? 'listening' : ''
-            } ${
-              charCount > maxChars * 0.8 ? 'near-limit' : ''
-            }`}
-            aria-label="Enter message"
+            } ${isLoading ? 'loading' : ''}`}
+            aria-label="メッセージ入力欄"
           />
           
-          {/* 入力状態インジケーター */}
+          {/* 音声認識中のビジュアルフィードバック */}
           {isListening && (
-            <div className="voice-indicator">
-              <div className="voice-wave">
-                <span></span>
-                <span></span>
-                <span></span>
+            <div className="voice-feedback">
+              <div className="voice-animation">
+                <div className="voice-wave"></div>
+                <div className="voice-wave"></div>
+                <div className="voice-wave"></div>
               </div>
             </div>
           )}
         </div>
 
-        {/* コントロールボタンエリア */}
-        <div className="control-buttons">
-          {/* 音声入力コントロール */}
-          <VoiceControls
-            isListening={isListening}
-            isEnabled={isVoiceInputEnabled}
-            isSupported={isVoiceSupported}
-            isLoading={isLoading}
-            onToggle={onVoiceToggle}
-          />
-          
+        {/* 改善されたボタン群 */}
+        <div className="input-actions">
+          {/* 音声入力ボタン */}
+          {isVoiceSupported && isVoiceInputEnabled && (
+            <button
+              type="button"
+              onClick={onVoiceToggle}
+              disabled={isLoading}
+              className={`voice-button ${isListening ? 'active' : ''}`}
+              aria-label={isListening ? '音声入力を停止' : '音声入力を開始'}
+              title={isListening ? 'Spaceキーまたはクリックで停止' : 'Spaceキーまたはクリックで開始'}
+            >
+              <span className="voice-icon">
+                {isListening ? '🛑' : '🎤'}
+              </span>
+              <span className="voice-label">
+                {isListening ? 'STOP' : 'VOICE'}
+              </span>
+            </button>
+          )}
+
           {/* 送信ボタン */}
-          <button 
+          <button
+            type="button"
             onClick={handleSendClick}
             disabled={isSendDisabled}
-            className={`enhanced-send-button ${
-              isLoading ? 'loading' : ''
-            } ${
-              !isSendDisabled ? 'ready' : ''
-            }`}
-            aria-label="Send message"
+            className={`send-button ${isSendDisabled ? 'disabled' : 'enabled'}`}
+            aria-label="メッセージを送信"
+            title="Enterキーまたはクリックで送信"
           >
             {isLoading ? (
               <>
-                <div className="button-spinner"></div>
-                <span>Sending...</span>
+                <span className="loading-spinner"></span>
+                <span>送信中...</span>
               </>
             ) : (
               <>
-                <span>Send</span>
+                <span className="send-icon">📤</span>
+                <span>送信</span>
               </>
             )}
           </button>
         </div>
       </div>
 
-      {/* ヒントテキスト */}
-      <div className="input-hints">
-        <small>
-          {isVoiceInputEnabled && isVoiceSupported ? (
-            <span>Tip: Use mic button for voice input, Enter key to send</span>
-          ) : (
-            <span>Tip: Enter key to send, Shift+Enter for new line</span>
-          )}
-        </small>
+      {/* キーボードショートカットヒント */}
+      <div className="keyboard-hints">
+        <span className="hint">💡 便利なキー操作:</span>
+        <span className="shortcut">Enter: 送信</span>
+        {isVoiceInputEnabled && <span className="shortcut">Space: 音声入力</span>}
+        <span className="shortcut">Shift+Enter: 改行</span>
       </div>
     </div>
   );
