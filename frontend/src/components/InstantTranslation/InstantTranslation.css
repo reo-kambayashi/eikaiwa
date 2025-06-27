@@ -3,14 +3,15 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: white;
+  background: #000000;
+  color: #ffffff;
   overflow: hidden;
 }
 
 .translation-header {
   padding: 16px 20px;
-  background: #f8fafc;
-  border-bottom: 1px solid #e5e7eb;
+  background: #1a1a1a;
+  border-bottom: 1px solid #333333;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -19,7 +20,7 @@
 .translation-title {
   font-size: 16px;
   font-weight: 600;
-  color: #374151;
+  color: #ffffff;
   margin: 0;
 }
 
@@ -31,24 +32,25 @@
 
 .control-btn {
   padding: 6px 10px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #444444;
   border-radius: 4px;
-  background: white;
-  color: #6b7280;
+  background: #2a2a2a;
+  color: #ffffff;
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .control-btn:hover {
-  border-color: #3b82f6;
-  color: #3b82f6;
+  border-color: #5a9cff;
+  color: #5a9cff;
+  background: #333333;
 }
 
 .control-btn.active {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  color: white;
+  background: #5a9cff;
+  border-color: #5a9cff;
+  color: #000000;
 }
 
 /* Main Content Area */
@@ -62,8 +64,8 @@
 /* Problem Display Section */
 .problem-section {
   padding: 24px 20px;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-bottom: 1px solid #333333;
 }
 
 .problem-header {
@@ -75,8 +77,8 @@
 
 .problem-counter {
   font-size: 12px;
-  color: #6b7280;
-  background: rgba(59, 130, 246, 0.1);
+  color: #ffffff;
+  background: rgba(90, 156, 255, 0.3);
   padding: 4px 8px;
   border-radius: 4px;
 }
@@ -89,24 +91,24 @@
 }
 
 .difficulty-badge.easy {
-  background: rgba(16, 185, 129, 0.1);
-  color: #065f46;
+  background: rgba(16, 185, 129, 0.3);
+  color: #4ade80;
 }
 
 .difficulty-badge.medium {
-  background: rgba(245, 158, 11, 0.1);
-  color: #92400e;
+  background: rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
 }
 
 .difficulty-badge.hard {
-  background: rgba(239, 68, 68, 0.1);
-  color: #991b1b;
+  background: rgba(239, 68, 68, 0.3);
+  color: #f87171;
 }
 
 .problem-text {
   font-size: 18px;
   font-weight: 500;
-  color: #1f2937;
+  color: #ffffff;
   line-height: 1.6;
   margin-bottom: 12px;
   text-align: center;
@@ -114,7 +116,7 @@
 
 .problem-context {
   font-size: 13px;
-  color: #6b7280;
+  color: #cccccc;
   text-align: center;
   font-style: italic;
 }
@@ -122,7 +124,7 @@
 /* Answer Input Section */
 .answer-section {
   padding: 20px;
-  background: white;
+  background: #000000;
 }
 
 .answer-input-container {
@@ -133,7 +135,7 @@
 .answer-input {
   width: 100%;
   padding: 16px 20px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid #444444;
   border-radius: 12px;
   font-size: 16px;
   line-height: 1.5;
@@ -141,18 +143,19 @@
   resize: vertical;
   font-family: inherit;
   transition: all 0.2s ease;
-  background: #f9fafb;
+  background: #1a1a1a;
+  color: #ffffff;
 }
 
 .answer-input:focus {
   outline: none;
-  border-color: #3b82f6;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #5a9cff;
+  background: #2a2a2a;
+  box-shadow: 0 0 0 3px rgba(90, 156, 255, 0.3);
 }
 
 .answer-input::placeholder {
-  color: #9ca3af;
+  color: #888888;
 }
 
 .answer-actions {
@@ -195,31 +198,31 @@
 }
 
 .submit-btn:disabled {
-  background: #e5e7eb;
-  color: #9ca3af;
+  background: #333333;
+  color: #666666;
   cursor: not-allowed;
   transform: none;
 }
 
 .skip-btn {
-  background: #f3f4f6;
-  color: #6b7280;
-  border: 1px solid #d1d5db;
+  background: #2a2a2a;
+  color: #ffffff;
+  border: 1px solid #444444;
 }
 
 .skip-btn:hover {
-  background: #e5e7eb;
-  border-color: #9ca3af;
+  background: #333333;
+  border-color: #666666;
 }
 
 .hint-btn {
-  background: rgba(245, 158, 11, 0.1);
-  color: #d97706;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.5);
 }
 
 .hint-btn:hover {
-  background: rgba(245, 158, 11, 0.2);
+  background: rgba(245, 158, 11, 0.4);
 }
 
 /* Result Display Section */
@@ -242,13 +245,13 @@
 }
 
 .result-section.correct {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.5);
 }
 
 .result-section.incorrect {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.5);
 }
 
 .result-header {
@@ -277,11 +280,11 @@
 }
 
 .result-section.correct .result-title {
-  color: #065f46;
+  color: #4ade80;
 }
 
 .result-section.incorrect .result-title {
-  color: #991b1b;
+  color: #f87171;
 }
 
 .result-content {
@@ -295,20 +298,21 @@
 }
 
 .result-section.correct .result-text {
-  color: #047857;
+  color: #34d399;
 }
 
 .result-section.incorrect .result-text {
-  color: #dc2626;
+  color: #fca5a5;
 }
 
 .correct-answer {
   font-weight: 500;
   padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 6px;
   border-left: 3px solid #10b981;
   margin: 8px 0;
+  color: #ffffff;
 }
 
 .result-actions {
@@ -318,8 +322,8 @@
 }
 
 .next-btn {
-  background: #3b82f6;
-  color: white;
+  background: #5a9cff;
+  color: #000000;
   padding: 8px 16px;
   border-radius: 6px;
   border: none;
@@ -329,14 +333,14 @@
 }
 
 .next-btn:hover {
-  background: #2563eb;
+  background: #4285f4;
 }
 
 /* Progress Section */
 .progress-section {
   padding: 16px 20px;
-  background: #f8fafc;
-  border-top: 1px solid #e5e7eb;
+  background: #1a1a1a;
+  border-top: 1px solid #333333;
 }
 
 .progress-header {
@@ -348,19 +352,19 @@
 
 .progress-label {
   font-size: 12px;
-  color: #6b7280;
+  color: #cccccc;
   font-weight: 500;
 }
 
 .progress-stats {
   font-size: 12px;
-  color: #374151;
+  color: #ffffff;
 }
 
 .progress-bar {
   width: 100%;
   height: 6px;
-  background: #e5e7eb;
+  background: #333333;
   border-radius: 3px;
   overflow: hidden;
 }
@@ -379,9 +383,9 @@
   gap: 12px;
   margin-bottom: 16px;
   padding: 12px;
-  background: #f9fafb;
+  background: #1a1a1a;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #333333;
 }
 
 .setting-item {
@@ -392,24 +396,24 @@
 
 .setting-label {
   font-size: 12px;
-  color: #6b7280;
+  color: #cccccc;
 }
 
 .setting-value {
   font-size: 12px;
   font-weight: 500;
-  color: #374151;
-  background: white;
+  color: #ffffff;
+  background: #2a2a2a;
   padding: 2px 6px;
   border-radius: 4px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #444444;
 }
 
 /* Loading States */
 .loading-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -419,8 +423,8 @@
 .loading-spinner {
   width: 24px;
   height: 24px;
-  border: 2px solid #e5e7eb;
-  border-top-color: #3b82f6;
+  border: 2px solid #333333;
+  border-top-color: #5a9cff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

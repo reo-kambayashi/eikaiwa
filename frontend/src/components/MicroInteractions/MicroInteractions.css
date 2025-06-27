@@ -299,24 +299,7 @@
   color: var(--color-text-primary);
 }
 
-/* Dark Mode Adjustments */
-[data-theme="dark"] .fab {
-  box-shadow: 
-    0 4px 6px rgba(0, 0, 0, 0.3),
-    0 1px 3px rgba(0, 0, 0, 0.4);
-}
-
-[data-theme="dark"] .fab:hover {
-  box-shadow: 
-    0 10px 15px rgba(0, 0, 0, 0.4),
-    0 4px 6px rgba(0, 0, 0, 0.5);
-}
-
-[data-theme="dark"] .animated-card.card-glow:hover {
-  box-shadow: 
-    var(--shadow-2xl),
-    0 0 30px rgba(59, 130, 246, 0.2);
-}
+/* Dark Mode Adjustments - Dark theme styles now applied by default */
 
 /* Accessibility: Reduced Motion */
 @media (prefers-reduced-motion: reduce) {

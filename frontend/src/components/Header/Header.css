@@ -1,12 +1,11 @@
 /* Header Container */
 .header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: #000000;
+  border-bottom: 2px solid #ffffff;
   position: sticky;
   top: 0;
   z-index: 1000;
+  color: #ffffff;
 }
 
 .header-content {
@@ -30,12 +29,12 @@
 .header-logo {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  background: #ffffff;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #000000;
   font-size: 18px;
   font-weight: 700;
   flex-shrink: 0;
@@ -343,36 +342,4 @@
   outline-offset: 2px;
 }
 
-/* Theme Support */
-.header[data-theme="dark"] {
-  background: rgba(17, 24, 39, 0.95);
-  border-bottom-color: rgba(55, 65, 81, 0.8);
-}
-
-.header[data-theme="dark"] .header-title {
-  color: #f9fafb;
-}
-
-.header[data-theme="dark"] .header-subtitle {
-  color: #9ca3af;
-}
-
-.header[data-theme="dark"] .nav-link {
-  color: #d1d5db;
-}
-
-.header[data-theme="dark"] .nav-link:hover,
-.header[data-theme="dark"] .nav-link.active {
-  background: rgba(59, 130, 246, 0.2);
-}
-
-.header[data-theme="dark"] .header-action-btn {
-  background: rgba(55, 65, 81, 0.8);
-  border-color: rgba(75, 85, 99, 0.8);
-  color: #d1d5db;
-}
-
-.header[data-theme="dark"] .mobile-menu {
-  background: #1f2937;
-  border-top-color: #374151;
-}
+/* Theme Support - Dark theme styles now applied by default */

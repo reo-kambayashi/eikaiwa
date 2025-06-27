@@ -14,7 +14,6 @@ import { useVoiceInput } from './hooks/useVoiceInput';
 import { useVoiceOutput } from './hooks/useVoiceOutput';
 import { useChat } from './hooks/useChat';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
-import { useTheme } from './hooks/useTheme';
 
 // UIコンポーネント
 import Header from './components/Header';
@@ -23,7 +22,6 @@ import ChatBox from './components/ChatBox';
 import InputArea from './components/InputArea';
 import GeminiChat from './components/GeminiChat';
 import InstantTranslation from './components/InstantTranslation';
-import ThemeToggle from './components/ThemeToggle';
 
 function App() {
   // ============================================================================
@@ -76,12 +74,6 @@ function App() {
     isSupported: isVoiceSupported
   } = useVoiceInput(voiceInputTimeout);
 
-  // テーマ管理機能
-  const {
-    themeMode,
-    appliedTheme,
-    setTheme
-  } = useTheme();
 
   // ============================================================================
   // イベントハンドラー
@@ -181,7 +173,7 @@ function App() {
   // UIレンダリング
   // ============================================================================
   return (
-    <div className="App" data-theme={appliedTheme}>
+    <div className="App">
       {/* モダンヘッダー：モード切り替えメニュー */}
       <header className="app-header">
         <div className="header-content">
@@ -193,12 +185,6 @@ function App() {
             <Header 
               currentMode={currentMode}
               onModeChange={handleModeChange}
-            />
-            <ThemeToggle
-              themeMode={themeMode}
-              appliedTheme={appliedTheme}
-              onThemeChange={setTheme}
-              variant="compact"
             />
           </div>
         </div>

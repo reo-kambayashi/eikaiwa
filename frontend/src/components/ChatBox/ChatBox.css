@@ -6,14 +6,14 @@
   height: 100%;
   background: transparent;
   position: relative;
+  color: #ffffff;
 }
 
 /* Chat Header */
 .chat-header {
   padding: var(--space-4) var(--space-6);
-  background: var(--glass-background-strong);
-  border-bottom: 1px solid var(--glass-border);
-  backdrop-filter: blur(10px);
+  background: #222222;
+  border-bottom: 2px solid #ffffff;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -22,18 +22,14 @@
 .chat-title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+  color: #ffffff;
   margin: 0;
   margin-bottom: var(--space-1);
-  background: linear-gradient(135deg, var(--color-primary-600), var(--color-secondary-600));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .message-count {
   font-size: var(--font-size-sm);
-  color: var(--color-text-tertiary);
+  color: #cccccc;
   font-weight: var(--font-weight-medium);
 }
 
@@ -305,18 +301,7 @@
   font-style: italic;
 }
 
-/* Dark Mode Support */
-[data-theme="dark"] .enhanced-message.ai-tutor .message-content {
-  background: var(--color-surface-secondary);
-  border-color: var(--color-border-primary);
-  color: var(--color-text-primary);
-}
-
-[data-theme="dark"] .enhanced-message.error .message-content {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: var(--color-error-400);
-}
+/* Dark Mode Support - All styles now applied by default */
 
 /* Responsive Design */
 @media (max-width: 768px) {

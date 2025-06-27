@@ -31,22 +31,7 @@
   opacity: 0.3;
 }
 
-/* Dark mode adjustments */
-[data-theme="dark"] .animated-background {
-  opacity: 0.3;
-}
-
-[data-theme="dark"] .animated-background.particles {
-  opacity: 0.4;
-}
-
-[data-theme="dark"] .animated-background.floating {
-  opacity: 0.25;
-}
-
-[data-theme="dark"] .animated-background.waves {
-  opacity: 0.2;
-}
+/* Dark mode adjustments - Dark theme styles now applied by default */
 
 /* High contrast mode - hide animations */
 @media (prefers-contrast: high) {
@@ -70,10 +55,6 @@
 @media (max-width: 768px) {
   .animated-background {
     opacity: 0.3;
-  }
-  
-  [data-theme="dark"] .animated-background {
-    opacity: 0.2;
   }
 }
 
