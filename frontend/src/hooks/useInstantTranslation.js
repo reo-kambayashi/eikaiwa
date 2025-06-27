@@ -4,6 +4,7 @@
 // ============================================================================
 
 import { useState, useCallback } from 'react';
+import { API_CONFIG } from '../utils/constants/apiConstants';
 
 /**
  * 瞬間英作文モードの状態管理フック
@@ -33,7 +34,7 @@ export const useInstantTranslation = () => {
     setError(null);
 
     try {
-      const response = await fetch('/api/instant-translation/problem');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/instant-translation/problem`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -78,7 +79,7 @@ export const useInstantTranslation = () => {
     setError(null);
 
     try {
-      const response = await fetch('/api/instant-translation/check', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/instant-translation/check`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

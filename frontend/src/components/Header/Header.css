@@ -1,113 +1,345 @@
-/* ============================================================================ */
-/* ヘッダーコンポーネントのスタイル */
-/* ============================================================================ */
-
-.app-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1rem 2rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+/* Header Container */
+.header {
+  background: #000000;
+  border-bottom: 2px solid #ffffff;
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1000;
+  color: #ffffff;
 }
 
 .header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
-.app-title {
-  margin: 0;
-  font-size: 1.8rem;
-  font-weight: 600;
-  letter-spacing: -0.5px;
-}
-
-/* モード切り替えナビゲーション */
-.mode-navigation {
+/* Logo and Title */
+.header-brand {
   display: flex;
-  gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 25px;
-  padding: 0.25rem;
-  backdrop-filter: blur(10px);
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
 }
 
-.mode-button {
-  background: transparent;
-  border: none;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.9rem;
+.header-logo {
+  width: 36px;
+  height: 36px;
+  background: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.header-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.header-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.header-subtitle {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1;
+}
+
+/* Navigation */
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nav-link {
+  font-size: 14px;
   font-weight: 500;
-  transition: all 0.3s ease;
-  white-space: nowrap;
+  color: #4b5563;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
   position: relative;
-  overflow: hidden;
 }
 
-.mode-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
+.nav-link:hover {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
 }
 
-.mode-button.active {
-  background: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  transform: translateY(-1px);
+.nav-link.active {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
 }
 
-.mode-button:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: #3b82f6;
+  border-radius: 50%;
 }
 
-/* レスポンシブデザイン */
+/* Header Actions */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-action-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.header-action-btn:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.header-action-btn.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+/* Notification Badge */
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+
+/* Status Indicator */
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 6px;
+  font-size: 12px;
+  color: #065f46;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  animation: statusPulse 2s infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.header-status.disconnected {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #991b1b;
+}
+
+.header-status.disconnected .status-dot {
+  background: #ef4444;
+}
+
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  color: #6b7280;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.mobile-menu-toggle:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+/* Mobile Menu */
+.mobile-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+}
+
+.mobile-menu.open {
+  display: block;
+}
+
+.mobile-nav {
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobile-nav .nav-link {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.mobile-actions {
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-  .app-header {
-    padding: 1rem;
-  }
-  
   .header-content {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: center;
+    padding: 12px 16px;
   }
   
-  .app-title {
-    font-size: 1.5rem;
-    text-align: center;
+  .header-nav,
+  .header-actions {
+    display: none;
   }
   
-  .mode-navigation {
-    width: 100%;
-    max-width: 300px;
+  .mobile-menu-toggle {
+    display: flex;
   }
   
-  .mode-button {
-    flex: 1;
-    padding: 0.75rem;
-    font-size: 0.85rem;
+  .header-title {
+    font-size: 18px;
+  }
+  
+  .header-subtitle {
+    font-size: 11px;
+  }
+  
+  .header-logo {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
   }
 }
 
 @media (max-width: 480px) {
-  .app-header {
-    padding: 0.75rem;
+  .header-content {
+    padding: 8px 12px;
   }
   
-  .app-title {
-    font-size: 1.3rem;
+  .header-brand {
+    gap: 8px;
   }
   
-  .mode-button {
-    padding: 0.6rem;
-    font-size: 0.8rem;
+  .header-title {
+    font-size: 16px;
+  }
+  
+  .header-subtitle {
+    display: none;
+  }
+  
+  .mobile-nav {
+    padding: 12px 16px;
+  }
+  
+  .mobile-actions {
+    padding: 12px 16px;
   }
 }
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .header {
+    border-bottom-width: 2px;
+  }
+  
+  .header-action-btn,
+  .mobile-menu-toggle {
+    border-width: 2px;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .nav-link,
+  .header-action-btn,
+  .mobile-menu-toggle {
+    transition: none;
+  }
+  
+  .status-dot {
+    animation: none;
+  }
+}
+
+/* Focus States */
+.nav-link:focus,
+.header-action-btn:focus,
+.mobile-menu-toggle:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Theme Support - Dark theme styles now applied by default */

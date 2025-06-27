@@ -1,18 +1,18 @@
-# 🗣️ English Communication App
+# English Communication App
 
 **日本人向け英語会話練習アプリ - AI powered English learning app for Japanese speakers**
 
 このプロジェクトは、日本人の英語学習者がAIと対話しながら英語を練習するためのWebアプリケーションです。Google Gemini AIを活用し、音声認識・音声合成機能を備えた包括的な学習環境を提供します。
 
-## ✨ 主な機能
+## 主な機能
 
-- 🤖 **AI会話パートナー**: Google Gemini AIによる自然な英語会話
-- 🎤 **音声認識**: Web Speech APIを使った音声入力
-- 🔊 **音声合成**: Google Cloud TTSによる自然な音声出力
-- ✅ **文法チェック**: AI による文法の確認とフィードバック
-- 🎛️ **音声設定**: 読み上げ速度や音声入力タイムアウトの調整
+- **AI会話パートナー**: Google Gemini AIによる自然な英語会話
+- **音声認識**: Web Speech APIを使った音声入力
+- **音声合成**: Google Cloud TTSによる自然な音声出力
+- **文法チェック**: AI による文法の確認とフィードバック
+- **音声設定**: 読み上げ速度や音声入力タイムアウトの調整
 
-## 🏗️ 技術スタック
+## 技術スタック
 
 - **フロントエンド**: React.js
 - **バックエンド**: Python (FastAPI)
@@ -20,7 +20,16 @@
 - **音声**: Web Speech API, Google Cloud Text-to-Speech
 - **パッケージ管理**: uv (Python), npm (JavaScript)
 
-## 📁 プロジェクト構造
+## Environment Variables
+
+   Run this command from the project root so Python can locate the
+   `backend` package. If you run it inside the `backend` directory, use:
+
+   ```bash
+   uvicorn main:app --reload
+   ```
+
+## プロジェクト構造
 
 ```
 eikaiwa/
@@ -53,7 +62,7 @@ eikaiwa/
 └── README.md                 # このファイル
 ```
 
-## 🏗️ コードアーキテクチャ
+## コードアーキテクチャ
 
 このプロジェクトは **初心者にも理解しやすい** 構造でリファクタリングされています：
 
@@ -80,7 +89,31 @@ eikaiwa/
 - **useVoiceOutput**: 音声合成機能
 - **useKeyboardShortcuts**: キーボードショートカット
 
-## 🚀 セットアップ手順
+## セットアップ手順
+
+### 📋 事前準備
+
+#### Google認証情報のセットアップ
+
+1. **Google Cloud Console**で新しいプロジェクトを作成
+2. **Google Gemini API**を有効化
+3. **OAuth 2.0 認証情報**を作成
+4. 認証情報JSONファイルを取得
+
+#### 認証情報ファイルの設定
+
+```bash
+# backend/credentials.json.example をコピー
+cp backend/credentials.json.example backend/credentials.json
+
+# credentials.json に実際の認証情報を入力
+# - client_id: GoogleクライアントID
+# - client_secret: Googleクライアントシークレット
+# - refresh_token: リフレッシュトークン
+# - quota_project_id: プロジェクトID
+```
+
+⚠️ **重要**: `backend/credentials.json`には機密情報が含まれるため、このファイルはGitリポジトリにコミットしないでください。
 
 ### 🐳 Docker Composeを使用した簡単セットアップ（推奨）
 
@@ -150,7 +183,7 @@ docker compose up
 
 ---
 
-### 🛠️ 手動セットアップ（開発者向け）
+### 手動セットアップ（開発者向け）
 
 ### 前提条件
 
@@ -233,7 +266,7 @@ npm start
 
 フロントエンドは http://localhost:3000 で起動します。
 
-## 🎯 使用方法
+## 使用方法
 
 1. ブラウザで http://localhost:3000 にアクセス
 2. 画面左側のパネルで学習レベルと練習タイプを選択
@@ -242,7 +275,7 @@ npm start
    - **音声入力**: マイクボタンをクリックして音声で話しかけ
 4. AIの返答は自動的に音声で再生されます（設定で無効化可能）
 
-## 🛠️ 開発者向け情報
+## 開発者向け情報
 
 ### コードフォーマット
 
@@ -270,7 +303,7 @@ curl http://localhost:8000/api/status
 2. フロントエンドのUIコンポーネントを `frontend/src/App.js` に追加
 3. 必要に応じてスタイルを `frontend/src/App.css` に追加
 
-## 🐛 トラブルシューティング
+## トラブルシューティング
 
 ### よくある問題
 
@@ -289,6 +322,9 @@ curl http://localhost:8000/api/status
 ### ログの確認
 
 ```bash
+# Docker Compose を使用している場合
+make logs
+
 # バックエンドログ
 cd backend
 uv run uvicorn main:app --reload --log-level debug
@@ -297,11 +333,11 @@ uv run uvicorn main:app --reload --log-level debug
 # ブラウザの開発者ツール > Console タブを確認
 ```
 
-## 📄 ライセンス
+## ライセンス
 
 このプロジェクトはMITライセンスの下で公開されています。
 
-## 🤝 コントリビューション
+## コントリビューション
 
 プルリクエストや Issue の作成を歓迎します！
 

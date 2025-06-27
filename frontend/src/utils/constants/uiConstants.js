@@ -35,7 +35,7 @@ export const UI_MESSAGES = {
   
   // プレースホルダー
   PLACEHOLDER_INPUT: 'Type your message here or use voice input...',
-  PLACEHOLDER_LISTENING: 'Listening... Please speak',
+  PLACEHOLDER_LISTENING: 'Voice input active... Please speak',
   
   // ボタンテキスト
   BUTTON_SEND: 'Send',
@@ -57,7 +57,7 @@ export const UI_MESSAGES = {
   PLACEHOLDER: {
     DEFAULT: "Type a message and press Enter",
     VOICE_ENABLED: "Type a message or press Space to start voice input",
-    LISTENING: "Listening... (Press Enter to stop & send)"
+    LISTENING: "Voice input active... (Press Enter to stop and send)"
   },
   
   // フォールバック

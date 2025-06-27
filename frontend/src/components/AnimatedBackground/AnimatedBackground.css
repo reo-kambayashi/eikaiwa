@@ -1,0 +1,66 @@
+/* Animated Background Component Styles */
+
+.animated-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.background-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  transition: opacity var(--transition-slow);
+}
+
+/* Variant-specific styles */
+.animated-background.particles {
+  opacity: 0.6;
+}
+
+.animated-background.floating {
+  opacity: 0.4;
+}
+
+.animated-background.waves {
+  opacity: 0.3;
+}
+
+/* Dark mode adjustments - Dark theme styles now applied by default */
+
+/* High contrast mode - hide animations */
+@media (prefers-contrast: high) {
+  .animated-background {
+    display: none;
+  }
+}
+
+/* Reduced motion - minimal opacity */
+@media (prefers-reduced-motion: reduce) {
+  .animated-background {
+    opacity: 0.1 !important;
+  }
+  
+  .background-canvas {
+    transition: none;
+  }
+}
+
+/* Performance optimization for mobile */
+@media (max-width: 768px) {
+  .animated-background {
+    opacity: 0.3;
+  }
+}
+
+/* Print styles */
+@media print {
+  .animated-background {
+    display: none;
+  }
+}
