@@ -8,11 +8,9 @@ import { useApi } from './useApi';
 
 /**
  * 回答チェックのためのカスタムフック
- * @param {Function} speak - 音声読み上げ関数
- * @param {boolean} isVoiceOutputEnabled - 音声出力の有効/無効
  * @returns {Object} 回答チェックの状態と関数
  */
-export const useAnswerChecker = (speak, isVoiceOutputEnabled) => {
+export const useAnswerChecker = () => {
   const [feedback, setFeedback] = useState('');
   const [showAnswer, setShowAnswer] = useState(false);
   
@@ -36,24 +34,18 @@ export const useAnswerChecker = (speak, isVoiceOutputEnabled) => {
         : 'もう一度チャレンジしてみましょう。正解を確認して練習を続けてください。';
 
       // API呼び出しで回答をチェック（フォールバック付き）
-      const result = await post('/api/check-instant-translation-answer', {
+      const result = await post('/api/instant-translation/check', {
         japanese: currentProblem.japanese,
-        correct_english: currentProblem.english,
-        user_answer: userAnswer.trim()
+        correctAnswer: currentProblem.english,
+        userAnswer: userAnswer.trim()
       }, {
         fallbackData: { feedback: fallbackFeedback },
         onSuccess: (data) => {
-          // 正解の音声読み上げ
-          if (isVoiceOutputEnabled && speak && currentProblem.english) {
-            speak(currentProblem.english);
-          }
+          // 音声出力は無効化済み
         },
         onError: (error) => {
           console.error('回答チェックエラー:', error);
-          // フォールバック時も音声読み上げ
-          if (isVoiceOutputEnabled && speak && currentProblem.english) {
-            speak(currentProblem.english);
-          }
+          // 音声出力は無効化済み
         }
       });
       
@@ -64,7 +56,7 @@ export const useAnswerChecker = (speak, isVoiceOutputEnabled) => {
     } catch (error) {
       console.error('予期しないエラー:', error);
     }
-  }, [post, speak, isVoiceOutputEnabled]);
+  }, [post]);
 
   /**
    * 回答状態をリセット

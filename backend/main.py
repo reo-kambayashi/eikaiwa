@@ -546,7 +546,7 @@ async def get_instant_translation_problem(
     difficulty: str = "all",
     category: str = "all",
     eiken_level: str = "",
-    long_text_mode: bool = False
+    long_text_mode: bool = False,
 ):
     """
     瞬間英作文の問題を取得するAPIエンドポイント
@@ -561,7 +561,8 @@ async def get_instant_translation_problem(
     """
 
     print(
-        f"🔔 Instant translation problem request: difficulty={difficulty}, category={category}, eiken_level={eiken_level}, long_text_mode={long_text_mode}")
+        f"🔔 Instant translation problem request: difficulty={difficulty}, category={category}, eiken_level={eiken_level}, long_text_mode={long_text_mode}"
+    )
 
     try:
         import json
@@ -577,7 +578,8 @@ async def get_instant_translation_problem(
 
                 # AI問題生成プロンプトを作成
                 ai_prompt = create_eiken_problem_generation_prompt(
-                    eiken_level, category_for_ai, long_text_mode)
+                    eiken_level, category_for_ai, long_text_mode
+                )
 
                 # AIに問題生成を依頼
                 ai_response = model.generate_content(ai_prompt)
@@ -587,8 +589,8 @@ async def get_instant_translation_problem(
                     ai_text = ai_response.text.strip()
 
                     # JSONブロックを探す
-                    json_start = ai_text.find('{')
-                    json_end = ai_text.rfind('}') + 1
+                    json_start = ai_text.find("{")
+                    json_end = ai_text.rfind("}") + 1
 
                     if json_start != -1 and json_end > json_start:
                         json_text = ai_text[json_start:json_end]
@@ -597,39 +599,57 @@ async def get_instant_translation_problem(
                             ai_problem = json.loads(json_text)
 
                             # 必要なフィールドが含まれているかチェック
-                            if all(key in ai_problem for key in ["japanese", "english"]):
+                            if all(
+                                key in ai_problem
+                                for key in ["japanese", "english"]
+                            ):
                                 print(f"✅ AI generated problem successfully")
 
                                 # 難易度とカテゴリを調整
                                 eiken_to_difficulty = {
-                                    "5": "easy", "4": "easy", "3": "medium",
-                                    "pre-2": "medium", "2": "medium",
-                                    "pre-1": "hard", "1": "hard"
+                                    "5": "easy",
+                                    "4": "easy",
+                                    "3": "medium",
+                                    "pre-2": "medium",
+                                    "2": "medium",
+                                    "pre-1": "hard",
+                                    "1": "hard",
                                 }
 
                                 return InstantTranslationProblem(
                                     japanese=ai_problem["japanese"],
                                     english=ai_problem["english"],
                                     difficulty=ai_problem.get(
-                                        "difficulty", eiken_to_difficulty.get(eiken_level, "medium")),
+                                        "difficulty",
+                                        eiken_to_difficulty.get(
+                                            eiken_level, "medium"
+                                        ),
+                                    ),
                                     category=ai_problem.get(
-                                        "category", category_for_ai)
+                                        "category", category_for_ai
+                                    ),
                                 )
                             else:
                                 print(
-                                    f"⚠️ AI response missing required fields, falling back to static problems")
+                                    f"⚠️ AI response missing required fields, falling back to static problems"
+                                )
                         except json.JSONDecodeError as e:
                             print(
-                                f"⚠️ Failed to parse AI JSON response: {e}, falling back to static problems")
+                                f"⚠️ Failed to parse AI JSON response: {e}, falling back to static problems"
+                            )
                     else:
                         print(
-                            f"⚠️ No valid JSON found in AI response, falling back to static problems")
+                            f"⚠️ No valid JSON found in AI response, falling back to static problems"
+                        )
                 else:
-                    print(f"⚠️ Empty AI response, falling back to static problems")
+                    print(
+                        f"⚠️ Empty AI response, falling back to static problems"
+                    )
 
             except Exception as e:
                 print(
-                    f"⚠️ AI problem generation failed: {e}, falling back to static problems")
+                    f"⚠️ AI problem generation failed: {e}, falling back to static problems"
+                )
 
         # 静的問題リストからの選択（フォールバック）
         print(f"📚 Using static problem list")
@@ -642,7 +662,7 @@ async def get_instant_translation_problem(
             "pre-2": "medium",
             "2": "medium",
             "pre-1": "hard",
-            "1": "hard"
+            "1": "hard",
         }
 
         # 難易度の決定 - 英検レベルが指定されている場合は優先
@@ -653,7 +673,7 @@ async def get_instant_translation_problem(
             difficulty_mapping = {
                 "basic": "easy",
                 "intermediate": "medium",
-                "advanced": "hard"
+                "advanced": "hard",
             }
             target_difficulty = difficulty_mapping.get(difficulty, "medium")
         else:
@@ -667,7 +687,10 @@ async def get_instant_translation_problem(
             filtered_problems = TRANSLATION_PROBLEMS.copy()
         else:
             filtered_problems = [
-                p for p in TRANSLATION_PROBLEMS if p["difficulty"] == target_difficulty]
+                p
+                for p in TRANSLATION_PROBLEMS
+                if p["difficulty"] == target_difficulty
+            ]
 
         # カテゴリフィルタ
         if category != "all":
@@ -679,13 +702,16 @@ async def get_instant_translation_problem(
                 "education": ["learning", "education"],
                 "technology": ["technology"],
                 "health": ["health"],
-                "culture": ["general"],     # 今後追加予定
-                "environment": ["general"]  # 今後追加予定
+                "culture": ["general"],  # 今後追加予定
+                "environment": ["general"],  # 今後追加予定
             }
 
             target_categories = category_mapping.get(category, [category])
             filtered_problems = [
-                p for p in filtered_problems if p["category"] in target_categories]
+                p
+                for p in filtered_problems
+                if p["category"] in target_categories
+            ]
         # 利用可能な問題がない場合のフォールバック
         if not filtered_problems:
             print(f"No problems found for filters, using fallback")
@@ -708,14 +734,14 @@ async def get_instant_translation_problem(
             "japanese": "私は毎日英語を勉強しています。",
             "english": "I study English every day.",
             "difficulty": "easy",
-            "category": "daily_life"
+            "category": "daily_life",
         }
 
         return InstantTranslationProblem(
             japanese=fallback_problem["japanese"],
             english=fallback_problem["english"],
             difficulty=fallback_problem["difficulty"],
-            category=fallback_problem["category"]
+            category=fallback_problem["category"],
         )
 
 
@@ -842,9 +868,7 @@ def create_translation_check_prompt(
     response_model=InstantTranslationProblem,
 )
 async def get_eiken_translation_problem(
-    difficulty: str = "all",
-    category: str = "all",
-    eiken_level: str = ""
+    difficulty: str = "all", category: str = "all", eiken_level: str = ""
 ):
     """
     英検対応瞬間英作文問題取得APIエンドポイント
@@ -859,10 +883,14 @@ async def get_eiken_translation_problem(
     """
 
     # 既存の関数を呼び出して重複を避ける
-    return await get_instant_translation_problem(difficulty, category, eiken_level, False)
+    return await get_instant_translation_problem(
+        difficulty, category, eiken_level, False
+    )
 
 
-def create_eiken_problem_generation_prompt(eiken_level: str, category: str = "general", long_text_mode: bool = False) -> str:
+def create_eiken_problem_generation_prompt(
+    eiken_level: str, category: str = "general", long_text_mode: bool = False
+) -> str:
     """
     英検レベルに応じた瞬間英作文問題を生成するためのプロンプトを作成
 
@@ -881,50 +909,74 @@ def create_eiken_problem_generation_prompt(eiken_level: str, category: str = "ge
             "grammar": "現在形、過去形、be動詞、一般動詞の基本形",
             "vocabulary": "中学1年生レベルの基本語彙 (約600語)",
             "sentence_structure": "シンプルな単文中心",
-            "examples": ["I am a student.", "I go to school.", "It is sunny today."]
+            "examples": [
+                "I am a student.",
+                "I go to school.",
+                "It is sunny today.",
+            ],
         },
         "4": {
             "description": "英検4級 (中学中級レベル)",
             "grammar": "助動詞 (can, will, must)、未来形、進行形",
             "vocabulary": "中学2年生レベルの語彙 (約1300語)",
             "sentence_structure": "助動詞を含む文、疑問文・否定文",
-            "examples": ["I can play tennis.", "Will you help me?", "She is reading a book."]
+            "examples": [
+                "I can play tennis.",
+                "Will you help me?",
+                "She is reading a book.",
+            ],
         },
         "3": {
             "description": "英検3級 (中学卒業レベル)",
             "grammar": "受動態、現在完了、不定詞、動名詞",
             "vocabulary": "中学3年生レベルの語彙 (約2100語)",
             "sentence_structure": "複文構造、接続詞を使った文",
-            "examples": ["This book was written by him.", "I have been to Tokyo.", "I want to learn English."]
+            "examples": [
+                "This book was written by him.",
+                "I have been to Tokyo.",
+                "I want to learn English.",
+            ],
         },
         "pre-2": {
             "description": "英検準2級 (高校中級レベル)",
             "grammar": "関係代名詞、仮定法の基本、分詞",
             "vocabulary": "高校基礎レベルの語彙 (約3600語)",
             "sentence_structure": "関係詞を使った複文、より複雑な構造",
-            "examples": ["The man who is standing there is my teacher.", "If I were you, I would study harder."]
+            "examples": [
+                "The man who is standing there is my teacher.",
+                "If I were you, I would study harder.",
+            ],
         },
         "2": {
             "description": "英検2級 (高校卒業レベル)",
             "grammar": "仮定法、複雑な時制、高度な文型",
             "vocabulary": "高校卒業レベルの語彙 (約5100語)",
             "sentence_structure": "複雑な複文、論理的な文構造",
-            "examples": ["If I had studied harder, I could have passed the exam.", "Having finished my homework, I went to bed."]
+            "examples": [
+                "If I had studied harder, I could have passed the exam.",
+                "Having finished my homework, I went to bed.",
+            ],
         },
         "pre-1": {
             "description": "英検準1級 (大学中級レベル)",
             "grammar": "高度な文法構造、論理的表現",
             "vocabulary": "大学中級レベルの語彙 (約7500語)",
             "sentence_structure": "学術的・ビジネス的表現",
-            "examples": ["The proposal is likely to be implemented next year.", "It is essential that we address this issue promptly."]
+            "examples": [
+                "The proposal is likely to be implemented next year.",
+                "It is essential that we address this issue promptly.",
+            ],
         },
         "1": {
             "description": "英検1級 (大学上級レベル)",
             "grammar": "最高レベルの文法、慣用表現",
             "vocabulary": "大学上級レベルの語彙 (約10000-15000語)",
             "sentence_structure": "高度な論理構造、専門的表現",
-            "examples": ["The ramifications of this decision could be far-reaching.", "Notwithstanding the challenges, we must persevere."]
-        }
+            "examples": [
+                "The ramifications of this decision could be far-reaching.",
+                "Notwithstanding the challenges, we must persevere.",
+            ],
+        },
     }
 
     # カテゴリ別のトピック
@@ -934,12 +986,19 @@ def create_eiken_problem_generation_prompt(eiken_level: str, category: str = "ge
         "travel": ["旅行", "交通", "宿泊", "観光", "文化"],
         "education": ["学校", "勉強", "試験", "図書館", "授業"],
         "health": ["健康", "病気", "運動", "食事", "病院"],
-        "technology": ["コンピューター", "スマートフォン", "インターネット", "アプリ", "SNS"],
-        "general": ["一般的な話題", "日常的な表現", "基本的な会話"]
+        "technology": [
+            "コンピューター",
+            "スマートフォン",
+            "インターネット",
+            "アプリ",
+            "SNS",
+        ],
+        "general": ["一般的な話題", "日常的な表現", "基本的な会話"],
     }
 
     eiken_info = eiken_characteristics.get(
-        eiken_level, eiken_characteristics["3"])
+        eiken_level, eiken_characteristics["3"]
+    )
     topics = category_topics.get(category, category_topics["general"])
 
     prompt = f"""

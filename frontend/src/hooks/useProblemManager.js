@@ -8,11 +8,9 @@ import { useApi } from './useApi';
 
 /**
  * 問題管理のためのカスタムフック
- * @param {Function} speak - 音声読み上げ関数
- * @param {boolean} isVoiceOutputEnabled - 音声出力の有効/無効
  * @returns {Object} 問題管理の状態と関数
  */
-export const useProblemManager = (speak, isVoiceOutputEnabled) => {
+export const useProblemManager = () => {
   const [currentProblem, setCurrentProblem] = useState(null);
   const [problemHistory, setProblemHistory] = useState([]);
   
@@ -45,17 +43,11 @@ export const useProblemManager = (speak, isVoiceOutputEnabled) => {
       const problem = await get(`/api/eiken-translation-problem?${params.toString()}`, {
         fallbackData: fallbackProblem,
         onSuccess: (data) => {
-          // 音声出力が有効な場合、問題文を読み上げ
-          if (isVoiceOutputEnabled && speak && data.japanese) {
-            speak(data.japanese);
-          }
+          // 音声出力は無効化済み
         },
         onError: (error) => {
           console.error('問題取得エラー:', error);
-          // フォールバック時も音声読み上げ
-          if (isVoiceOutputEnabled && speak) {
-            speak(fallbackProblem.japanese);
-          }
+          // 音声出力は無効化済み
         }
       });
       
@@ -66,7 +58,7 @@ export const useProblemManager = (speak, isVoiceOutputEnabled) => {
     } catch (error) {
       console.error('予期しないエラー:', error);
     }
-  }, [get, speak, isVoiceOutputEnabled]);
+  }, [get]);
 
   /**
    * 問題履歴をクリア

@@ -22,19 +22,11 @@ import ResultDisplay from './ResultDisplay';
 /**
  * 瞬間英作文モードのメインコンポーネント
  * @param {Object} props - コンポーネントのプロパティ
- * @param {boolean} props.isVoiceOutputEnabled - 瞬間英作文モード用音声出力の有効/無効
- * @param {boolean} props.isVoiceOutputEnabledForChat - チャットモード用音声出力の有効/無効（参考値）
- * @param {Function} props.toggleTranslationVoiceOutput - 瞬間英作文モード音声出力切り替え関数
- * @param {Function} props.speak - 音声読み上げ関数
  * @param {boolean} props.isVoiceInputEnabled - 音声入力の有効/無効
  * @param {boolean} props.isVoiceSupported - 音声入力サポート状況
  * @param {number} props.voiceInputTimeout - 音声入力のタイムアウト
  */
 const InstantTranslation = ({ 
-  isVoiceOutputEnabled, 
-  isVoiceOutputEnabledForChat,
-  toggleTranslationVoiceOutput,
-  speak, 
   isVoiceInputEnabled, 
   isVoiceSupported, 
   voiceInputTimeout 
@@ -49,14 +41,14 @@ const InstantTranslation = ({
     currentProblem, 
     isLoading, 
     fetchNewProblem 
-  } = useProblemManager(speak, isVoiceOutputEnabled);
+  } = useProblemManager();
 
   const { 
     feedback, 
     showAnswer, 
     checkAnswer, 
     resetAnswer 
-  } = useAnswerChecker(speak, isVoiceOutputEnabled);
+  } = useAnswerChecker();
 
   const {
     difficulty,
@@ -148,13 +140,6 @@ const InstantTranslation = ({
         />
         <div className="translation-controls">
           <button 
-            className={`voice-output-btn ${isVoiceOutputEnabled ? 'enabled' : 'disabled'}`}
-            onClick={() => toggleTranslationVoiceOutput(!isVoiceOutputEnabled)}
-            title={isVoiceOutputEnabled ? '音声出力をオフにする' : '音声出力をオンにする'}
-          >
-            {isVoiceOutputEnabled ? '🔊' : '🔇'} 音声出力
-          </button>
-          <button 
             className="new-problem-btn"
             onClick={handleStartNewProblem}
             disabled={isLoading}
@@ -210,10 +195,6 @@ const InstantTranslation = ({
 };
 
 InstantTranslation.propTypes = {
-  isVoiceOutputEnabled: PropTypes.bool.isRequired,
-  isVoiceOutputEnabledForChat: PropTypes.bool.isRequired,
-  toggleTranslationVoiceOutput: PropTypes.func.isRequired,
-  speak: PropTypes.func.isRequired,
   isVoiceInputEnabled: PropTypes.bool.isRequired,
   isVoiceSupported: PropTypes.bool.isRequired,
   voiceInputTimeout: PropTypes.number.isRequired
