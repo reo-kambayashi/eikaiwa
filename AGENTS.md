@@ -136,23 +136,41 @@ make logs          # View application logs
 make build         # Rebuild Docker images
 make clean         # Remove all containers, images, and volumes
 make status        # Show container status
+make help          # Show all available commands
+make setup         # Initial project setup (install dependencies)
+make test          # Run all tests (backend + frontend)
+make format        # Format Python code with black (79 char limit)
+```
+
+### Additional Development Commands
+```bash
+make test-backend            # Run backend tests only
+make test-frontend           # Run frontend tests only
+make format-check            # Check if Python code needs formatting
+make manual-backend          # Start backend manually (without Docker)
+make manual-frontend         # Start frontend manually (without Docker)
+make check-ports             # Check if required ports are available
+make kill-ports              # Kill processes on required ports
 ```
 
 ### Manual Development
 **Backend Development:**
 ```bash
 cd backend
+uv sync                      # Install/sync dependencies
 uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
-uv run pytest tests/          # Run tests
-uv run black --line-length 79 main.py  # Format code
+uv run pytest tests/ -v      # Run tests with verbose output
+uv run black --line-length 79 *.py  # Format all Python files
 ```
 
 **Frontend Development:**
 ```bash
 cd frontend
-npm start          # Development server (http://localhost:3000)
-npm build          # Production build
-npm test           # Run tests
+npm install                  # Install dependencies
+npm start                    # Development server (http://localhost:3000)
+npm build                    # Production build
+npm test                     # Run tests in interactive mode
+npm test -- --coverage --watchAll=false  # Run tests with coverage (CI mode)
 ```
 
 ## Contribution Guidelines
@@ -169,10 +187,21 @@ npm test           # Run tests
 - Document any new environment variables or setup requirements
 - Ensure all voice features work in supported browsers
 
-### Port Management
+### Port Management and Troubleshooting
 - If port 8000 is not available, close existing processes and restart
-- Check port availability: `lsof -i :8000`
+- Check port availability: `lsof -i :8000` or `make check-ports`
+- Kill processes on required ports: `make kill-ports`
 - Use `make clean` to ensure clean Docker environment
+
+### Common Development Workflow
+1. `make clean` - Clean Docker environment
+2. `make setup` - Install dependencies  
+3. `make dev` - Start development mode
+4. `make test` - Run all tests
+5. `make format` - Format code before commit
+6. Make changes and test manually
+7. `make test` - Verify tests still pass
+8. Commit changes
 
 ## Key Implementation Notes
 

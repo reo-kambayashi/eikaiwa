@@ -1,5 +1,5 @@
 # GEMINI.md
-This file provides guidance to Gemini when working with code in this repository.
+This file provides guidance to Google Gemini when working with code in this repository.
 
 ## Development Commands
 
@@ -12,6 +12,10 @@ make logs          # View application logs
 make build         # Rebuild Docker images
 make clean         # Remove all containers, images, and volumes
 make status        # Show container status
+make help          # Show all available commands
+make setup         # Initial project setup (install dependencies)
+make test          # Run all tests (backend + frontend)
+make format        # Format Python code with black (79 char limit)
 ```
 
 ### Manual Development
@@ -19,16 +23,29 @@ make status        # Show container status
 ```bash
 cd backend
 uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
-uv run pytest tests/          # Run tests
-uv run black --line-length 79 main.py  # Format code (required: 79 char limit)
+uv run pytest tests/ -v      # Run tests with verbose output
+uv run black --line-length 79 *.py  # Format all Python files (required: 79 char limit)
+uv sync                      # Install/sync dependencies
 ```
 
 **Frontend:**
 ```bash
 cd frontend
-npm start          # Development server (http://localhost:3000)
-npm build          # Production build
-npm test           # Run tests
+npm start                    # Development server (http://localhost:3000)
+npm build                    # Production build
+npm test                     # Run tests in interactive mode
+npm test -- --coverage --watchAll=false  # Run tests with coverage (CI mode)
+```
+
+### Individual Testing Commands
+```bash
+make test-backend            # Run backend tests only
+make test-frontend           # Run frontend tests only
+make format-check            # Check if Python code needs formatting
+make manual-backend          # Start backend manually (without Docker)
+make manual-frontend         # Start frontend manually (without Docker)
+make check-ports             # Check if required ports are available
+make kill-ports              # Kill processes on required ports
 ```
 
 ## Architecture Overview
@@ -125,3 +142,24 @@ REACT_APP_API_URL=http://localhost:8000               # Frontend API URL
 - Update README.md and instructions.md as needed
 - All new Python code must be formatted with black (79 character limit)
 - Commit messages should be short and in imperative mood
+- **Never create new files** unless absolutely necessary for achieving your goal
+- **Always prefer editing existing files** to creating new ones
+- Use `make format` or `uv run black --line-length 79 *.py` before committing Python code
+- Run `make test` to ensure all tests pass before committing changes
+
+## Port Management and Troubleshooting
+
+If you encounter port conflicts:
+```bash
+make check-ports             # Check port availability
+make kill-ports              # Kill processes on ports 3000 and 8000
+lsof -i :8000               # Check what's using port 8000
+lsof -i :3000               # Check what's using port 3000
+```
+
+Common development workflow:
+1. `make clean` - Clean Docker environment
+2. `make setup` - Install dependencies
+3. `make dev` - Start development mode
+4. `make test` - Run all tests
+5. `make format` - Format code before commit

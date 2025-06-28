@@ -12,6 +12,10 @@ make logs          # View application logs
 make build         # Rebuild Docker images
 make clean         # Remove all containers, images, and volumes
 make status        # Show container status
+make help          # Show all available commands
+make setup         # Initial project setup (install dependencies)
+make test          # Run all tests (backend + frontend)
+make format        # Format Python code with black (79 char limit)
 ```
 
 ### Manual Development
@@ -19,16 +23,25 @@ make status        # Show container status
 ```bash
 cd backend
 uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
-uv run pytest tests/          # Run tests
-uv run black --line-length 79 main.py  # Format code (required: 79 char limit)
+uv run pytest tests/ -v      # Run tests with verbose output
+uv run black --line-length 79 *.py  # Format all Python files (required: 79 char limit)
+uv sync                      # Install/sync dependencies
 ```
 
 **Frontend:**
 ```bash
 cd frontend
-npm start          # Development server (http://localhost:3000)
-npm build          # Production build
-npm test           # Run tests
+npm start                    # Development server (http://localhost:3000)
+npm build                    # Production build
+npm test                     # Run tests in interactive mode
+npm test -- --coverage --watchAll=false  # Run tests with coverage (CI mode)
+```
+
+### Individual Testing Commands
+```bash
+make test-backend            # Run backend tests only
+make test-frontend           # Run frontend tests only
+make format-check            # Check if Python code needs formatting
 ```
 
 ## Architecture Overview
@@ -125,6 +138,10 @@ REACT_APP_API_URL=http://localhost:8000               # Frontend API URL
 - Update README.md and instructions.md as needed
 - All new Python code must be formatted with black (79 character limit)
 - Commit messages should be short and in imperative mood
+- **Never create new files** unless absolutely necessary for achieving your goal
+- **Always prefer editing existing files** to creating new ones
+- Use `make format` or `uv run black --line-length 79 *.py` before committing Python code
+- Run `make test` to ensure all tests pass before committing changes
 
 # important-instruction-reminders
 Do what has been asked; nothing more, nothing less.
