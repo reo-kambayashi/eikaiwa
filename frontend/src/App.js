@@ -234,6 +234,8 @@ function App() {
             <main className="translation-main">
               <InstantTranslation 
                 isVoiceOutputEnabled={isVoiceOutputEnabled}
+                isVoiceOutputEnabledForChat={isVoiceOutputEnabled}
+                toggleTranslationVoiceOutput={toggleVoiceOutput}
                 speak={speak}
                 isVoiceInputEnabled={isVoiceInputEnabled}
                 isVoiceSupported={isVoiceSupported}

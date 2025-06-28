@@ -83,7 +83,10 @@ const AnswerInput = ({
               onClick={onToggleListening}
               title={isListening ? 'Stop voice input' : 'Start voice input'}
             >
-              {isListening ? '' : ''}
+              <span className="voice-btn-icon">{isListening ? '🛑' : '🎤'}</span>
+              <span className="voice-btn-text">
+                {isListening ? '音声停止' : '音声入力'}
+              </span>
             </button>
             
             {transcript && (
@@ -95,7 +98,8 @@ const AnswerInput = ({
                 }}
                 title="Clear voice input"
               >
-                
+                <span className="clear-btn-icon">🗑️</span>
+                <span className="clear-btn-text">クリア</span>
               </button>
             )}
             
@@ -130,7 +134,8 @@ const AnswerInput = ({
           onClick={focusInput}
           title="Focus input field"
         >
-          
+          <span className="focus-btn-icon">📝</span>
+          <span className="focus-btn-text">入力欄へ</span>
         </button>
       </div>
     </div>

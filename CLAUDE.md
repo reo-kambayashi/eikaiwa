@@ -125,3 +125,9 @@ REACT_APP_API_URL=http://localhost:8000               # Frontend API URL
 - Update README.md and instructions.md as needed
 - All new Python code must be formatted with black (79 character limit)
 - Commit messages should be short and in imperative mood
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.

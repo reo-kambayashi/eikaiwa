@@ -1,4 +1,56 @@
-/* Instant Translation Container */
+/* ============================================================================
+ * 瞬間英作文 - 新しいレイアウト構造
+ * 左側20%: 設定パネル
+ * 右側80%: 問題表示と回答欄
+ * ============================================================================ */
+
+/* メインコンテナ - 横並びレイアウト */
+.instant-translation-container {
+  height: 100%;
+  display: flex;
+  background: #000000;
+  color: #ffffff;
+  overflow: hidden;
+}
+
+/* 左側：設定パネル (20%) */
+.translation-settings-sidebar {
+  width: 20%;
+  min-width: 250px;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  background: #1a1a1a;
+  border-right: 1px solid #333333;
+  overflow-y: auto;
+}
+
+/* 右側：メインコンテンツ (80%) */
+.translation-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #000000;
+  overflow: hidden;
+}
+
+/* レスポンシブ対応 - タブレット以下 */
+@media (max-width: 768px) {
+  .instant-translation-container {
+    flex-direction: column;
+  }
+  
+  .translation-settings-sidebar {
+    width: 100%;
+    min-width: unset;
+    max-width: unset;
+    max-height: 200px;
+    border-right: none;
+    border-bottom: 1px solid #333333;
+  }
+}
+
+/* Instant Translation Container - 旧スタイル（後方互換性のため残す） */
 .instant-translation {
   height: 100%;
   display: flex;
@@ -24,10 +76,34 @@
   margin: 0;
 }
 
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
 .translation-controls {
   display: flex;
   gap: 8px;
   align-items: center;
+  padding: 16px 20px;
+  flex-wrap: wrap;
+}
+
+/* サイドバー内のコントロール */
+.translation-settings-sidebar .translation-controls {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.translation-settings-sidebar .translation-controls button {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14px;
+  border-radius: 6px;
+  text-align: center;
 }
 
 .control-btn {
@@ -53,12 +129,91 @@
   color: #000000;
 }
 
+/* 音声出力ボタン */
+.voice-output-btn {
+  padding: 12px 16px;
+  border: 1px solid #444444;
+  border-radius: 6px;
+  background: #2a2a2a;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.voice-output-btn:hover {
+  border-color: #ffffff;
+  background: #333333;
+}
+
+.voice-output-btn.enabled {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.voice-output-btn.enabled:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+/* 新しい問題ボタン */
+.new-problem-btn {
+  padding: 12px 16px;
+  border: 1px solid #10b981;
+  border-radius: 6px;
+  background: #10b981;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.new-problem-btn:hover {
+  background: #059669;
+  border-color: #059669;
+}
+
+.new-problem-btn:disabled {
+  background: #374151;
+  border-color: #374151;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
 /* Main Content Area */
 .translation-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+/* 右側メインコンテンツ内のエリア分割 */
+.problem-area {
+  flex: 0 0 auto;
+  min-height: 200px;
+  border-bottom: 1px solid #333333;
+}
+
+.answer-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 150px;
+  border-bottom: 1px solid #333333;
+}
+
+.result-area {
+  flex: 0 0 auto;
+  min-height: 100px;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 /* Problem Display Section */
@@ -544,11 +699,207 @@
   }
 }
 
+/* Voice Input Controls */
+.voice-input-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid #333333;
+}
+
+.voice-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid #444444;
+  border-radius: 6px;
+  background: #2a2a2a;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+}
+
+.voice-btn:hover {
+  background: #333333;
+  border-color: #666666;
+}
+
+.voice-btn.listening {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #f87171;
+}
+
+.voice-btn-icon {
+  font-size: 16px;
+}
+
+.voice-btn-text {
+  font-weight: 500;
+}
+
+.clear-transcript-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border: 1px solid #444444;
+  border-radius: 4px;
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 12px;
+}
+
+.clear-transcript-btn:hover {
+  background: rgba(245, 158, 11, 0.3);
+  border-color: rgba(245, 158, 11, 0.5);
+}
+
+.clear-btn-icon {
+  font-size: 14px;
+}
+
+.clear-btn-text {
+  font-weight: 500;
+}
+
+.focus-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border: 1px solid #444444;
+  border-radius: 4px;
+  background: #2a2a2a;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 12px;
+}
+
+.focus-btn:hover {
+  background: #333333;
+  border-color: #666666;
+}
+
+.focus-btn-icon {
+  font-size: 14px;
+}
+
+.focus-btn-text {
+  font-weight: 500;
+}
+
+.listening-indicator {
+  font-size: 12px;
+  color: #f87171;
+  font-style: italic;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.check-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.check-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.check-btn:disabled {
+  background: #333333;
+  color: #666666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.next-btn {
+  background: linear-gradient(135deg, #5a9cff, #4285f4);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.next-btn:hover {
+  background: linear-gradient(135deg, #4285f4, #3367d6);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(90, 156, 255, 0.4);
+}
+
+/* Mobile Responsive Updates */
+@media (max-width: 768px) {
+  .voice-input-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  
+  .voice-btn,
+  .clear-transcript-btn,
+  .focus-btn {
+    justify-content: center;
+    padding: 8px 12px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .check-btn,
+  .next-btn {
+    width: 100%;
+    padding: 12px;
+  }
+}
+
 /* High Contrast Mode */
 @media (prefers-contrast: high) {
   .answer-input,
   .control-btn,
-  .action-btn {
+  .action-btn,
+  .voice-btn,
+  .clear-transcript-btn,
+  .focus-btn,
+  .check-btn,
+  .next-btn {
     border-width: 2px;
   }
   

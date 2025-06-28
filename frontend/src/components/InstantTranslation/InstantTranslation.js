@@ -126,9 +126,9 @@ const InstantTranslation = ({
   // レンダリング
   // ============================================================================
   return (
-    <>
-      {/* 左側：設定パネル */}
-      <div className="translation-settings-section">
+    <div className="instant-translation-container">
+      {/* 左側：設定パネル (20%) */}
+      <div className="translation-settings-sidebar">
         <div className="translation-header">
           <h3 className="section-title">設定</h3>
         </div>
@@ -160,44 +160,48 @@ const InstantTranslation = ({
         </div>
       </div>
 
-      {/* 中央：問題表示と回答入力 */}
-      <div className="translation-main-section">
+      {/* 右側：問題表示と回答入力 (80%) */}
+      <div className="translation-main-content">
         <div className="translation-header">
           <h3 className="section-title">瞬間英作文</h3>
         </div>
         <div className="translation-content">
-          <ProblemDisplay
-            currentProblem={currentProblem}
-            isLoading={isLoading}
-          />
-          <AnswerInput
-            userAnswer={userAnswer}
-            onAnswerChange={handleAnswerChange}
-            onCheckAnswer={handleCheckAnswer}
-            onNextProblem={handleNextProblem}
-            showAnswer={showAnswer}
-            isVoiceInputEnabled={isVoiceInputEnabled}
-            isVoiceSupported={isVoiceSupported}
-            isListening={isListening}
-            transcript={transcript}
-            onToggleListening={toggleListening}
-            onClearTranscript={clearTranscript}
-          />
-        </div>
-      </div>
+          {/* 問題表示エリア */}
+          <div className="problem-area">
+            <ProblemDisplay
+              currentProblem={currentProblem}
+              isLoading={isLoading}
+            />
+          </div>
+          
+          {/* 回答入力エリア */}
+          <div className="answer-area">
+            <AnswerInput
+              userAnswer={userAnswer}
+              onAnswerChange={handleAnswerChange}
+              onCheckAnswer={handleCheckAnswer}
+              onNextProblem={handleNextProblem}
+              showAnswer={showAnswer}
+              isVoiceInputEnabled={isVoiceInputEnabled}
+              isVoiceSupported={isVoiceSupported}
+              isListening={isListening}
+              transcript={transcript}
+              onToggleListening={toggleListening}
+              onClearTranscript={clearTranscript}
+            />
+          </div>
 
-      {/* 右側：結果表示 */}
-      <div className="translation-result-section">
-        <div className="translation-header">
-          <h3 className="section-title">結果</h3>
+          {/* 結果表示エリア */}
+          <div className="result-area">
+            <ResultDisplay
+              showAnswer={showAnswer}
+              currentProblem={currentProblem}
+              feedback={feedback}
+            />
+          </div>
         </div>
-        <ResultDisplay
-          showAnswer={showAnswer}
-          currentProblem={currentProblem}
-          feedback={feedback}
-        />
       </div>
-    </>
+    </div>
   );
 };
 
