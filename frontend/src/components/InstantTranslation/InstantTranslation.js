@@ -62,10 +62,12 @@ const InstantTranslation = ({
     difficulty,
     category,
     eikenLevel,
+    longTextMode,
     showSettings,
     handleDifficultyChange,
     handleCategoryChange,
     handleEikenLevelChange,
+    handleLongTextModeChange,
     applySettings,
     toggleSettings
   } = useInstantTranslationSettings(fetchNewProblem);
@@ -104,15 +106,15 @@ const InstantTranslation = ({
     setUserAnswer('');
     resetAnswer();
     clearTranscript();
-    fetchNewProblem(difficulty, category, eikenLevel);
-  }, [resetAnswer, clearTranscript, fetchNewProblem, difficulty, category, eikenLevel]);
+    fetchNewProblem(difficulty, category, eikenLevel, longTextMode);
+  }, [resetAnswer, clearTranscript, fetchNewProblem, difficulty, category, eikenLevel, longTextMode]);
 
   /**
    * 新しい問題を開始
    */
   const handleStartNewProblem = useCallback(() => {
-    fetchNewProblem(difficulty, category, eikenLevel);
-  }, [fetchNewProblem, difficulty, category, eikenLevel]);
+    fetchNewProblem(difficulty, category, eikenLevel, longTextMode);
+  }, [fetchNewProblem, difficulty, category, eikenLevel, longTextMode]);
 
   // ============================================================================
   // 初期化
@@ -137,9 +139,11 @@ const InstantTranslation = ({
           eikenLevel={eikenLevel}
           difficulty={difficulty}
           category={category}
+          longTextMode={longTextMode}
           onEikenLevelChange={handleEikenLevelChange}
           onDifficultyChange={handleDifficultyChange}
           onCategoryChange={handleCategoryChange}
+          onLongTextModeChange={handleLongTextModeChange}
           onApplySettings={applySettings}
         />
         <div className="translation-controls">

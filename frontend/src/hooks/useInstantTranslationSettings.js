@@ -14,6 +14,7 @@ export const useInstantTranslationSettings = (fetchNewProblem) => {
   const [difficulty, setDifficulty] = useState('all');
   const [category, setCategory] = useState('all');
   const [eikenLevel, setEikenLevel] = useState('');
+  const [longTextMode, setLongTextMode] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
   /**
@@ -41,15 +42,23 @@ export const useInstantTranslationSettings = (fetchNewProblem) => {
   }, []);
 
   /**
+   * 長文モード変更ハンドラー
+   * @param {Event} e - イベントオブジェクト
+   */
+  const handleLongTextModeChange = useCallback((e) => {
+    setLongTextMode(e.target.checked);
+  }, []);
+
+  /**
    * 設定適用ハンドラー
    * 現在の設定で新しい問題を取得
    */
   const applySettings = useCallback(() => {
     if (fetchNewProblem) {
-      fetchNewProblem(difficulty, category, eikenLevel);
+      fetchNewProblem(difficulty, category, eikenLevel, longTextMode);
     }
     setShowSettings(false);
-  }, [difficulty, category, eikenLevel, fetchNewProblem]);
+  }, [difficulty, category, eikenLevel, longTextMode, fetchNewProblem]);
 
   /**
    * 設定パネルの表示/非表示切り替え
@@ -72,16 +81,19 @@ export const useInstantTranslationSettings = (fetchNewProblem) => {
     setDifficulty('all');
     setCategory('all');
     setEikenLevel('');
+    setLongTextMode(false);
   }, []);
 
   return {
     difficulty,
     category,
     eikenLevel,
+    longTextMode,
     showSettings,
     handleDifficultyChange,
     handleCategoryChange,
     handleEikenLevelChange,
+    handleLongTextModeChange,
     applySettings,
     toggleSettings,
     closeSettings,

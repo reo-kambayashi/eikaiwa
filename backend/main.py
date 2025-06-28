@@ -545,7 +545,8 @@ TRANSLATION_PROBLEMS = [
 async def get_instant_translation_problem(
     difficulty: str = "all",
     category: str = "all",
-    eiken_level: str = ""
+    eiken_level: str = "",
+    long_text_mode: bool = False
 ):
     """
     瞬間英作文の問題を取得するAPIエンドポイント
@@ -560,7 +561,7 @@ async def get_instant_translation_problem(
     """
 
     print(
-        f"🔔 Instant translation problem request: difficulty={difficulty}, category={category}, eiken_level={eiken_level}")
+        f"🔔 Instant translation problem request: difficulty={difficulty}, category={category}, eiken_level={eiken_level}, long_text_mode={long_text_mode}")
 
     try:
         import json
@@ -576,7 +577,7 @@ async def get_instant_translation_problem(
 
                 # AI問題生成プロンプトを作成
                 ai_prompt = create_eiken_problem_generation_prompt(
-                    eiken_level, category_for_ai)
+                    eiken_level, category_for_ai, long_text_mode)
 
                 # AIに問題生成を依頼
                 ai_response = model.generate_content(ai_prompt)
@@ -858,10 +859,10 @@ async def get_eiken_translation_problem(
     """
 
     # 既存の関数を呼び出して重複を避ける
-    return await get_instant_translation_problem(difficulty, category, eiken_level)
+    return await get_instant_translation_problem(difficulty, category, eiken_level, False)
 
 
-def create_eiken_problem_generation_prompt(eiken_level: str, category: str = "general") -> str:
+def create_eiken_problem_generation_prompt(eiken_level: str, category: str = "general", long_text_mode: bool = False) -> str:
     """
     英検レベルに応じた瞬間英作文問題を生成するためのプロンプトを作成
 
@@ -967,6 +968,7 @@ def create_eiken_problem_generation_prompt(eiken_level: str, category: str = "ge
 2. 日本人学習者にとって実用性の高い表現
 3. 自然で適切な英語表現
 4. 指定されたカテゴリに関連する内容
+5. {"複数文で構成する（長文モード）" if long_text_mode else "短い1文のみで構成する（デフォルト）"}
 
 【出力形式】
 以下のJSON形式で出力してください：
@@ -977,7 +979,7 @@ def create_eiken_problem_generation_prompt(eiken_level: str, category: str = "ge
     "category": "カテゴリ名"
 }}
 
-1つの問題を作成してください。
+{"2-3文からなる" if long_text_mode else "1つの"}問題を作成してください。
 """
 
     return prompt

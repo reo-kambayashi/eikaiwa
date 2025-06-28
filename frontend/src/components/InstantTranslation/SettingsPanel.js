@@ -23,9 +23,11 @@ const SettingsPanel = ({
   eikenLevel,
   difficulty,
   category,
+  longTextMode,
   onEikenLevelChange,
   onDifficultyChange,
   onCategoryChange,
+  onLongTextModeChange,
   onApplySettings
 }) => {
   if (!showSettings) return null;
@@ -85,6 +87,18 @@ const SettingsPanel = ({
         </select>
       </div>
 
+      <div className="setting-group">
+        <label htmlFor="long-text-mode-checkbox">
+          <input
+            type="checkbox"
+            id="long-text-mode-checkbox"
+            checked={longTextMode}
+            onChange={onLongTextModeChange}
+          />
+          Long Text Mode (複数文)
+        </label>
+      </div>
+
       <button 
         className="apply-settings-btn"
         onClick={onApplySettings}
@@ -100,9 +114,11 @@ SettingsPanel.propTypes = {
   eikenLevel: PropTypes.string.isRequired,
   difficulty: PropTypes.string.isRequired,
   category: PropTypes.string.isRequired,
+  longTextMode: PropTypes.bool.isRequired,
   onEikenLevelChange: PropTypes.func.isRequired,
   onDifficultyChange: PropTypes.func.isRequired,
   onCategoryChange: PropTypes.func.isRequired,
+  onLongTextModeChange: PropTypes.func.isRequired,
   onApplySettings: PropTypes.func.isRequired
 };
 

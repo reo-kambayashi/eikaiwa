@@ -24,13 +24,14 @@ export const useProblemManager = (speak, isVoiceOutputEnabled) => {
    * @param {string} category - カテゴリ設定
    * @param {string} eikenLevel - 英検レベル設定
    */
-  const fetchNewProblem = useCallback(async (difficulty = 'all', category = 'all', eikenLevel = '') => {
+  const fetchNewProblem = useCallback(async (difficulty = 'all', category = 'all', eikenLevel = '', longTextMode = false) => {
     try {
       // APIリクエストパラメータの構築
       const params = new URLSearchParams();
       if (difficulty !== 'all') params.append('difficulty', difficulty);
       if (category !== 'all') params.append('category', category);
       if (eikenLevel) params.append('eiken_level', eikenLevel);
+      if (longTextMode) params.append('long_text_mode', 'true');
 
       // フォールバック問題を定義
       const fallbackProblem = {
