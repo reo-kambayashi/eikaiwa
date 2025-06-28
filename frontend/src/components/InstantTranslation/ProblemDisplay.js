@@ -33,30 +33,10 @@ const ProblemDisplay = ({ currentProblem, isLoading }) => {
 
   return (
     <div className="problem-section">
-      <h2>Translate the following Japanese to English:</h2>
+      <h5 className="instruction-text">Translate the following Japanese to English:</h5>
       
       <div className="problem-content">
-        <p className="japanese-text">{currentProblem.japanese}</p>
-        
-        <div className="problem-meta">
-          {currentProblem.difficulty && (
-            <span className={`badge difficulty-${currentProblem.difficulty}`}>
-              {getDifficultyLabel(currentProblem.difficulty)}
-            </span>
-          )}
-          
-          {currentProblem.category && (
-            <span className={`badge category-${currentProblem.category}`}>
-              {getCategoryLabel(currentProblem.category)}
-            </span>
-          )}
-          
-          {currentProblem.eiken_level && (
-            <span className={`badge eiken-level-${currentProblem.eiken_level}`}>
-              Eiken Level {currentProblem.eiken_level}
-            </span>
-          )}
-        </div>
+        <h2 className="japanese-text">{currentProblem.japanese}</h2>
       </div>
     </div>
   );
