@@ -447,6 +447,94 @@ TRANSLATION_PROBLEMS = [
         "difficulty": "hard",
         "category": "conditional",
     },
+    # 追加のwork/businessカテゴリ問題
+    {
+        "japanese": "プロジェクトの進捗はいかがですか？",
+        "english": "How is the progress of the project?",
+        "difficulty": "medium",
+        "category": "work",
+    },
+    {
+        "japanese": "来月から新しい部署に異動することになりました。",
+        "english": "I will be transferred to a new department starting next month.",
+        "difficulty": "hard",
+        "category": "work",
+    },
+    {
+        "japanese": "この提案書について質問があります。",
+        "english": "I have a question about this proposal.",
+        "difficulty": "medium",
+        "category": "work",
+    },
+    {
+        "japanese": "会議の資料を準備する必要があります。",
+        "english": "I need to prepare materials for the meeting.",
+        "difficulty": "easy",
+        "category": "work",
+    },
+    {
+        "japanese": "締切を延長していただくことは可能でしょうか？",
+        "english": "Would it be possible to extend the deadline?",
+        "difficulty": "hard",
+        "category": "work",
+    },
+    # technology カテゴリ
+    {
+        "japanese": "新しいアプリをダウンロードしました。",
+        "english": "I downloaded a new app.",
+        "difficulty": "easy",
+        "category": "technology",
+    },
+    {
+        "japanese": "コンピューターが動かなくなってしまいました。",
+        "english": "My computer has stopped working.",
+        "difficulty": "medium",
+        "category": "technology",
+    },
+    {
+        "japanese": "このソフトウェアは非常に使いやすいです。",
+        "english": "This software is very user-friendly.",
+        "difficulty": "medium",
+        "category": "technology",
+    },
+    # health カテゴリ
+    {
+        "japanese": "頭が痛いので病院に行きます。",
+        "english": "I have a headache, so I'm going to the hospital.",
+        "difficulty": "easy",
+        "category": "health",
+    },
+    {
+        "japanese": "毎日運動するように心がけています。",
+        "english": "I try to exercise every day.",
+        "difficulty": "medium",
+        "category": "health",
+    },
+    {
+        "japanese": "バランスの取れた食事を摂ることが大切です。",
+        "english": "It's important to have a balanced diet.",
+        "difficulty": "hard",
+        "category": "health",
+    },
+    # education カテゴリ
+    {
+        "japanese": "大学で経済学を専攻しています。",
+        "english": "I'm majoring in economics at university.",
+        "difficulty": "medium",
+        "category": "education",
+    },
+    {
+        "japanese": "図書館で宿題をしています。",
+        "english": "I'm doing my homework at the library.",
+        "difficulty": "easy",
+        "category": "education",
+    },
+    {
+        "japanese": "今度の試験の準備をしなければなりません。",
+        "english": "I have to prepare for the upcoming exam.",
+        "difficulty": "medium",
+        "category": "education",
+    },
 ]
 
 
@@ -454,21 +542,156 @@ TRANSLATION_PROBLEMS = [
     "/api/instant-translation/problem",
     response_model=InstantTranslationProblem,
 )
-async def get_instant_translation_problem():
+async def get_instant_translation_problem(
+    difficulty: str = "all",
+    category: str = "all",
+    eiken_level: str = ""
+):
     """
     瞬間英作文の問題を取得するAPIエンドポイント
 
-    ランダムに問題を選択して返します。
-    将来的にはAIで動的に問題を生成することも可能です。
+    難易度、カテゴリ、英検レベルに基づいて適切な問題を返します。
+    英検レベルが指定されている場合は、AIを使って動的に問題を生成します。
+
+    Args:
+        difficulty: 問題の難易度 (all, basic, intermediate, advanced)
+        category: 問題のカテゴリ (all, daily_life, work, travel, etc.)
+        eiken_level: 英検レベル (5, 4, 3, pre-2, 2, pre-1, 1)
     """
 
-    print("🔔 Instant translation problem request received")
+    print(
+        f"🔔 Instant translation problem request: difficulty={difficulty}, category={category}, eiken_level={eiken_level}")
 
     try:
+        import json
         import random
 
+        # 英検レベルが指定されていて、AIが利用可能な場合はAI生成を試行
+        if eiken_level and eiken_level.strip() and model:
+            print(f"🤖 Generating AI problem for Eiken level {eiken_level}")
+
+            try:
+                # カテゴリのマッピング
+                category_for_ai = category if category != "all" else "general"
+
+                # AI問題生成プロンプトを作成
+                ai_prompt = create_eiken_problem_generation_prompt(
+                    eiken_level, category_for_ai)
+
+                # AIに問題生成を依頼
+                ai_response = model.generate_content(ai_prompt)
+
+                if ai_response.text:
+                    # AIの応答をパースしてJSONを抽出
+                    ai_text = ai_response.text.strip()
+
+                    # JSONブロックを探す
+                    json_start = ai_text.find('{')
+                    json_end = ai_text.rfind('}') + 1
+
+                    if json_start != -1 and json_end > json_start:
+                        json_text = ai_text[json_start:json_end]
+
+                        try:
+                            ai_problem = json.loads(json_text)
+
+                            # 必要なフィールドが含まれているかチェック
+                            if all(key in ai_problem for key in ["japanese", "english"]):
+                                print(f"✅ AI generated problem successfully")
+
+                                # 難易度とカテゴリを調整
+                                eiken_to_difficulty = {
+                                    "5": "easy", "4": "easy", "3": "medium",
+                                    "pre-2": "medium", "2": "medium",
+                                    "pre-1": "hard", "1": "hard"
+                                }
+
+                                return InstantTranslationProblem(
+                                    japanese=ai_problem["japanese"],
+                                    english=ai_problem["english"],
+                                    difficulty=ai_problem.get(
+                                        "difficulty", eiken_to_difficulty.get(eiken_level, "medium")),
+                                    category=ai_problem.get(
+                                        "category", category_for_ai)
+                                )
+                            else:
+                                print(
+                                    f"⚠️ AI response missing required fields, falling back to static problems")
+                        except json.JSONDecodeError as e:
+                            print(
+                                f"⚠️ Failed to parse AI JSON response: {e}, falling back to static problems")
+                    else:
+                        print(
+                            f"⚠️ No valid JSON found in AI response, falling back to static problems")
+                else:
+                    print(f"⚠️ Empty AI response, falling back to static problems")
+
+            except Exception as e:
+                print(
+                    f"⚠️ AI problem generation failed: {e}, falling back to static problems")
+
+        # 静的問題リストからの選択（フォールバック）
+        print(f"📚 Using static problem list")
+
+        # 英検レベルを難易度にマッピング
+        eiken_to_difficulty = {
+            "5": "easy",
+            "4": "easy",
+            "3": "medium",
+            "pre-2": "medium",
+            "2": "medium",
+            "pre-1": "hard",
+            "1": "hard"
+        }
+
+        # 難易度の決定 - 英検レベルが指定されている場合は優先
+        if eiken_level and eiken_level in eiken_to_difficulty:
+            target_difficulty = eiken_to_difficulty[eiken_level]
+        elif difficulty != "all":
+            # フロントエンドの難易度をバックエンドの形式に変換
+            difficulty_mapping = {
+                "basic": "easy",
+                "intermediate": "medium",
+                "advanced": "hard"
+            }
+            target_difficulty = difficulty_mapping.get(difficulty, "medium")
+        else:
+            target_difficulty = "all"
+
+        # 問題フィルタリング
+        filtered_problems = []
+
+        # 難易度フィルタ
+        if target_difficulty == "all":
+            filtered_problems = TRANSLATION_PROBLEMS.copy()
+        else:
+            filtered_problems = [
+                p for p in TRANSLATION_PROBLEMS if p["difficulty"] == target_difficulty]
+
+        # カテゴリフィルタ
+        if category != "all":
+            # フロントエンドのカテゴリ名をバックエンドの形式に変換
+            category_mapping = {
+                "daily_life": ["daily_life", "daily_routine", "preferences"],
+                "work": ["business", "work"],
+                "travel": ["travel", "transportation"],
+                "education": ["learning", "education"],
+                "technology": ["technology"],
+                "health": ["health"],
+                "culture": ["general"],     # 今後追加予定
+                "environment": ["general"]  # 今後追加予定
+            }
+
+            target_categories = category_mapping.get(category, [category])
+            filtered_problems = [
+                p for p in filtered_problems if p["category"] in target_categories]
+        # 利用可能な問題がない場合のフォールバック
+        if not filtered_problems:
+            print(f"No problems found for filters, using fallback")
+            filtered_problems = TRANSLATION_PROBLEMS.copy()
+
         # ランダムに問題を選択
-        problem = random.choice(TRANSLATION_PROBLEMS)
+        problem = random.choice(filtered_problems)
 
         return InstantTranslationProblem(
             japanese=problem["japanese"],
@@ -479,9 +702,19 @@ async def get_instant_translation_problem():
 
     except Exception as e:
         print(f"Error generating instant translation problem: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to generate instant translation problem",
+        # エラー時のフォールバック問題
+        fallback_problem = {
+            "japanese": "私は毎日英語を勉強しています。",
+            "english": "I study English every day.",
+            "difficulty": "easy",
+            "category": "daily_life"
+        }
+
+        return InstantTranslationProblem(
+            japanese=fallback_problem["japanese"],
+            english=fallback_problem["english"],
+            difficulty=fallback_problem["difficulty"],
+            category=fallback_problem["category"]
         )
 
 
@@ -598,6 +831,153 @@ def create_translation_check_prompt(
 - 2-3文で簡潔にまとめる
 
 日本人学習者にとって理解しやすく、学習意欲を高めるような評価をお願いします。
+"""
+
+    return prompt
+
+
+@app.get(
+    "/api/eiken-translation-problem",
+    response_model=InstantTranslationProblem,
+)
+async def get_eiken_translation_problem(
+    difficulty: str = "all",
+    category: str = "all",
+    eiken_level: str = ""
+):
+    """
+    英検対応瞬間英作文問題取得APIエンドポイント
+
+    フロントエンド互換性のためのエイリアスエンドポイント。
+    /api/instant-translation/problemと同じ機能を提供します。
+
+    Args:
+        difficulty: 問題の難易度 (all, basic, intermediate, advanced)
+        category: 問題のカテゴリ (all, daily_life, work, travel, etc.)
+        eiken_level: 英検レベル (5, 4, 3, pre-2, 2, pre-1, 1)
+    """
+
+    # 既存の関数を呼び出して重複を避ける
+    return await get_instant_translation_problem(difficulty, category, eiken_level)
+
+
+def create_eiken_problem_generation_prompt(eiken_level: str, category: str = "general") -> str:
+    """
+    英検レベルに応じた瞬間英作文問題を生成するためのプロンプトを作成
+
+    Args:
+        eiken_level: 英検レベル (5, 4, 3, pre-2, 2, pre-1, 1)
+        category: 問題のカテゴリ (daily_life, work, travel, etc.)
+
+    Returns:
+        AIが問題を生成するためのプロンプト
+    """
+
+    # 英検レベル別の特徴定義
+    eiken_characteristics = {
+        "5": {
+            "description": "英検5級 (中学初級レベル)",
+            "grammar": "現在形、過去形、be動詞、一般動詞の基本形",
+            "vocabulary": "中学1年生レベルの基本語彙 (約600語)",
+            "sentence_structure": "シンプルな単文中心",
+            "examples": ["I am a student.", "I go to school.", "It is sunny today."]
+        },
+        "4": {
+            "description": "英検4級 (中学中級レベル)",
+            "grammar": "助動詞 (can, will, must)、未来形、進行形",
+            "vocabulary": "中学2年生レベルの語彙 (約1300語)",
+            "sentence_structure": "助動詞を含む文、疑問文・否定文",
+            "examples": ["I can play tennis.", "Will you help me?", "She is reading a book."]
+        },
+        "3": {
+            "description": "英検3級 (中学卒業レベル)",
+            "grammar": "受動態、現在完了、不定詞、動名詞",
+            "vocabulary": "中学3年生レベルの語彙 (約2100語)",
+            "sentence_structure": "複文構造、接続詞を使った文",
+            "examples": ["This book was written by him.", "I have been to Tokyo.", "I want to learn English."]
+        },
+        "pre-2": {
+            "description": "英検準2級 (高校中級レベル)",
+            "grammar": "関係代名詞、仮定法の基本、分詞",
+            "vocabulary": "高校基礎レベルの語彙 (約3600語)",
+            "sentence_structure": "関係詞を使った複文、より複雑な構造",
+            "examples": ["The man who is standing there is my teacher.", "If I were you, I would study harder."]
+        },
+        "2": {
+            "description": "英検2級 (高校卒業レベル)",
+            "grammar": "仮定法、複雑な時制、高度な文型",
+            "vocabulary": "高校卒業レベルの語彙 (約5100語)",
+            "sentence_structure": "複雑な複文、論理的な文構造",
+            "examples": ["If I had studied harder, I could have passed the exam.", "Having finished my homework, I went to bed."]
+        },
+        "pre-1": {
+            "description": "英検準1級 (大学中級レベル)",
+            "grammar": "高度な文法構造、論理的表現",
+            "vocabulary": "大学中級レベルの語彙 (約7500語)",
+            "sentence_structure": "学術的・ビジネス的表現",
+            "examples": ["The proposal is likely to be implemented next year.", "It is essential that we address this issue promptly."]
+        },
+        "1": {
+            "description": "英検1級 (大学上級レベル)",
+            "grammar": "最高レベルの文法、慣用表現",
+            "vocabulary": "大学上級レベルの語彙 (約10000-15000語)",
+            "sentence_structure": "高度な論理構造、専門的表現",
+            "examples": ["The ramifications of this decision could be far-reaching.", "Notwithstanding the challenges, we must persevere."]
+        }
+    }
+
+    # カテゴリ別のトピック
+    category_topics = {
+        "daily_life": ["家族", "食事", "買い物", "趣味", "天気"],
+        "work": ["仕事", "会議", "プロジェクト", "同僚", "スケジュール"],
+        "travel": ["旅行", "交通", "宿泊", "観光", "文化"],
+        "education": ["学校", "勉強", "試験", "図書館", "授業"],
+        "health": ["健康", "病気", "運動", "食事", "病院"],
+        "technology": ["コンピューター", "スマートフォン", "インターネット", "アプリ", "SNS"],
+        "general": ["一般的な話題", "日常的な表現", "基本的な会話"]
+    }
+
+    eiken_info = eiken_characteristics.get(
+        eiken_level, eiken_characteristics["3"])
+    topics = category_topics.get(category, category_topics["general"])
+
+    prompt = f"""
+あなたは英検対策の専門家です。以下の条件に従って瞬間英作文の問題を1つ作成してください。
+
+【対象レベル】
+{eiken_info['description']}
+
+【文法レベル】
+{eiken_info['grammar']}
+
+【語彙レベル】
+{eiken_info['vocabulary']}
+
+【文構造】
+{eiken_info['sentence_structure']}
+
+【参考例文】
+{', '.join(eiken_info['examples'])}
+
+【問題カテゴリ】
+{category} - トピック例: {', '.join(topics)}
+
+【作成条件】
+1. 指定された英検レベルに適した語彙・文法のみを使用
+2. 日本人学習者にとって実用性の高い表現
+3. 自然で適切な英語表現
+4. 指定されたカテゴリに関連する内容
+
+【出力形式】
+以下のJSON形式で出力してください：
+{{
+    "japanese": "日本語の文章",
+    "english": "対応する英語の文章",
+    "difficulty": "easy/medium/hard",
+    "category": "カテゴリ名"
+}}
+
+1つの問題を作成してください。
 """
 
     return prompt
