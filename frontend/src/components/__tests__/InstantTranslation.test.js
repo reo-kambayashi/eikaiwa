@@ -18,24 +18,21 @@ jest.mock('../../utils/api', () => ({
 
 // Mock the custom hooks
 jest.mock('../../hooks/useProblemManager', () => ({
-  __esModule: true,
-  default: jest.fn()
+  useProblemManager: jest.fn()
 }));
 
 jest.mock('../../hooks/useAnswerChecker', () => ({
-  __esModule: true,
-  default: jest.fn()
+  useAnswerChecker: jest.fn()
 }));
 
 jest.mock('../../hooks/useInstantTranslationSettings', () => ({
-  __esModule: true,
-  default: jest.fn()
+  useInstantTranslationSettings: jest.fn()
 }));
 
 describe('InstantTranslation Component', () => {
-  const mockUseProblemManager = require('../../hooks/useProblemManager').default;
-  const mockUseAnswerChecker = require('../../hooks/useAnswerChecker').default;
-  const mockUseInstantTranslationSettings = require('../../hooks/useInstantTranslationSettings').default;
+  const { useProblemManager } = require('../../hooks/useProblemManager');
+  const { useAnswerChecker } = require('../../hooks/useAnswerChecker');
+  const { useInstantTranslationSettings } = require('../../hooks/useInstantTranslationSettings');
 
   const mockProblem = {
     problem: 'こんにちは',
@@ -54,28 +51,27 @@ describe('InstantTranslation Component', () => {
     jest.clearAllMocks();
 
     // Mock hook return values
-    mockUseProblemManager.mockReturnValue({
+    useProblemManager.mockReturnValue({
       currentProblem: mockProblem,
       isLoading: false,
-      error: null,
-      fetchProblem: jest.fn(),
-      clearProblem: jest.fn()
+      fetchNewProblem: jest.fn(),
+      clearProblemHistory: jest.fn(),
+      resetCurrentProblem: jest.fn()
     });
 
-    mockUseAnswerChecker.mockReturnValue({
-      result: null,
-      isChecking: false,
-      error: null,
+    useAnswerChecker.mockReturnValue({
+      feedback: null,
+      showAnswer: false,
       checkAnswer: jest.fn(),
-      clearResult: jest.fn()
+      resetAnswer: jest.fn()
     });
 
-    mockUseInstantTranslationSettings.mockReturnValue({
+    useInstantTranslationSettings.mockReturnValue({
       settings: {
         category: 'daily_life',
         difficulty: 'easy',
-        eiken_level: null,
-        long_text: false
+        eikenLevel: null,
+        longTextMode: false
       },
       updateSettings: jest.fn()
     });

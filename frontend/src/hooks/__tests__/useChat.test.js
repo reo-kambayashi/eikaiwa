@@ -6,16 +6,16 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import useChat from '../useChat';
+import { useChat } from '../useChat';
 
 // Mock the API module
 jest.mock('../../utils/api', () => ({
-  sendMessage: jest.fn(),
+  sendMessageToAI: jest.fn(),
   fetchWelcomeMessage: jest.fn()
 }));
 
 describe('useChat Hook', () => {
-  const mockSendMessage = require('../../utils/api').sendMessage;
+  const mockSendMessage = require('../../utils/api').sendMessageToAI;
   const mockFetchWelcomeMessage = require('../../utils/api').fetchWelcomeMessage;
 
   beforeEach(() => {
@@ -23,7 +23,7 @@ describe('useChat Hook', () => {
   });
 
   test('initializes with empty messages and correct state', () => {
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(false, jest.fn()));
     
     expect(result.current.messages).toEqual([]);
     expect(result.current.isLoading).toBe(false);
@@ -35,7 +35,7 @@ describe('useChat Hook', () => {
   test('sends message and updates conversation history', async () => {
     mockSendMessage.mockResolvedValue({ reply: 'AI response' });
     
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(false, jest.fn()));
     
     await act(async () => {
       await result.current.sendMessage('Hello');
@@ -59,7 +59,7 @@ describe('useChat Hook', () => {
   test('handles loading state correctly', async () => {
     mockSendMessage.mockImplementation(() => new Promise(resolve => setTimeout(() => resolve({ reply: 'Response' }), 100)));
     
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(false, jest.fn()));
     
     act(() => {
       result.current.sendMessage('Hello');
@@ -77,7 +77,7 @@ describe('useChat Hook', () => {
   test('handles API errors gracefully', async () => {
     mockSendMessage.mockRejectedValue(new Error('API Error'));
     
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(false, jest.fn()));
     
     await act(async () => {
       await result.current.sendMessage('Hello');
@@ -90,7 +90,7 @@ describe('useChat Hook', () => {
   test('clears conversation history', async () => {
     mockSendMessage.mockResolvedValue({ reply: 'AI response' });
     
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(false, jest.fn()));
     
     // Send a message first
     await act(async () => {
@@ -110,7 +110,7 @@ describe('useChat Hook', () => {
   test('fetches welcome message on initialization', async () => {
     mockFetchWelcomeMessage.mockResolvedValue({ reply: 'Welcome!' });
     
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(false, jest.fn()));
     
     await act(async () => {
       // Wait for welcome message to be fetched
@@ -121,7 +121,7 @@ describe('useChat Hook', () => {
   });
 
   test('handles empty message input', async () => {
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(false, jest.fn()));
     
     await act(async () => {
       await result.current.sendMessage('');
@@ -133,7 +133,7 @@ describe('useChat Hook', () => {
   });
 
   test('handles whitespace-only message input', async () => {
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(false, jest.fn()));
     
     await act(async () => {
       await result.current.sendMessage('   ');
@@ -147,7 +147,7 @@ describe('useChat Hook', () => {
   test('passes conversation history to API', async () => {
     mockSendMessage.mockResolvedValue({ reply: 'AI response' });
     
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(false, jest.fn()));
     
     // Send first message
     await act(async () => {
@@ -171,7 +171,7 @@ describe('useChat Hook', () => {
   test('limits conversation history length', async () => {
     mockSendMessage.mockResolvedValue({ reply: 'AI response' });
     
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(false, jest.fn()));
     
     // Send many messages to test history limiting
     for (let i = 0; i < 15; i++) {
@@ -187,7 +187,7 @@ describe('useChat Hook', () => {
   test('handles network timeout errors', async () => {
     mockSendMessage.mockRejectedValue(new Error('Network timeout'));
     
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(false, jest.fn()));
     
     await act(async () => {
       await result.current.sendMessage('Hello');
@@ -201,7 +201,7 @@ describe('useChat Hook', () => {
     mockSendMessage.mockRejectedValueOnce(new Error('API Error'))
                    .mockResolvedValueOnce({ reply: 'Success' });
     
-    const { result } = renderHook(() => useChat());
+    const { result } = renderHook(() => useChat(false, jest.fn()));
     
     // First message fails
     await act(async () => {

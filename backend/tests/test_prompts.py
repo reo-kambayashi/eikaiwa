@@ -14,7 +14,9 @@ import os
 import pytest
 
 # Add project root to Python path for imports
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+project_root = os.path.dirname(os.path.dirname(__file__))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
 from prompts import (
     create_conversation_prompt,
@@ -154,6 +156,7 @@ class TestAIProblemGenerationPrompts:
     def test_problem_generation_with_eiken_level(self):
         """Test problem generation with Eiken level specification."""
         category = "work"
+        eiken_level = "3"
         
         prompt = create_eiken_problem_generation_prompt(eiken_level, category)
         
@@ -205,9 +208,8 @@ class TestWelcomePrompts:
         assert "welcome" in prompt.lower() or "ようこそ" in prompt
         
     def test_welcome_prompt_with_name(self):
-        """Test welcome prompt with user name."""
-        user_name = "Tanaka"
-        prompt = create_welcome_prompt(user_name)
+        """Test welcome prompt without name parameter (function doesn't accept parameters)."""
+        prompt = create_welcome_prompt()
         
         assert isinstance(prompt, str)
         assert len(prompt) > 0

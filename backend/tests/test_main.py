@@ -190,20 +190,20 @@ class TestInstantTranslationEndpoints:
         assert response.status_code == 200
         
         data = response.json()
-        assert "problem" in data
-        assert "solution" in data
+        assert "japanese" in data
+        assert "english" in data
         assert "category" in data
         assert "difficulty" in data
         
         # Validate required fields are strings
-        assert isinstance(data["problem"], str)
-        assert isinstance(data["solution"], str)
+        assert isinstance(data["japanese"], str)
+        assert isinstance(data["english"], str)
         assert isinstance(data["category"], str)
         assert isinstance(data["difficulty"], str)
         
         # Check that text is not empty
-        assert len(data["problem"]) > 0
-        assert len(data["solution"]) > 0
+        assert len(data["japanese"]) > 0
+        assert len(data["english"]) > 0
 
     def test_get_problem_with_filters(self):
         """
@@ -228,9 +228,9 @@ class TestInstantTranslationEndpoints:
         This tests that the endpoint accepts requests and returns proper responses.
         """
         test_request = {
-            "problem": "こんにちは",
-            "correct_answer": "Hello",
-            "user_answer": "Hi"
+            "japanese": "こんにちは",
+            "correctAnswer": "Hello",
+            "userAnswer": "Hi"
         }
         
         response = client.post("/api/instant-translation/check", json=test_request)
@@ -239,12 +239,12 @@ class TestInstantTranslationEndpoints:
         assert response.status_code == 200
         
         data = response.json()
-        assert "is_correct" in data
+        assert "isCorrect" in data
         assert "score" in data
         assert "feedback" in data
         
         # Validate data types
-        assert isinstance(data["is_correct"], bool)
+        assert isinstance(data["isCorrect"], bool)
         assert isinstance(data["score"], (int, float))
         assert isinstance(data["feedback"], str)
         

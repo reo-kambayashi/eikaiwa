@@ -112,13 +112,14 @@ GOOGLE_APPLICATION_CREDENTIALS=path/to/tts-creds.json # Optional for TTS
 REACT_APP_API_URL=http://localhost:8000               # Frontend API URL
 ```
 
-## API Endpoints
+## Translation Practice System
 
-- `GET /` - Health check
-- `GET /api/status` - Service configuration status
-- `GET /api/welcome` - Initial AI greeting
-- `POST /api/respond` - Main conversation endpoint (expects `{message: string}`)
-- `POST /api/tts` - Text-to-speech conversion (expects `{text: string}`)
+The app includes a comprehensive translation practice system with:
+- **147 static problems** across categories (daily_life, work, travel, health, technology, education)
+- **Multiple difficulty levels** (easy, medium, hard) and **Eiken levels** (5, 4, 3, pre-2, 2, pre-1, 1)
+- **AI-generated problems** as fallback with dynamic difficulty adjustment
+- **Intelligent answer checking** with partial credit and detailed feedback
+- **Long text mode** for extended translation practice with paragraph-length content
 
 ## Testing Strategy
 
@@ -128,11 +129,31 @@ REACT_APP_API_URL=http://localhost:8000               # Frontend API URL
 
 ## Key Implementation Notes
 
-1. **Voice Features**: Web Speech API for input, Google Cloud TTS + browser fallback for output
-2. **Error Resilience**: Multiple fallback mechanisms for AI and TTS services
-3. **Beginner-Friendly**: Extensive comments in both Japanese and English
-4. **Performance**: API caching, retry logic, and lazy loading patterns
-5. **Accessibility**: Keyboard shortcuts and voice controls
+### Voice Features Architecture
+- **Input**: Web Speech API with timeout management and error recovery
+- **Output**: Dual TTS system - Google Cloud TTS (primary) with browser TTS fallback
+- **Browser Compatibility**: Tested across Chrome, Firefox, Safari with feature detection
+- **Visual Feedback**: Real-time wave animations and clear state indicators
+
+### Performance and Reliability
+- **API Caching**: Memory-based response caching with configurable TTL
+- **Retry Logic**: Exponential backoff for network requests
+- **Error Boundaries**: Comprehensive error handling preventing cascade failures
+- **Lazy Loading**: Component and resource loading optimization
+- **Service Degradation**: Graceful fallbacks when external services unavailable
+
+### Accessibility and User Experience
+- **Keyboard Shortcuts**: Enter (send), Space (voice input), Shift+Enter (newline), Tab (navigation)
+- **ARIA Attributes**: Screen reader compatibility throughout interface
+- **Visual States**: Clear feedback for voice input, processing, and error states
+- **Bilingual Support**: Japanese UI with English learning content
+- **Error Recovery**: User-friendly error messages with actionable guidance
+
+### AI Integration Patterns
+- **Context Management**: Conversation history limited to last 10 messages for token efficiency
+- **Prompt Engineering**: Sophisticated prompt system in separate `prompts.py` with template classes
+- **Response Validation**: JSON parsing with fallback handling for malformed responses
+- **Service Monitoring**: Real-time service availability with status endpoint exposure
 
 ## Development Guidelines
 
@@ -156,6 +177,37 @@ make kill-ports              # Kill processes on ports 3000 and 8000
 lsof -i :8000               # Check what's using port 8000
 lsof -i :3000               # Check what's using port 3000
 ```
+
+## Architecture Decision Records
+
+### Single-File Backend Design
+**Decision**: Consolidate all FastAPI functionality in single `main.py` file
+**Rationale**: Prioritize beginner accessibility and easy navigation over traditional modular structure
+**Trade-offs**: Large file size vs. simplified understanding for new developers
+
+### Dual TTS System
+**Decision**: Implement Google Cloud TTS as primary with browser TTS fallback
+**Rationale**: Ensure voice output reliability across different deployment environments
+**Implementation**: Service availability check before each TTS request with graceful degradation
+
+### Custom Hooks Pattern
+**Decision**: Abstract all business logic into custom hooks, keeping components purely presentational
+**Rationale**: Maximize reusability, testability, and separation of concerns
+**Implementation**: Each hook manages specific domain logic (chat, settings, voice, problems)
+
+### Static + Dynamic Problem System
+**Decision**: Maintain static problem database with AI generation fallback
+**Rationale**: Ensure consistent quality while enabling dynamic content generation
+**Implementation**: 147 curated problems with AI generation for Eiken-specific requests
+
+## Important Development Reminders
+
+- **Security**: Never commit API keys or sensitive credentials to repository
+- **Performance**: Monitor token usage and implement conversation history limits
+- **Error Handling**: Always provide fallback responses and graceful degradation
+- **User Experience**: Prioritize smooth conversation flow and clear error recovery
+- **Accessibility**: Maintain keyboard navigation and screen reader compatibility
+- **Bilingual Support**: Preserve Japanese UI elements and English learning content separation
 
 Common development workflow:
 1. `make clean` - Clean Docker environment

@@ -42,38 +42,6 @@ const ProblemDisplay = ({ currentProblem, isLoading }) => {
   );
 };
 
-/**
- * 難易度ラベルを取得
- * @param {string} difficulty - 難易度
- * @returns {string} 難易度ラベル
- */
-const getDifficultyLabel = (difficulty) => {
-  const labels = {
-    basic: 'Basic',
-    intermediate: 'Intermediate',
-    advanced: 'Advanced'
-  };
-  return labels[difficulty] || difficulty;
-};
-
-/**
- * カテゴリラベルを取得
- * @param {string} category - カテゴリ
- * @returns {string} カテゴリラベル
- */
-const getCategoryLabel = (category) => {
-  const labels = {
-    daily_life: 'Daily Life',
-    work: 'Work',
-    travel: 'Travel',
-    education: 'Education',
-    technology: 'Technology',
-    health: 'Health',
-    culture: 'Culture',
-    environment: 'Environment'
-  };
-  return labels[category] || category;
-};
 
 ProblemDisplay.propTypes = {
   currentProblem: PropTypes.shape({

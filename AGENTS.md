@@ -92,30 +92,34 @@ Settings managed via useSettings hook with localStorage persistence
 ### Code Conventions
 
 #### Python Backend
-- Use single-file design pattern in `main.py`
-- Add extensive comments for beginner-friendly code
-- Handle errors gracefully with proper HTTP status codes
-- Use environment variables for all configuration
-- Follow async/await patterns for API endpoints
+- Format with `black --line-length 79` (strictly enforced via pyproject.toml)
+- Single-file design pattern in `main.py` with comprehensive section organization
+- Extensive bilingual comments for beginner-friendly code
+- Environment variables via `.env` file with graceful fallback handling
+- Pydantic models for all request/response validation
+- Service availability checks before external API calls
 
 #### JavaScript Frontend
-- Separate business logic into custom hooks
-- Keep components pure and focused on UI
-- Use extensive comments in both Japanese and English
-- Follow component composition patterns
-- Implement proper error boundaries and loading states
+- Extensive Japanese and English comments throughout codebase
+- Custom hooks pattern for all business logic abstraction
+- Component composition over inheritance with clear separation of concerns
+- PropTypes for runtime type safety without TypeScript complexity
+- Centralized constants organization in `utils/constants/` directory
+- Immutable state patterns for predictable updates
 
 #### File Organization Rules
-- **Never create new files** unless absolutely necessary
+- **Never create new files** unless absolutely necessary for achieving your goal
 - **Always prefer editing existing files** to creating new ones
-- Follow the established directory structure
+- Follow the established directory structure and naming conventions
 - Maintain clear separation between hooks, components, and utilities
 
 ### Testing Strategy
-- **Backend**: Use pytest for API endpoint testing (`/backend/tests/`)
-- **Frontend**: React Testing Library for component testing
-- **Integration**: Manual testing of voice features (browser-dependent)
-- **API Testing**: Use curl or similar tools for endpoint verification
+- **Backend**: pytest in `/backend/tests/` focusing on API endpoint structure and service availability
+- **Frontend**: React Testing Library with coverage reporting for component and hook testing
+- **Integration**: Manual testing of voice features across browsers (Chrome, Firefox, Safari)
+- **API Testing**: Service availability testing with graceful degradation validation
+- **Always run tests for any code changes made** - test relevant functionality after each modification
+- **Continuously improve tests** - enhance test coverage and quality when working on code changes
 
 ### Environment Setup
 Required environment variables in `.env`:
@@ -124,6 +128,15 @@ GEMINI_API_KEY=your_gemini_api_key                    # Required for AI
 GOOGLE_APPLICATION_CREDENTIALS=path/to/tts-creds.json # Optional for TTS
 REACT_APP_API_URL=http://localhost:8000               # Frontend API URL
 ```
+
+## Translation Practice System
+
+The app includes a comprehensive translation practice system with:
+- **147 static problems** across categories (daily_life, work, travel, health, technology, education)
+- **Multiple difficulty levels** (easy, medium, hard) and **Eiken levels** (5, 4, 3, pre-2, 2, pre-1, 1)
+- **AI-generated problems** as fallback with dynamic difficulty adjustment
+- **Intelligent answer checking** with partial credit and detailed feedback
+- **Long text mode** for extended translation practice with paragraph-length content
 
 ## Development Workflow
 
@@ -180,6 +193,7 @@ npm test -- --coverage --watchAll=false  # Run tests with coverage (CI mode)
 - Keep commit messages short and in the imperative mood
 - Test all changes thoroughly before submission
 - Update documentation when making significant changes
+- **Update CLAUDE.md, GEMINI.md, and AGENTS.md appropriately** when making architectural or workflow changes
 
 ### Pull Request Process
 - Summaries should highlight key changes and mention tests run

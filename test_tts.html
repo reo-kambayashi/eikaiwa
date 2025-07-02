@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTS Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+        }
+        #output {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TTS機能テスト</h1>
+        
+        <div class="test-section">
+            <h2>1. バックエンドAPI直接テスト</h2>
+            <textarea id="testText" placeholder="テストしたいテキストを入力してください...">Hello, this is a test of the TTS service. How are you today?</textarea>
+            <br>
+            <button onclick="testBackendAPI()">バックエンドAPIテスト</button>
+            <button onclick="testGoogleTTS()">Google TTSテスト</button>
+            <button onclick="testBrowserTTS()">ブラウザTTSテスト</button>
+            
+            <div id="apiStatus" class="status info">
+                バックエンドAPIの状態をテストします
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. フロントエンド統合テスト</h2>
+            <button onclick="testFrontendTTS()">フロントエンドTTS機能テスト</button>
+            <button onclick="stopAllAudio()">音声停止</button>
+            
+            <div id="frontendStatus" class="status info">
+                フロントエンドのTTS機能をテストします
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. システム状態確認</h2>
+            <button onclick="checkSystemStatus()">システム状態確認</button>
+            
+            <div id="systemStatus" class="status info">
+                システム全体の状態を確認します
+            </div>
+        </div>
+
+        <div id="output"></div>
+    </div>
+
+    <script>
+        let currentAudio = null;
+        const API_BASE = 'http://localhost:8000';
+
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.textContent += `[${timestamp}] ${message}\n`;
+            console.log(message);
+        }
+
+        function updateStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.className = `status ${type}`;
+            element.textContent = message;
+        }
+
+        async function testBackendAPI() {
+            const text = document.getElementById('testText').value.trim();
+            if (!text) {
+                updateStatus('apiStatus', 'テキストを入力してください', 'error');
+                return;
+            }
+
+            updateStatus('apiStatus', 'バックエンドAPIをテスト中...', 'info');
+            log('Testing backend API...');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/tts`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        voice: 'ja-JP-Wavenet-A',
+                        speed: 1.0
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                log(`Backend API response: ${JSON.stringify(data, null, 2)}`);
+
+                if (data.audio_data) {
+                    updateStatus('apiStatus', 'バックエンドAPI成功 - 音声データ受信', 'success');
+                    
+                    // 音声を再生してみる
+                    const binaryString = atob(data.audio_data);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    
+                    const audioBlob = new Blob([bytes], { type: data.content_type || 'audio/mpeg' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    currentAudio = new Audio(audioUrl);
+                    
+                    currentAudio.onended = () => {
+                        URL.revokeObjectURL(audioUrl);
+                        log('Backend TTS playback completed');
+                    };
+                    
+                    currentAudio.onerror = (error) => {
+                        log(`Backend TTS playback error: ${error}`);
+                        updateStatus('apiStatus', 'バックエンドAPI - 音声再生エラー', 'error');
+                    };
+                    
+                    await currentAudio.play();
+                    log('Backend TTS audio started playing');
+                } else if (data.use_browser_tts) {
+                    updateStatus('apiStatus', 'バックエンドAPI - ブラウザTTSフォールバック指示', 'info');
+                    log('Backend requested browser TTS fallback');
+                } else {
+                    updateStatus('apiStatus', 'バックエンドAPI - 不明な応答', 'error');
+                    log('Unknown backend response');
+                }
+
+            } catch (error) {
+                updateStatus('apiStatus', `バックエンドAPIエラー: ${error.message}`, 'error');
+                log(`Backend API Error: ${error}`);
+            }
+        }
+
+        async function testGoogleTTS() {
+            const text = document.getElementById('testText').value.trim();
+            if (!text) {
+                updateStatus('apiStatus', 'テキストを入力してください', 'error');
+                return;
+            }
+
+            // Google TTSの詳細テスト
+            log('Testing Google TTS directly...');
+            await testBackendAPI(); // 同じロジックを使用
+        }
+
+        async function testBrowserTTS() {
+            const text = document.getElementById('testText').value.trim();
+            if (!text) {
+                updateStatus('apiStatus', 'テキストを入力してください', 'error');
+                return;
+            }
+
+            updateStatus('apiStatus', 'ブラウザTTSをテスト中...', 'info');
+            log('Testing browser TTS...');
+
+            try {
+                if (!('speechSynthesis' in window)) {
+                    throw new Error('ブラウザはSpeech Synthesis APIをサポートしていません');
+                }
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
+                utterance.volume = 1.0;
+
+                utterance.onstart = () => {
+                    log('Browser TTS started');
+                    updateStatus('apiStatus', 'ブラウザTTS再生中...', 'info');
+                };
+
+                utterance.onend = () => {
+                    log('Browser TTS completed');
+                    updateStatus('apiStatus', 'ブラウザTTS完了', 'success');
+                };
+
+                utterance.onerror = (error) => {
+                    log(`Browser TTS error: ${error.error}`);
+                    updateStatus('apiStatus', `ブラウザTTSエラー: ${error.error}`, 'error');
+                };
+
+                speechSynthesis.speak(utterance);
+
+            } catch (error) {
+                updateStatus('apiStatus', `ブラウザTTSエラー: ${error.message}`, 'error');
+                log(`Browser TTS Error: ${error}`);
+            }
+        }
+
+        async function testFrontendTTS() {
+            const text = document.getElementById('testText').value.trim();
+            if (!text) {
+                updateStatus('frontendStatus', 'テキストを入力してください', 'error');
+                return;
+            }
+
+            updateStatus('frontendStatus', 'フロントエンドTTSをテスト中...', 'info');
+            log('Testing frontend TTS integration...');
+
+            try {
+                // フロントエンドのAPIを直接呼び出し
+                const response = await fetch(`${API_BASE}/api/tts`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        voice_name: 'en-US-Neural2-D',
+                        language_code: 'en-US',
+                        speaking_rate: 1.0
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.audio_data) {
+                    // Base64をBlobに変換
+                    const binaryString = atob(data.audio_data);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    
+                    const audioBlob = new Blob([bytes], { type: data.content_type || 'audio/mpeg' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    currentAudio = new Audio(audioUrl);
+                    
+                    currentAudio.onended = () => {
+                        URL.revokeObjectURL(audioUrl);
+                        updateStatus('frontendStatus', 'フロントエンドTTS完了', 'success');
+                        log('Frontend TTS completed');
+                    };
+                    
+                    currentAudio.onerror = (error) => {
+                        updateStatus('frontendStatus', 'フロントエンドTTS再生エラー', 'error');
+                        log(`Frontend TTS playback error: ${error}`);
+                    };
+                    
+                    await currentAudio.play();
+                    updateStatus('frontendStatus', 'フロントエンドTTS再生中...', 'info');
+                    log('Frontend TTS audio playing');
+                } else {
+                    updateStatus('frontendStatus', 'フロントエンドTTS - 音声データなし', 'error');
+                    log('No audio data received from frontend API');
+                }
+
+            } catch (error) {
+                updateStatus('frontendStatus', `フロントエンドTTSエラー: ${error.message}`, 'error');
+                log(`Frontend TTS Error: ${error}`);
+            }
+        }
+
+        async function checkSystemStatus() {
+            updateStatus('systemStatus', 'システム状態を確認中...', 'info');
+            log('Checking system status...');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/status`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const status = await response.json();
+                log(`System Status: ${JSON.stringify(status, null, 2)}`);
+
+                const statusMessages = [];
+                if (status.gemini_configured) statusMessages.push('✅ Gemini設定済み');
+                if (status.google_credentials_configured) statusMessages.push('✅ Google認証設定済み');
+                if (status.tts_configured) statusMessages.push('✅ TTS設定済み');
+
+                updateStatus('systemStatus', statusMessages.join(', '), 'success');
+
+            } catch (error) {
+                updateStatus('systemStatus', `システム状態エラー: ${error.message}`, 'error');
+                log(`System Status Error: ${error}`);
+            }
+        }
+
+        function stopAllAudio() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+            
+            if ('speechSynthesis' in window) {
+                speechSynthesis.cancel();
+            }
+            
+            log('All audio stopped');
+            updateStatus('frontendStatus', '音声停止', 'info');
+            updateStatus('apiStatus', '音声停止', 'info');
+        }
+
+        // ページ読み込み時にシステム状態を確認
+        window.onload = () => {
+            log('TTS Test Page loaded');
+            checkSystemStatus();
+        };
+    </script>
+</body>
+</html>

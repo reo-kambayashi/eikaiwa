@@ -43,6 +43,10 @@ npm test -- --coverage --watchAll=false  # Run tests with coverage (CI mode)
 make test-backend            # Run backend tests only
 make test-frontend           # Run frontend tests only
 make format-check            # Check if Python code needs formatting
+make manual-backend          # Start backend manually (without Docker)
+make manual-frontend         # Start frontend manually (without Docker)
+make check-ports             # Check if required ports are available
+make kill-ports              # Kill processes on required ports
 ```
 
 ## Architecture Overview
@@ -230,6 +234,8 @@ The app includes a comprehensive translation practice system with:
 ### Testing and Quality Assurance
 - Use `make format` or `uv run black --line-length 79 *.py` before committing Python code
 - Run `make test` to ensure all tests pass before committing changes
+- **Always run tests for any code changes made** - test relevant functionality after each modification
+- **Continuously improve tests** - enhance test coverage and quality when working on code changes
 - Test voice features across different browsers and devices
 - Verify both Chat and Translation modes function correctly after changes
 - Check service availability fallbacks work properly

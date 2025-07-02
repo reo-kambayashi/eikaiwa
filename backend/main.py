@@ -11,6 +11,7 @@ Key features:
 - Voice input and output customization
 """
 
+import base64
 import os
 
 import google.generativeai as genai
@@ -227,7 +228,10 @@ async def text_to_speech(request: TTSRequest):
                 for part in candidate.content.parts:
                     if hasattr(part, "inline_data") and part.inline_data:
                         # Found audio data
-                        audio_base64 = part.inline_data.data
+                        audio_bytes = part.inline_data.data
+                        audio_base64 = base64.b64encode(audio_bytes).decode(
+                            "utf-8"
+                        )
                         mime_type = part.inline_data.mime_type or "audio/wav"
                         return {
                             "audio_data": audio_base64,

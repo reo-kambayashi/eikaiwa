@@ -55,13 +55,11 @@ const InstantTranslation = ({
     category,
     eikenLevel,
     longTextMode,
-    showSettings,
     handleDifficultyChange,
     handleCategoryChange,
     handleEikenLevelChange,
     handleLongTextModeChange,
-    applySettings,
-    toggleSettings
+    applySettings
   } = useInstantTranslationSettings(fetchNewProblem);
 
   const {
