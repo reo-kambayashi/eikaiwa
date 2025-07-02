@@ -11,15 +11,13 @@ Key features:
 - Voice input and output customization
 """
 
-import base64
-import io
 import os
 
 import google.generativeai as genai
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response as FastAPIResponse
+from fastapi.responses import Response
 from pydantic import BaseModel
 
 # Load environment variables from the `.env` file located at the project root.
@@ -181,7 +179,10 @@ async def api_status():
     """
     return {
         "gemini_configured": bool(GEMINI_API_KEY and model),
-        "google_credentials_configured": bool(GOOGLE_APPLICATION_CREDENTIALS and os.path.exists(GOOGLE_APPLICATION_CREDENTIALS)),
+        "google_credentials_configured": bool(
+            GOOGLE_APPLICATION_CREDENTIALS
+            and os.path.exists(GOOGLE_APPLICATION_CREDENTIALS)
+        ),
         "gemini_tts_configured": bool(GEMINI_API_KEY and tts_model),
         "tts_configured": bool(tts_model),
     }
@@ -198,10 +199,8 @@ async def text_to_speech(request: TTSRequest):
 
     try:
         # Gemini TTS requires specific content format with modalities
-        content = {
-            "parts": [{"text": request.text}]
-        }
-        
+        content = {"parts": [{"text": request.text}]}
+
         # Generate config with modalities for audio output
         generation_config = {
             "response_modalities": ["AUDIO"],
@@ -211,36 +210,37 @@ async def text_to_speech(request: TTSRequest):
                         "voice_name": "kore"  # Female English voice from available list
                     }
                 }
-            }
+            },
         }
-        
+
         # Generate audio using Gemini TTS model
         response = tts_model.generate_content(
-            content,
-            generation_config=generation_config
+            content, generation_config=generation_config
         )
 
         # Check if response contains audio data
-        if hasattr(response, 'candidates') and response.candidates:
+        if hasattr(response, "candidates") and response.candidates:
             candidate = response.candidates[0]
-            if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+            if hasattr(candidate, "content") and hasattr(
+                candidate.content, "parts"
+            ):
                 for part in candidate.content.parts:
-                    if hasattr(part, 'inline_data') and part.inline_data:
+                    if hasattr(part, "inline_data") and part.inline_data:
                         # Found audio data
                         audio_base64 = part.inline_data.data
                         mime_type = part.inline_data.mime_type or "audio/wav"
                         return {
-                            "audio_data": audio_base64, 
-                            "content_type": mime_type
+                            "audio_data": audio_base64,
+                            "content_type": mime_type,
                         }
-        
+
         # If no audio data found, fallback to browser TTS
         print("No audio data found in Gemini TTS response")
         return {
-            "audio_data": "", 
+            "audio_data": "",
             "content_type": "text/plain",
             "fallback_text": request.text,
-            "use_browser_tts": True
+            "use_browser_tts": True,
         }
 
     except HTTPException:
@@ -250,11 +250,11 @@ async def text_to_speech(request: TTSRequest):
         print(f"Gemini TTS Error: {str(e)}")
         # Fallback to browser TTS
         return {
-            "audio_data": "", 
+            "audio_data": "",
             "content_type": "text/plain",
             "fallback_text": request.text,
             "use_browser_tts": True,
-            "error": str(e)
+            "error": str(e),
         }
 
 

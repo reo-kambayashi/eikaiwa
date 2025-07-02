@@ -12,7 +12,7 @@ AI英会話練習アプリ用プロンプトテンプレート集
   prompt = templates.get_conversation_prompt(user_text="Hello", history=chat_history)
 """
 
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional
 from dataclasses import dataclass
 from enum import Enum
 
@@ -143,12 +143,12 @@ class PromptTemplates:
         """英検レベルを適切な日本語表記に変換（英語表記も含む）"""
         level_mapping = {
             EikenLevel.GRADE_5: "5級 (5)",
-            EikenLevel.GRADE_4: "4級 (4)", 
+            EikenLevel.GRADE_4: "4級 (4)",
             EikenLevel.GRADE_3: "3級 (3)",
             EikenLevel.GRADE_PRE_2: "準2級 (pre-2)",
             EikenLevel.GRADE_2: "2級 (2)",
             EikenLevel.GRADE_PRE_1: "準1級 (pre-1)",
-            EikenLevel.GRADE_1: "1級 (1)"
+            EikenLevel.GRADE_1: "1級 (1)",
         }
         return level_mapping.get(eiken_level, "3級")
 
@@ -562,7 +562,7 @@ def create_conversation_prompt(
     return prompt_templates.get_conversation_prompt(user_text, history)
 
 
-def create_welcome_prompt(user_name: str = None) -> str:
+def create_welcome_prompt() -> str:
     """後方互換性のための関数"""
     return prompt_templates.get_welcome_prompt()
 
@@ -572,7 +572,9 @@ def get_welcome_prompt() -> str:
     return prompt_templates.get_welcome_prompt()
 
 
-def get_ai_problem_generation_prompt(category: str, difficulty: str, eiken_level: str = None) -> str:
+def get_ai_problem_generation_prompt(
+    category: str, difficulty: str, eiken_level: str = None
+) -> str:
     """AI問題生成プロンプト（後方互換性）"""
     if eiken_level:
         return create_eiken_problem_generation_prompt(eiken_level, category)
@@ -588,26 +590,28 @@ def create_problem_generation_prompt(difficulty: str, category: str) -> str:
     # Handle category mapping (daily_life -> daily, etc.)
     category_mapping = {
         "daily_life": "DAILY",
-        "daily": "DAILY", 
+        "daily": "DAILY",
         "business": "BUSINESS",
         "work": "BUSINESS",
         "travel": "TRAVEL",
         "food": "FOOD",
-        "hobby": "HOBBY"
+        "hobby": "HOBBY",
     }
     category_key = category_mapping.get(category.lower(), "DAILY")
     cat_type = getattr(CategoryType, category_key, CategoryType.DAILY)
-    
+
     # Get the base prompt and add original category for backward compatibility
-    prompt = prompt_templates.get_problem_generation_prompt(diff_level, cat_type)
-    
+    prompt = prompt_templates.get_problem_generation_prompt(
+        diff_level, cat_type
+    )
+
     # Include original category term for tests
     if category != cat_type.value:
         prompt = prompt.replace(
             f"【カテゴリ】: {cat_type.value}",
-            f"【カテゴリ】: {cat_type.value} ({category})"
+            f"【カテゴリ】: {cat_type.value} ({category})",
         )
-    
+
     return prompt
 
 
@@ -627,41 +631,43 @@ def create_eiken_problem_generation_prompt(
     # Handle eiken level mapping (pre-2 -> GRADE_PRE_2, etc.)
     eiken_mapping = {
         "5": "GRADE_5",
-        "4": "GRADE_4", 
+        "4": "GRADE_4",
         "3": "GRADE_3",
         "pre-2": "GRADE_PRE_2",
         "2": "GRADE_2",
         "pre-1": "GRADE_PRE_1",
-        "1": "GRADE_1"
+        "1": "GRADE_1",
     }
     eiken_key = eiken_mapping.get(eiken_level.lower(), "GRADE_3")
     eiken_enum = getattr(EikenLevel, eiken_key, EikenLevel.GRADE_3)
-    
+
     cat_enum = None
     if category:
         # Use same category mapping as regular problem generation
         category_mapping = {
             "daily_life": "DAILY",
-            "daily": "DAILY", 
+            "daily": "DAILY",
             "business": "BUSINESS",
             "work": "BUSINESS",
             "travel": "TRAVEL",
             "food": "FOOD",
-            "hobby": "HOBBY"
+            "hobby": "HOBBY",
         }
         category_key = category_mapping.get(category.lower(), "DAILY")
         cat_enum = getattr(CategoryType, category_key, CategoryType.DAILY)
-    
+
     # Get the base prompt
-    prompt = prompt_templates.get_eiken_problem_generation_prompt(eiken_enum, cat_enum)
-    
+    prompt = prompt_templates.get_eiken_problem_generation_prompt(
+        eiken_enum, cat_enum
+    )
+
     # Include original category term for tests if it was mapped
     if category and cat_enum and category != cat_enum.value:
         prompt = prompt.replace(
             f"【カテゴリ】: {cat_enum.value}",
-            f"【カテゴリ】: {cat_enum.value} ({category})"
+            f"【カテゴリ】: {cat_enum.value} ({category})",
         )
-    
+
     return prompt
 
 

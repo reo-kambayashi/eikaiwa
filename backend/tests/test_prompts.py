@@ -34,7 +34,6 @@ class TestConversationPrompts:
         """Test basic conversation prompt generation."""
         user_input = "Hello, how are you?"
         conversation_history = []
-        grammar_check = True
         
         prompt = create_conversation_prompt(user_input, conversation_history)
         
@@ -51,7 +50,6 @@ class TestConversationPrompts:
             {"role": "user", "content": "Hello"},
             {"role": "assistant", "content": "Hi there! How can I help you today?"}
         ]
-        grammar_check = True
         
         prompt = create_conversation_prompt(user_input, conversation_history)
         
@@ -64,7 +62,6 @@ class TestConversationPrompts:
         """Test conversation prompt without grammar checking."""
         user_input = "I want to practice conversation"
         conversation_history = []
-        grammar_check = False
         
         prompt = create_conversation_prompt(user_input, conversation_history)
         
@@ -79,7 +76,6 @@ class TestConversationPrompts:
             {"role": "user", "content": f"Message {i}"}
             for i in range(20)  # Create long history
         ]
-        grammar_check = True
         
         prompt = create_conversation_prompt(user_input, conversation_history)
         
@@ -147,7 +143,6 @@ class TestAIProblemGenerationPrompts:
         """Test basic problem generation prompt."""
         category = "daily_life"
         difficulty = "easy"
-        eiken_level = None
         
         prompt = create_problem_generation_prompt(difficulty, category)
         
@@ -159,7 +154,6 @@ class TestAIProblemGenerationPrompts:
     def test_problem_generation_with_eiken_level(self):
         """Test problem generation with Eiken level specification."""
         category = "work"
-        eiken_level = "pre-2"
         
         prompt = create_eiken_problem_generation_prompt(eiken_level, category)
         
@@ -237,7 +231,6 @@ class TestPromptValidation:
         """Test prompts with special characters and Unicode."""
         user_input = "Hello 👋 こんにちは 🌟"
         conversation_history = []
-        grammar_check = True
         
         prompt = create_conversation_prompt(user_input, conversation_history)
         
@@ -248,7 +241,6 @@ class TestPromptValidation:
         """Test prompts with very long input."""
         user_input = "This is a very long message. " * 100
         conversation_history = []
-        grammar_check = True
         
         prompt = create_conversation_prompt(user_input, conversation_history)
         
@@ -259,7 +251,6 @@ class TestPromptValidation:
         """Test prompts with empty input."""
         user_input = ""
         conversation_history = []
-        grammar_check = True
         
         prompt = create_conversation_prompt(user_input, conversation_history)
         
@@ -285,7 +276,6 @@ class TestPromptReturnFormats:
         """Test that conversation prompts include format instructions."""
         user_input = "How do I improve my English?"
         conversation_history = []
-        grammar_check = True
         
         prompt = create_conversation_prompt(user_input, conversation_history)
         
@@ -308,7 +298,6 @@ class TestPromptReturnFormats:
         """Test that problem generation prompts specify format."""
         category = "daily_life"
         difficulty = "easy"
-        eiken_level = None
         
         prompt = create_problem_generation_prompt(difficulty, category)
         
