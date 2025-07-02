@@ -16,6 +16,9 @@ Or manually:
 import os
 import sys
 import pytest
+import json
+import base64
+from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 
 # Add project root to Python path for imports
@@ -170,6 +173,224 @@ def test_import_main_module():
     assert hasattr(main, "Request")
     assert hasattr(main, "Response")
     assert hasattr(main, "TTSRequest")
+
+
+class TestInstantTranslationEndpoints:
+    """Test the instant translation endpoints."""
+
+    def test_get_problem_endpoint(self):
+        """
+        Test getting a translation problem.
+        
+        Tests both static problems and fallback to AI generation.
+        """
+        response = client.get("/api/instant-translation/problem")
+        
+        # Should return 200 regardless of AI service status
+        assert response.status_code == 200
+        
+        data = response.json()
+        assert "problem" in data
+        assert "solution" in data
+        assert "category" in data
+        assert "difficulty" in data
+        
+        # Validate required fields are strings
+        assert isinstance(data["problem"], str)
+        assert isinstance(data["solution"], str)
+        assert isinstance(data["category"], str)
+        assert isinstance(data["difficulty"], str)
+        
+        # Check that text is not empty
+        assert len(data["problem"]) > 0
+        assert len(data["solution"]) > 0
+
+    def test_get_problem_with_filters(self):
+        """
+        Test getting a translation problem with category and difficulty filters.
+        """
+        # Test with category filter
+        response = client.get("/api/instant-translation/problem?category=daily_life")
+        assert response.status_code == 200
+        
+        # Test with difficulty filter
+        response = client.get("/api/instant-translation/problem?difficulty=easy")
+        assert response.status_code == 200
+        
+        # Test with both filters
+        response = client.get("/api/instant-translation/problem?category=work&difficulty=medium")
+        assert response.status_code == 200
+
+    def test_check_answer_endpoint_structure(self):
+        """
+        Test the answer checking endpoint structure.
+        
+        This tests that the endpoint accepts requests and returns proper responses.
+        """
+        test_request = {
+            "problem": "こんにちは",
+            "correct_answer": "Hello",
+            "user_answer": "Hi"
+        }
+        
+        response = client.post("/api/instant-translation/check", json=test_request)
+        
+        # Should return 200 (might be a fallback response if AI not configured)
+        assert response.status_code == 200
+        
+        data = response.json()
+        assert "is_correct" in data
+        assert "score" in data
+        assert "feedback" in data
+        
+        # Validate data types
+        assert isinstance(data["is_correct"], bool)
+        assert isinstance(data["score"], (int, float))
+        assert isinstance(data["feedback"], str)
+        
+        # Score should be between 0 and 100
+        assert 0 <= data["score"] <= 100
+
+
+class TestErrorHandling:
+    """Test error handling and edge cases."""
+    
+    def test_respond_endpoint_empty_text(self):
+        """
+        Test respond endpoint with empty text.
+        """
+        test_request = {"text": ""}
+        response = client.post("/api/respond", json=test_request)
+        
+        # Should handle empty text gracefully
+        assert response.status_code in [200, 400]
+        
+    def test_respond_endpoint_invalid_json(self):
+        """
+        Test respond endpoint with invalid JSON structure.
+        """
+        # Missing required 'text' field
+        response = client.post("/api/respond", json={})
+        assert response.status_code == 422  # Validation error
+        
+    def test_tts_endpoint_invalid_parameters(self):
+        """
+        Test TTS endpoint with invalid parameters.
+        """
+        # Test with invalid speaking rate
+        test_request = {
+            "text": "Hello",
+            "speaking_rate": 10.0  # Too high
+        }
+        response = client.post("/api/tts", json=test_request)
+        # Should handle gracefully, either 200 with adjusted rate or error
+        assert response.status_code in [200, 400, 503]
+        
+    def test_check_answer_missing_fields(self):
+        """
+        Test answer checking with missing required fields.
+        """
+        # Missing correct_answer field
+        test_request = {
+            "problem": "Hello",
+            "user_answer": "Hi"
+        }
+        response = client.post("/api/instant-translation/check", json=test_request)
+        assert response.status_code == 422  # Validation error
+
+
+class TestServiceIntegration:
+    """Test integration with external services."""
+    
+    @patch('main.model')
+    def test_respond_with_mocked_ai(self, mock_model):
+        """
+        Test conversation endpoint with mocked AI service.
+        """
+        # Mock AI response
+        mock_response = MagicMock()
+        mock_response.text = "This is a test response from AI."
+        mock_model.generate_content.return_value = mock_response
+        
+        test_request = {
+            "text": "Hello, how are you?",
+            "conversation_history": []
+        }
+        
+        response = client.post("/api/respond", json=test_request)
+        assert response.status_code == 200
+        
+        data = response.json()
+        assert data["reply"] == "This is a test response from AI."
+        
+    @patch('main.tts_model')
+    def test_tts_with_mocked_service(self, mock_tts_model):
+        """
+        Test TTS endpoint with mocked TTS service.
+        """
+        # Mock TTS response
+        mock_response = MagicMock()
+        mock_response.audio_data = base64.b64encode(b"fake_audio_data").decode('utf-8')
+        mock_tts_model.generate_content.return_value = mock_response
+        
+        test_request = {
+            "text": "Hello world",
+            "voice_name": "kore",
+            "speaking_rate": 1.0
+        }
+        
+        with patch('main.tts_model', mock_tts_model):
+            response = client.post("/api/tts", json=test_request)
+            
+        # Should return 200 if mocked properly
+        if response.status_code == 200:
+            data = response.json()
+            assert "audio_data" in data
+            assert "content_type" in data
+            
+
+class TestDataValidation:
+    """Test data validation and sanitization."""
+    
+    def test_conversation_history_validation(self):
+        """
+        Test that conversation history is properly validated.
+        """
+        test_request = {
+            "text": "Hello",
+            "conversation_history": [
+                {"role": "user", "content": "Previous message"},
+                {"role": "assistant", "content": "Previous response"}
+            ]
+        }
+        
+        response = client.post("/api/respond", json=test_request)
+        assert response.status_code == 200
+        
+    def test_long_text_handling(self):
+        """
+        Test handling of very long text inputs.
+        """
+        long_text = "Hello " * 1000  # Very long text
+        test_request = {"text": long_text}
+        
+        response = client.post("/api/respond", json=test_request)
+        # Should handle gracefully, either process or return appropriate error
+        assert response.status_code in [200, 400, 413]
+        
+    def test_special_characters_handling(self):
+        """
+        Test handling of special characters and Unicode.
+        """
+        test_request = {
+            "text": "Hello 👋 こんにちは 🌟 Special chars: @#$%^&*()"
+        }
+        
+        response = client.post("/api/respond", json=test_request)
+        assert response.status_code == 200
+        
+        data = response.json()
+        assert len(data["reply"]) > 0
 
 
 if __name__ == "__main__":

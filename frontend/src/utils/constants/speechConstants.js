@@ -33,7 +33,7 @@ export const TTS_CONFIG = {
   // 音声設定
   VOICE_LANGUAGE: 'en-US',
   VOICE_GENDER: 'female',
-  VOICE_NAME: "en-US-Neural2-D", // Google Cloud TTS使用時の音声名
+  VOICE_NAME: "kore", // Gemini TTS使用時の音声名（女性音声）
   
   // 読み上げ速度の設定
   SPEAKING_RATE: {

@@ -20,7 +20,6 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response as FastAPIResponse
-from google.cloud import texttospeech
 from pydantic import BaseModel
 
 # Load environment variables from the `.env` file located at the project root.
@@ -40,22 +39,11 @@ GOOGLE_APPLICATION_CREDENTIALS = os.getenv(
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
     model = genai.GenerativeModel("gemini-2.5-flash")
+    # Initialize Gemini TTS model
+    tts_model = genai.GenerativeModel("gemini-2.5-flash-preview-tts")
 else:
     model = None
-
-# Configure Google Cloud Text-to-Speech client
-# This handles the conversion of AI responses to natural-sounding speech
-tts_client = None
-try:
-    # Only initialize TTS if credentials file exists and is accessible
-    if GOOGLE_APPLICATION_CREDENTIALS and os.path.exists(
-        GOOGLE_APPLICATION_CREDENTIALS
-    ):
-        tts_client = texttospeech.TextToSpeechClient()
-except Exception as e:
-    # Print warning but don't crash - TTS is optional
-    print(f"Warning: Could not initialize TTS client: {e}")
-    tts_client = None
+    tts_model = None
 
 # Create FastAPI application instance
 app = FastAPI()
@@ -102,11 +90,11 @@ class TTSRequest(BaseModel):
     Request model for text-to-speech synthesis.
 
     Defines parameters for converting text to natural-sounding speech
-    using Google Cloud TTS service.
+    using Gemini TTS service.
     """
 
     text: str  # Text to convert to speech
-    voice_name: str = "en-US-Neural2-D"  # Default: female English voice
+    voice_name: str = "kore"  # Default: female English voice for Gemini TTS
     language_code: str = "en-US"  # Language and region code
     speaking_rate: float = 1.0  # Speech speed (0.25-4.0, 1.0 = normal)
 
@@ -193,54 +181,81 @@ async def api_status():
     """
     return {
         "gemini_configured": bool(GEMINI_API_KEY and model),
-        "google_credentials_configured": bool(GOOGLE_APPLICATION_CREDENTIALS),
-        "tts_configured": bool(tts_client),
+        "google_credentials_configured": bool(GOOGLE_APPLICATION_CREDENTIALS and os.path.exists(GOOGLE_APPLICATION_CREDENTIALS)),
+        "gemini_tts_configured": bool(GEMINI_API_KEY and tts_model),
+        "tts_configured": bool(tts_model),
     }
 
 
 @app.post("/api/tts")
 async def text_to_speech(request: TTSRequest):
-    """Convert text to speech using Google Cloud TTS."""
+    """Convert text to speech using Gemini TTS."""
 
-    if not tts_client:
+    if not tts_model:
         raise HTTPException(
             status_code=503, detail="TTS service not available"
         )
 
     try:
-
-        # Create synthesis input
-        synthesis_input = texttospeech.SynthesisInput(text=request.text)
-
-        # Build voice selection parameters
-        voice = texttospeech.VoiceSelectionParams(
-            language_code=request.language_code, name=request.voice_name
+        # Gemini TTS requires specific content format with modalities
+        content = {
+            "parts": [{"text": request.text}]
+        }
+        
+        # Generate config with modalities for audio output
+        generation_config = {
+            "response_modalities": ["AUDIO"],
+            "speech_config": {
+                "voice_config": {
+                    "prebuilt_voice_config": {
+                        "voice_name": "kore"  # Female English voice from available list
+                    }
+                }
+            }
+        }
+        
+        # Generate audio using Gemini TTS model
+        response = tts_model.generate_content(
+            content,
+            generation_config=generation_config
         )
 
-        # Select audio file type
-        audio_config = texttospeech.AudioConfig(
-            audio_encoding=texttospeech.AudioEncoding.MP3,
-            speaking_rate=request.speaking_rate,
-        )
-
-        # Perform text-to-speech request
-        response = tts_client.synthesize_speech(
-            input=synthesis_input, voice=voice, audio_config=audio_config
-        )
-
-        # Encode audio content to base64
-        audio_base64 = base64.b64encode(response.audio_content).decode("utf-8")
-
-        return {"audio_data": audio_base64, "content_type": "audio/mpeg"}
+        # Check if response contains audio data
+        if hasattr(response, 'candidates') and response.candidates:
+            candidate = response.candidates[0]
+            if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                for part in candidate.content.parts:
+                    if hasattr(part, 'inline_data') and part.inline_data:
+                        # Found audio data
+                        audio_base64 = part.inline_data.data
+                        mime_type = part.inline_data.mime_type or "audio/wav"
+                        return {
+                            "audio_data": audio_base64, 
+                            "content_type": mime_type
+                        }
+        
+        # If no audio data found, fallback to browser TTS
+        print("No audio data found in Gemini TTS response")
+        return {
+            "audio_data": "", 
+            "content_type": "text/plain",
+            "fallback_text": request.text,
+            "use_browser_tts": True
+        }
 
     except HTTPException:
         # Propagate HTTP errors such as 503 without modification
         raise
     except Exception as e:
-        print(f"TTS Error: {str(e)}")
-        raise HTTPException(
-            status_code=500, detail=f"TTS generation failed: {str(e)}"
-        )
+        print(f"Gemini TTS Error: {str(e)}")
+        # Fallback to browser TTS
+        return {
+            "audio_data": "", 
+            "content_type": "text/plain",
+            "fallback_text": request.text,
+            "use_browser_tts": True,
+            "error": str(e)
+        }
 
 
 @app.get("/api/welcome", response_model=Response)

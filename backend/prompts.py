@@ -26,8 +26,10 @@ class DifficultyLevel(Enum):
 
 
 class EikenLevel(Enum):
-    """英検レベル定義（3級〜1級）"""
+    """英検レベル定義（5級〜1級）"""
 
+    GRADE_5 = "grade_5"
+    GRADE_4 = "grade_4"
     GRADE_3 = "grade_3"
     GRADE_PRE_2 = "grade_pre_2"
     GRADE_2 = "grade_2"
@@ -71,6 +73,22 @@ class PromptTemplates:
         }
 
         self.eiken_descriptions = {
+            EikenLevel.GRADE_5: {
+                "level": "英検5級レベル",
+                "description": "中学初級程度の英語力",
+                "grammar": "現在形、be動詞、基本的な疑問文・否定文、簡単な命令文",
+                "vocabulary": "身近な話題の基本語彙（約600語）",
+                "topics": "家族、友達、学校、好きなもの、身の回りの簡単な事柄",
+                "writing_style": "1文の短く簡単な表現、基本的な語順",
+            },
+            EikenLevel.GRADE_4: {
+                "level": "英検4級レベル",
+                "description": "中学中級程度の英語力",
+                "grammar": "過去形、進行形、未来形、助動詞can、there is/are構文",
+                "vocabulary": "日常会話の基本語彙（約900語）",
+                "topics": "家族、学校生活、友人、趣味、スポーツ、季節の行事",
+                "writing_style": "1〜2文の簡単な表現、時制を意識した表現",
+            },
             EikenLevel.GRADE_3: {
                 "level": "英検3級レベル",
                 "description": "中学校卒業程度の英語力",
@@ -120,6 +138,19 @@ class PromptTemplates:
             CategoryType.FOOD: "食事や料理に関する表現",
             CategoryType.HOBBY: "趣味や娯楽に関する表現",
         }
+
+    def _format_eiken_level(self, eiken_level: EikenLevel) -> str:
+        """英検レベルを適切な日本語表記に変換（英語表記も含む）"""
+        level_mapping = {
+            EikenLevel.GRADE_5: "5級 (5)",
+            EikenLevel.GRADE_4: "4級 (4)", 
+            EikenLevel.GRADE_3: "3級 (3)",
+            EikenLevel.GRADE_PRE_2: "準2級 (pre-2)",
+            EikenLevel.GRADE_2: "2級 (2)",
+            EikenLevel.GRADE_PRE_1: "準1級 (pre-1)",
+            EikenLevel.GRADE_1: "1級 (1)"
+        }
+        return level_mapping.get(eiken_level, "3級")
 
     def get_conversation_prompt(
         self, user_text: str, chat_history: Optional[List[ChatMessage]] = None
@@ -237,12 +268,17 @@ Please respond with a welcoming message to get the conversation started."""
 - 実用性の低い表現
 
 【出力形式】:
-日本語: [日本語の文章]
-英語: [対応する英語の文章]
+以下のJSON形式で翻訳(translation)問題とその解答を作成してください：
+{{
+  "problem": "日本語の文章（翻訳問題）",
+  "solution": "対応する英語の文章（解答）"
+}}
 
 例：
-日本語: 今日は忙しい一日でした。
-英語: Today was a busy day.
+{{
+  "problem": "今日は忙しい一日でした。",
+  "solution": "Today was a busy day."
+}}
 
 新しい問題を作成してください。"""
 
@@ -281,7 +317,7 @@ Please respond with a welcoming message to get the conversation started."""
 【作文スタイル】: {eiken_info['writing_style']}{category_text}
 
 【作成条件】:
-- 英検{eiken_level.value.replace('grade_', '').replace('_', '級・')}級レベルに適した問題
+- 英検{self._format_eiken_level(eiken_level)}に適した問題
 - 日本人が実際に使いそうな自然な日本語文
 - 英検試験で出題されそうな実用的な表現
 - 指定された文法項目を含む自然な英語訳
@@ -297,20 +333,25 @@ Please respond with a welcoming message to get the conversation started."""
 - 実用性の低い表現
 
 【特別な指示】:
-- 英検{eiken_level.value.replace('grade_', '').replace('_', '級・')}級の語彙・文法レベルを厳密に守る
+- 英検{self._format_eiken_level(eiken_level)}の語彙・文法レベルを厳密に守る
 - 英検試験の実際の出題形式を意識する
 - 学習者がレベルアップを実感できる適切な難易度設定
 - 英検合格に直結する実用的な表現を優先
 
 【出力形式】:
-日本語: [日本語の文章]
-英語: [対応する英語の文章]
+以下のJSON形式で翻訳(translation)問題とその解答を作成してください：
+{{
+  "problem": "日本語の文章（翻訳問題）",
+  "solution": "対応する英語の文章（解答）"
+}}
 
 例（英検3級レベルの場合）：
-日本語: 私は毎日英語を勉強しています。
-英語: I study English every day.
+{{
+  "problem": "私は毎日英語を勉強しています。",
+  "solution": "I study English every day."
+}}
 
-新しい英検{eiken_level.value.replace('grade_', '').replace('_', '級・')}級レベルの問題を作成してください。"""
+新しい英検{self._format_eiken_level(eiken_level)}レベルの問題を作成してください。"""
 
         return prompt.strip()
 
@@ -328,7 +369,7 @@ Please respond with a welcoming message to get the conversation started."""
         Returns:
             評価・フィードバック生成用プロンプト
         """
-        prompt = f"""あなたは経験豊富な英語教師です。日本人学習者の瞬間英作文の回答を評価してください。
+        prompt = f"""あなたは経験豊富な英語教師です。日本人学習者の瞬間英作文・翻訳(translation)問題の回答を評価してください。
 
 【問題】
 日本語: "{japanese}"
@@ -348,12 +389,17 @@ Please respond with a welcoming message to get the conversation started."""
 - Not quite right: 改善が必要な回答
 
 【返答形式】
-以下の形式で評価してください：
-- 「Excellent!」「Good!」「Not quite right」のいずれかで始める
+以下のJSON形式で評価してください：
+{{
+  "score": "excellent" | "good" | "not quite right",
+  "feedback": "具体的なフィードバック文（2-3文で簡潔に）"
+}}
+
+評価のガイドライン：
+- 「Excellent!」「Good!」「Not quite right」のいずれかで評価
 - 具体的な改善点やアドバイスを含める（必要に応じて）
 - 代替表現の提案（適切な場合）
 - 励ましの言葉を含める
-- 2-3文で簡潔にまとめる
 - 学習者の努力を認める
 
 【教育方針】
@@ -516,9 +562,22 @@ def create_conversation_prompt(
     return prompt_templates.get_conversation_prompt(user_text, history)
 
 
-def create_welcome_prompt() -> str:
+def create_welcome_prompt(user_name: str = None) -> str:
     """後方互換性のための関数"""
     return prompt_templates.get_welcome_prompt()
+
+
+def get_welcome_prompt() -> str:
+    """後方互換性のための関数 - get_welcome_prompt"""
+    return prompt_templates.get_welcome_prompt()
+
+
+def get_ai_problem_generation_prompt(category: str, difficulty: str, eiken_level: str = None) -> str:
+    """AI問題生成プロンプト（後方互換性）"""
+    if eiken_level:
+        return create_eiken_problem_generation_prompt(eiken_level, category)
+    else:
+        return create_problem_generation_prompt(difficulty, category)
 
 
 def create_problem_generation_prompt(difficulty: str, category: str) -> str:
@@ -526,8 +585,30 @@ def create_problem_generation_prompt(difficulty: str, category: str) -> str:
     diff_level = getattr(
         DifficultyLevel, difficulty.upper(), DifficultyLevel.MEDIUM
     )
-    cat_type = getattr(CategoryType, category.upper(), CategoryType.DAILY)
-    return prompt_templates.get_problem_generation_prompt(diff_level, cat_type)
+    # Handle category mapping (daily_life -> daily, etc.)
+    category_mapping = {
+        "daily_life": "DAILY",
+        "daily": "DAILY", 
+        "business": "BUSINESS",
+        "work": "BUSINESS",
+        "travel": "TRAVEL",
+        "food": "FOOD",
+        "hobby": "HOBBY"
+    }
+    category_key = category_mapping.get(category.lower(), "DAILY")
+    cat_type = getattr(CategoryType, category_key, CategoryType.DAILY)
+    
+    # Get the base prompt and add original category for backward compatibility
+    prompt = prompt_templates.get_problem_generation_prompt(diff_level, cat_type)
+    
+    # Include original category term for tests
+    if category != cat_type.value:
+        prompt = prompt.replace(
+            f"【カテゴリ】: {cat_type.value}",
+            f"【カテゴリ】: {cat_type.value} ({category})"
+        )
+    
+    return prompt
 
 
 def create_translation_check_prompt(
@@ -543,16 +624,45 @@ def create_eiken_problem_generation_prompt(
     eiken_level: str, category: str = None
 ) -> str:
     """英検レベル対応問題生成プロンプト（後方互換性）"""
-    # 文字列からEnumに変換
-    eiken_enum = getattr(
-        EikenLevel, f"GRADE_{eiken_level.upper()}", EikenLevel.GRADE_3
-    )
+    # Handle eiken level mapping (pre-2 -> GRADE_PRE_2, etc.)
+    eiken_mapping = {
+        "5": "GRADE_5",
+        "4": "GRADE_4", 
+        "3": "GRADE_3",
+        "pre-2": "GRADE_PRE_2",
+        "2": "GRADE_2",
+        "pre-1": "GRADE_PRE_1",
+        "1": "GRADE_1"
+    }
+    eiken_key = eiken_mapping.get(eiken_level.lower(), "GRADE_3")
+    eiken_enum = getattr(EikenLevel, eiken_key, EikenLevel.GRADE_3)
+    
     cat_enum = None
     if category:
-        cat_enum = getattr(CategoryType, category.upper(), CategoryType.DAILY)
-    return prompt_templates.get_eiken_problem_generation_prompt(
-        eiken_enum, cat_enum
-    )
+        # Use same category mapping as regular problem generation
+        category_mapping = {
+            "daily_life": "DAILY",
+            "daily": "DAILY", 
+            "business": "BUSINESS",
+            "work": "BUSINESS",
+            "travel": "TRAVEL",
+            "food": "FOOD",
+            "hobby": "HOBBY"
+        }
+        category_key = category_mapping.get(category.lower(), "DAILY")
+        cat_enum = getattr(CategoryType, category_key, CategoryType.DAILY)
+    
+    # Get the base prompt
+    prompt = prompt_templates.get_eiken_problem_generation_prompt(eiken_enum, cat_enum)
+    
+    # Include original category term for tests if it was mapped
+    if category and cat_enum and category != cat_enum.value:
+        prompt = prompt.replace(
+            f"【カテゴリ】: {cat_enum.value}",
+            f"【カテゴリ】: {cat_enum.value} ({category})"
+        )
+    
+    return prompt
 
 
 # 使用例とテスト用のサンプルコード

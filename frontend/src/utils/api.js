@@ -387,8 +387,14 @@ export const textToSpeech = async (text, speakingRate = 1.0) => {
       );
     }
 
-    // バックエンドはJSONレスポンスでbase64エンコードされた音声データを返す
+    // バックエンドはJSONレスポンスを返す（Gemini TTSの場合はフォールバック情報も含む）
     const jsonResponse = await response.json();
+    
+    // Gemini TTSがフォールバックを指示している場合
+    if (jsonResponse.use_browser_tts) {
+      console.log('⚠️ Backend requests browser TTS fallback');
+      throw new AppError('Backend requested browser TTS fallback', ERROR_TYPES.API);
+    }
     
     if (!jsonResponse.audio_data) {
       throw new AppError('No audio data in response', ERROR_TYPES.API);
@@ -407,7 +413,7 @@ export const textToSpeech = async (text, speakingRate = 1.0) => {
       throw new AppError('Received empty audio data', ERROR_TYPES.API);
     }
 
-    console.log('✅ Text-to-speech conversion completed', {
+    console.log('✅ Gemini TTS conversion completed', {
       audioSize: audioBlob.size,
       audioType: audioBlob.type
     });

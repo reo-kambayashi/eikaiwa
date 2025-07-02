@@ -35,6 +35,8 @@ dev = [
     "black>=23.0.0",              # Code formatting
     "pytest>=7.0.0",              # Testing framework
     "pytest-asyncio>=0.21.0",     # Async testing support
+    "httpx>=0.24.0",              # Required for FastAPI TestClient
+    "pytest-cov>=4.0.0",          # Coverage reporting
 ]
 
 # Build system configuration for uv
