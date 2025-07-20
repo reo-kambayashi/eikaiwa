@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-AI英会話練習アプリ用プロンプトテンプレート集
-==============================================
+Prompt Templates for the AI English Conversation Practice App
+==============================================================
 
-このファイルには、英語学習支援アプリで使用される全てのプロンプトテンプレートが
-統合されています。プロンプトの管理と編集を容易にするため、機能別に整理されています。
+This file centralizes all prompt templates used in the English learning application.
+It is structured for easy management and modification of prompts.
 
-使用方法:
+Usage:
   from prompts import PromptTemplates
   templates = PromptTemplates()
   prompt = templates.get_conversation_prompt(user_text="Hello", history=chat_history)
@@ -18,7 +18,7 @@ from enum import Enum
 
 
 class DifficultyLevel(Enum):
-    """難易度レベル定義"""
+    """Defines difficulty levels for problems."""
 
     EASY = "easy"
     MEDIUM = "medium"
@@ -26,7 +26,7 @@ class DifficultyLevel(Enum):
 
 
 class EikenLevel(Enum):
-    """英検レベル定義（5級〜1級）"""
+    """Defines Eiken levels (Grade 5 to 1)."""
 
     GRADE_5 = "grade_5"
     GRADE_4 = "grade_4"
@@ -38,7 +38,7 @@ class EikenLevel(Enum):
 
 
 class CategoryType(Enum):
-    """問題カテゴリ定義"""
+    """Defines problem categories."""
 
     DAILY = "daily"
     BUSINESS = "business"
@@ -49,7 +49,7 @@ class CategoryType(Enum):
 
 @dataclass
 class ChatMessage:
-    """チャットメッセージのデータ構造"""
+    """Data structure for a single chat message."""
 
     role: str  # "user" or "assistant"
     content: str
@@ -58,499 +58,571 @@ class ChatMessage:
 
 class PromptTemplates:
     """
-    プロンプトテンプレート管理クラス
-
-    全てのAIプロンプトを統一的に管理し、動的に生成します。
-    プロンプトの変更や追加は、このクラスを通じて行います。
+    Manages and generates all AI prompt templates for the application.
+    All modifications and additions to prompts should be done through this class.
     """
 
     def __init__(self):
-        """プロンプトテンプレートの初期化"""
+        """Initializes the prompt templates with detailed descriptions."""
         self.difficulty_descriptions = {
-            DifficultyLevel.EASY: "中学レベルの基本的な文法と語彙",
-            DifficultyLevel.MEDIUM: "高校レベルの文法と日常会話語彙",
-            DifficultyLevel.HARD: "大学レベルの複雑な文法と専門語彙",
+            DifficultyLevel.EASY: "Basic junior high school level grammar and vocabulary.",
+            DifficultyLevel.MEDIUM: "High school level grammar and daily conversation vocabulary.",
+            DifficultyLevel.HARD: "University level complex grammar and specialized vocabulary.",
         }
 
         self.eiken_descriptions = {
             EikenLevel.GRADE_5: {
-                "level": "英検5級レベル",
-                "description": "中学初級程度の英語力",
-                "grammar": "現在形、be動詞、基本的な疑問文・否定文、簡単な命令文",
-                "vocabulary": "身近な話題の基本語彙（約600語）",
-                "topics": "家族、友達、学校、好きなもの、身の回りの簡単な事柄",
-                "writing_style": "1文の短く簡単な表現、基本的な語順",
+                "level": "Eiken Grade 5",
+                "description": "Basic English proficiency, equivalent to early junior high school.",
+                "grammar": "Present tense, be-verbs, basic questions/negatives, simple commands.",
+                "vocabulary": "Approx. 600 basic words for familiar topics.",
+                "topics": "Family, friends, school, hobbies, everyday objects.",
+                "writing_style": "Short, simple sentences with basic word order.",
             },
             EikenLevel.GRADE_4: {
-                "level": "英検4級レベル",
-                "description": "中学中級程度の英語力",
-                "grammar": "過去形、進行形、未来形、助動詞can、there is/are構文",
-                "vocabulary": "日常会話の基本語彙（約900語）",
-                "topics": "家族、学校生活、友人、趣味、スポーツ、季節の行事",
-                "writing_style": "1〜2文の簡単な表現、時制を意識した表現",
+                "level": "Eiken Grade 4",
+                "description": "Intermediate English proficiency, equivalent to mid-junior high school.",
+                "grammar": "Past tense, progressive tense, future tense, 'can', 'there is/are'.",
+                "vocabulary": "Approx. 900 words for daily conversation.",
+                "topics": "School life, hobbies, sports, seasonal events.",
+                "writing_style": "Simple sentences (1-2) with awareness of tense.",
             },
             EikenLevel.GRADE_3: {
-                "level": "英検3級レベル",
-                "description": "中学校卒業程度の英語力",
-                "grammar": "現在・過去・未来の基本時制、助動詞can/will/may、基本的な疑問文・否定文",
-                "vocabulary": "身近な話題の基本語彙（約1300語）",
-                "topics": "家族、学校、趣味、日常生活、簡単な社会問題",
-                "writing_style": "1〜2文の短い英作文、基本的な表現の組み合わせ",
+                "level": "Eiken Grade 3",
+                "description": "Proficiency equivalent to junior high school graduation.",
+                "grammar": "Basic tenses (past, present, future), modals ('can', 'will', 'may').",
+                "vocabulary": "Approx. 1,300 words for personal topics.",
+                "topics": "Family, school, hobbies, daily life, simple social issues.",
+                "writing_style": "Short compositions (1-2 sentences) combining basic expressions.",
             },
             EikenLevel.GRADE_PRE_2: {
-                "level": "英検準2級レベル",
-                "description": "高校中級程度の英語力",
-                "grammar": "現在完了形、受動態、不定詞・動名詞、比較級・最上級、関係代名詞の基本",
-                "vocabulary": "日常会話と学習に必要な語彙（約2600語）",
-                "topics": "学校生活、友人関係、将来の夢、環境問題、健康、文化の違い",
-                "writing_style": "2〜3文の複文構造、理由や意見を含む表現",
+                "level": "Eiken Grade Pre-2",
+                "description": "Proficiency equivalent to intermediate high school.",
+                "grammar": "Present perfect, passive voice, infinitives, gerunds, comparatives, basic relative pronouns.",
+                "vocabulary": "Approx. 2,600 words for daily life and academic needs.",
+                "topics": "School life, friendships, future plans, environment, health, cultural differences.",
+                "writing_style": "Compound sentences (2-3) including reasons and opinions.",
             },
             EikenLevel.GRADE_2: {
-                "level": "英検2級レベル",
-                "description": "高校卒業程度の英語力",
-                "grammar": "完了進行形、関係代名詞・関係副詞、仮定法、分詞構文、間接疑問文",
-                "vocabulary": "社会生活に必要な語彙（約3800語）",
-                "topics": "社会問題、環境、科学技術、国際関係、教育、メディア、ボランティア",
-                "writing_style": "3〜4文の論理的な文章、具体例や理由を含む説明",
+                "level": "Eiken Grade 2",
+                "description": "Proficiency equivalent to high school graduation.",
+                "grammar": "Perfect progressive, relative pronouns/adverbs, subjunctive mood, participles.",
+                "vocabulary": "Approx. 3,800 words for social life.",
+                "topics": "Social issues, environment, technology, international relations, education.",
+                "writing_style": "Logical paragraphs (3-4 sentences) with examples and reasons.",
             },
             EikenLevel.GRADE_PRE_1: {
-                "level": "英検準1級レベル",
-                "description": "大学中級程度の英語力",
-                "grammar": "複雑な文法構造、倒置、省略、強調構文、高度な時制の一致",
-                "vocabulary": "幅広い分野の語彙（約7500語）、学術的・専門的表現",
-                "topics": "政治、経済、医療、科学研究、哲学、国際問題、文化論、社会制度",
-                "writing_style": "5〜6文の高度な論理展開、抽象的概念の説明、批判的思考",
+                "level": "Eiken Grade Pre-1",
+                "description": "Proficiency equivalent to intermediate university level.",
+                "grammar": "Complex structures, inversion, ellipsis, advanced tense agreement.",
+                "vocabulary": "Approx. 7,500 words for a wide range of fields.",
+                "topics": "Politics, economy, medicine, science, philosophy, international affairs.",
+                "writing_style": "Advanced logical arguments (5-6 sentences), explaining abstract concepts.",
             },
             EikenLevel.GRADE_1: {
-                "level": "英検1級レベル",
-                "description": "大学上級程度の英語力",
-                "grammar": "ネイティブレベルの複雑な文法、慣用表現、高度な語法",
-                "vocabulary": "専門分野を含む幅広い語彙（約10000語以上）、比喩表現、学術用語",
-                "topics": "高度な社会問題、学術研究、哲学的議論、国際政治、経済理論、科学論文レベル",
-                "writing_style": "複数段落の高度な論述、批判的分析、創造的表現、ネイティブレベルの自然さ",
+                "level": "Eiken Grade 1",
+                "description": "Advanced proficiency, equivalent to upper university level.",
+                "grammar": "Native-level complex grammar, idioms, advanced usage.",
+                "vocabulary": "Over 10,000 words, including specialized and academic terms.",
+                "topics": "Advanced social issues, academic research, philosophical debates, global politics.",
+                "writing_style": "Multi-paragraph essays with critical analysis and creative expression.",
             },
         }
 
         self.category_descriptions = {
-            CategoryType.DAILY: "日常生活でよく使われる表現",
-            CategoryType.BUSINESS: "ビジネスシーンでの実用的な表現",
-            CategoryType.TRAVEL: "旅行先で役立つ会話表現",
-            CategoryType.FOOD: "食事や料理に関する表現",
-            CategoryType.HOBBY: "趣味や娯楽に関する表現",
+            CategoryType.DAILY: "Expressions used in everyday life.",
+            CategoryType.BUSINESS: "Practical expressions for business situations.",
+            CategoryType.TRAVEL: "Helpful conversation for traveling.",
+            CategoryType.FOOD: "Expressions related to food and dining.",
+            CategoryType.HOBBY: "Expressions related to hobbies and leisure.",
         }
 
     def _format_eiken_level(self, eiken_level: EikenLevel) -> str:
-        """英検レベルを適切な日本語表記に変換（英語表記も含む）"""
+        """Formats EikenLevel enum into a user-friendly string."""
         level_mapping = {
-            EikenLevel.GRADE_5: "5級 (5)",
-            EikenLevel.GRADE_4: "4級 (4)",
-            EikenLevel.GRADE_3: "3級 (3)",
-            EikenLevel.GRADE_PRE_2: "準2級 (pre-2)",
-            EikenLevel.GRADE_2: "2級 (2)",
-            EikenLevel.GRADE_PRE_1: "準1級 (pre-1)",
-            EikenLevel.GRADE_1: "1級 (1)",
+            EikenLevel.GRADE_5: "Grade 5",
+            EikenLevel.GRADE_4: "Grade 4",
+            EikenLevel.GRADE_3: "Grade 3",
+            EikenLevel.GRADE_PRE_2: "Grade Pre-2",
+            EikenLevel.GRADE_2: "Grade 2",
+            EikenLevel.GRADE_PRE_1: "Grade Pre-1",
+            EikenLevel.GRADE_1: "Grade 1",
         }
-        return level_mapping.get(eiken_level, "3級")
+        return level_mapping.get(eiken_level, "Grade 3")
 
     def get_conversation_prompt(
         self, user_text: str, chat_history: Optional[List[ChatMessage]] = None
     ) -> str:
         """
-        英会話レッスン用のメインプロンプトを生成
+        Generates the main prompt for an English conversation lesson.
 
         Args:
-            user_text: ユーザーからの入力メッセージ
-            chat_history: 過去の会話履歴（オプション）
+            user_text: The user's input message.
+            chat_history: The recent conversation history (optional).
 
         Returns:
-            完全な会話プロンプト文字列
+            A complete, structured prompt for the AI.
         """
-        # 会話履歴をコンテキストとして構築
         history_context = ""
         if chat_history and len(chat_history) > 0:
-            history_context = "\n\nCONVERSATION HISTORY:\n"
-            for msg in chat_history[-5:]:  # 最新5メッセージのみ使用
+            history_lines = []
+            for msg in chat_history[-5:]:  # Use the last 5 messages
                 role = "Student" if msg.role == "user" else "Teacher"
-                history_context += f"{role}: {msg.content}\n"
-            history_context += "\nPlease reference this conversation history in your response when relevant."
+                history_lines.append(f"{role}: {msg.content}")
+            history_context = "\n".join(history_lines)
 
-        prompt = f"""You are an expert English teacher and conversation partner specializing in helping Japanese learners.
+        prompt = f"""
+<META_INSTRUCTION>
+You will act as 'Echo', an AI English conversation partner. Your goal is to provide a natural, encouraging, and educational conversation experience for a Japanese learner. Analyze the student's message and the conversation history, then formulate a response that follows your persona and teaching style.
+</META_INSTRUCTION>
 
-IMPORTANT GUIDELINES:
-- Always be encouraging and supportive
-- Use natural, conversational English
-- Provide gentle corrections when needed
-- Ask follow-up questions to keep the conversation flowing
-- Use examples and explanations when helpful
-- Reference previous parts of the conversation when relevant
-- Keep responses concise and engaging (1-3 sentences)
-- Focus on practical, everyday English
-- Be patient and understanding of language learning challenges
-- Celebrate progress and efforts, not just perfection
+<PERSONA>
+You are 'Echo', an expert English teacher and conversation partner specializing in helping Japanese learners. You are patient, encouraging, and friendly. Your persona is that of a supportive guide, not a strict instructor.
+</PERSONA>
 
-TEACHING STYLE:
-- Use the sandwich method for corrections (positive → correction → positive)
-- Provide alternative expressions when appropriate
-- Explain cultural context when relevant
-- Encourage natural conversation flow over perfect grammar{history_context}
+<PRIMARY_DIRECTIVE>
+Engage the student in a natural, flowing English conversation. Your response should be both conversational and educational, helping the student practice and learn in a low-pressure environment.
+</PRIMARY_DIRECTIVE>
 
-CURRENT MESSAGE FROM STUDENT:
-"{user_text}"
+<TEACHING_STYLE>
+- **Encouragement First**: Always be supportive. Celebrate effort and progress.
+- **Natural Language**: Use conversational English, not textbook phrases.
+- **Gentle Corrections**: Use the "sandwich method" for corrections (e.g., "That's a great point! A more natural way to say it would be [...]. But your meaning was perfectly clear.").
+- **Flowing Conversation**: Ask follow-up questions to keep the conversation going.
+- **Contextual Reference**: Refer to previous parts of the conversation to show you are listening.
+- **Cultural Notes**: Briefly explain cultural context when it's relevant and helpful.
+</TEACHING_STYLE>
 
-Please respond naturally as a friendly English teacher and conversation partner. Focus on maintaining engagement while providing educational value."""
+<CONSTRAINTS>
+- **Language**: Respond ONLY in English.
+- **Conciseness**: Keep responses concise and engaging (generally 1-3 sentences).
+- **Focus**: Prioritize practical, everyday English.
+- **Clarity**: Avoid overly complex jargon or grammar explanations unless asked.
+- **Do Not Over-Correct**: Focus on errors that impede understanding. Do not correct every minor mistake.
+</CONSTRAINTS>
 
+<CONVERSATION_HISTORY>
+{history_context}
+</CONVERSATION_HISTORY>
+
+<STUDENT_MESSAGE>
+{user_text}
+</STUDENT_MESSAGE>
+
+<RESPONSE_INSTRUCTION>
+Based on all the above, provide your response as 'Echo'.
+</RESPONSE_INSTRUCTION>
+"""
         return prompt.strip()
 
     def get_welcome_prompt(self) -> str:
         """
-        新規ユーザー向けウェルカムメッセージプロンプト
+        Generates a prompt for a welcome message to a new user.
 
         Returns:
-            ウェルカムメッセージ生成用プロンプト
+            A prompt to generate a warm welcome message.
         """
-        prompt = """You are an expert English teacher and conversation partner specializing in helping Japanese learners.
+        prompt = f"""
+<PERSONA>
+You are 'Echo', an expert English teacher and conversation partner for Japanese learners. You are warm, approachable, and motivating.
+</PERSONA>
 
-Please create a warm, encouraging welcome message for a new student starting English conversation practice.
+<TASK>
+Create a warm, encouraging welcome message for a new student. The message should make them feel comfortable and excited to start practicing.
+</TASK>
 
-GUIDELINES:
-- Keep it friendly and encouraging
-- Mention that you're here to help with English conversation
-- Invite them to start practicing by asking a question or sharing something about themselves
-- Use clear, natural English that's appropriate for learners
-- Show enthusiasm for helping them improve
-- Keep it concise (2-3 sentences)
-- Make them feel comfortable about making mistakes
+<GUIDELINES>
+- Keep it friendly and encouraging (2-3 sentences).
+- Introduce yourself as their AI conversation partner, 'Echo'.
+- Invite them to start by asking a simple, open-ended question (e.g., "How was your day?" or "What's something you enjoy doing?").
+- Reassure them that making mistakes is a normal and welcome part of learning.
+- Use clear, natural English suitable for learners.
+</GUIDELINES>
 
-TONE:
-- Warm and approachable
-- Professional but friendly
-- Motivating and supportive
-
-Please respond with a welcoming message to get the conversation started."""
-
+<RESPONSE_INSTRUCTION>
+Generate the welcome message now.
+</RESPONSE_INSTRUCTION>
+"""
         return prompt.strip()
 
     def get_problem_generation_prompt(
         self, difficulty: DifficultyLevel, category: CategoryType
     ) -> str:
         """
-        瞬間英作文問題生成プロンプト
+        Generates a prompt to create an instant translation (Eisakubun) problem.
 
         Args:
-            difficulty: 問題の難易度レベル
-            category: 問題のカテゴリ
+            difficulty: The difficulty level of the problem.
+            category: The category of the problem.
 
         Returns:
-            問題生成用プロンプト文字列
+            A prompt for generating a new problem.
         """
         difficulty_desc = self.difficulty_descriptions[difficulty]
         category_desc = self.category_descriptions[category]
 
-        prompt = f"""あなたは日本人の英語学習者向けの瞬間英作文問題を作成する専門家です。
+        prompt = f"""
+<ROLE>
+You are an expert content creator specializing in Japanese-to-English translation problems ("瞬間英作文") for language learners.
+</ROLE>
 
-以下の条件で新しい問題を1つ作成してください：
+<TASK>
+Generate a single, new translation problem based on the specified criteria. The problem must be practical, culturally appropriate, and well-suited for a Japanese learner.
+</TASK>
 
-【難易度】: {difficulty.value} - {difficulty_desc}
-【カテゴリ】: {category.value} - {category_desc}
+<CRITERIA>
+- **Difficulty**: {difficulty.value} ({difficulty_desc})
+- **Category**: {category.value} ({category_desc})
+</CRITERIA>
 
-【作成条件】:
-- 日本人が実際に使いそうな自然な日本語文
-- 英語学習に適した実用的な表現
-- 文法的に正確で自然な英語訳
-- 学習者のレベルに適した語彙と文法構造
-- 文化的に適切で現代的な内容
-- 暗記ではなく理解を促す問題設計
+<CHAIN_OF_THOUGHT_PROCESS>
+1.  **Analyze Request**: Understand the difficulty and category.
+2.  **Brainstorm**: Think of a common, practical situation a Japanese person might want to express in English that fits the criteria.
+3.  **Formulate Japanese**: Write a natural-sounding Japanese sentence. It should be something a person would actually say.
+4.  **Formulate English**: Create a standard, natural, and grammatically correct English translation. This is the model answer.
+5.  **Review**: Check that the problem meets all quality standards.
+6.  **Format Output**: Present the result in the specified JSON format.
+</CHAIN_OF_THOUGHT_PROCESS>
 
-【避けるべき要素】:
-- 古い表現や不自然な日本語
-- 複雑すぎる文法構造（難易度に応じて調整）
-- 文化的に不適切な内容
-- 実用性の低い表現
+<QUALITY_STANDARDS>
+- **Practicality**: The expression should be useful in real life.
+- **Natural Language**: Both the Japanese and English sentences must sound natural. Avoid stiff, textbook-like phrasing.
+- **Clarity**: The translation should be unambiguous.
+- **Level Appropriateness**: Vocabulary and grammar must match the specified difficulty level.
+- **Avoid**: Outdated expressions, culturally insensitive content, overly niche topics.
+</QUALITY_STANDARDS>
 
-【出力形式】:
-以下のJSON形式で翻訳(translation)問題とその解答を作成してください：
+<OUTPUT_FORMAT>
+You MUST respond with a single, valid JSON object containing the problem and solution. Do not include any other text or explanation outside the JSON structure.
 {{
-  "problem": "日本語の文章（翻訳問題）",
-  "solution": "対応する英語の文章（解答）"
+  "problem": "ここに日本語の文章（翻訳問題）",
+  "solution": "ここに英語の文章（解答）"
 }}
+</OUTPUT_FORMAT>
 
-例：
-{{
-  "problem": "今日は忙しい一日でした。",
-  "solution": "Today was a busy day."
-}}
-
-新しい問題を作成してください。"""
-
+<INSTRUCTION>
+Generate the new problem now.
+</INSTRUCTION>
+"""
         return prompt.strip()
 
     def get_eiken_problem_generation_prompt(
-        self, eiken_level: EikenLevel, category: CategoryType = None
+        self, eiken_level: EikenLevel, category: Optional[CategoryType] = None
     ) -> str:
         """
-        英検レベル別瞬間英作文問題生成プロンプト
+        Generates a prompt to create an Eiken-level-specific translation problem.
 
         Args:
-            eiken_level: 英検レベル（3級〜1級）
-            category: 問題のカテゴリ（オプション）
+            eiken_level: The Eiken level for the problem.
+            category: The optional category for the problem.
 
         Returns:
-            英検レベル対応問題生成用プロンプト文字列
+            A prompt for generating a new Eiken-level problem.
         """
         eiken_info = self.eiken_descriptions[eiken_level]
         category_text = ""
         if category:
             category_desc = self.category_descriptions[category]
-            category_text = (
-                f"\n【カテゴリ】: {category.value} - {category_desc}"
-            )
+            category_text = f'\n- **Category**: {category.value} ({category_desc})'
 
-        prompt = f"""あなたは日本人の英語学習者向けの英検対応瞬間英作文問題を作成する専門家です。
+        prompt = f"""
+<ROLE>
+You are an expert content creator specializing in Eiken test preparation materials for Japanese learners. Your task is to create a "瞬間英作文" (instant translation) problem that precisely matches the specified Eiken level.
+</ROLE>
 
-以下の条件で新しい問題を1つ作成してください：
+<TASK>
+Generate a single, new translation problem that aligns perfectly with the Eiken level requirements provided.
+</TASK>
 
-【英検レベル】: {eiken_info['level']}
-【対象レベル】: {eiken_info['description']}
-【使用文法】: {eiken_info['grammar']}
-【語彙レベル】: {eiken_info['vocabulary']}
-【推奨トピック】: {eiken_info['topics']}
-【作文スタイル】: {eiken_info['writing_style']}{category_text}
+<EIKEN_LEVEL_SPECIFICATIONS>
+- **Eiken Level**: {eiken_info['level']}
+- **Target Proficiency**: {eiken_info['description']}
+- **Required Grammar**: {eiken_info['grammar']}
+- **Vocabulary Level**: {eiken_info['vocabulary']}
+- **Recommended Topics**: {eiken_info['topics']}
+- **Expected Writing Style**: {eiken_info['writing_style']}{category_text}
+</EIKEN_LEVEL_SPECIFICATIONS>
 
-【作成条件】:
-- 英検{self._format_eiken_level(eiken_level)}に適した問題
-- 日本人が実際に使いそうな自然な日本語文
-- 英検試験で出題されそうな実用的な表現
-- 指定された文法項目を含む自然な英語訳
-- 学習者のレベルに適した語彙と文法構造
-- 英検の出題傾向に沿った現代的な内容
-- 単なる暗記ではなく理解を促す問題設計
+<CHAIN_OF_THOUGHT_PROCESS>
+1.  **Analyze Specifications**: Deeply understand the target Eiken level's grammar, vocabulary, and topic constraints.
+2.  **Brainstorm Scenario**: Imagine a scenario or question that would likely appear on an actual Eiken test for this level.
+3.  **Formulate Japanese**: Write a natural Japanese sentence that requires the target grammar and vocabulary for its translation.
+4.  **Formulate English**: Construct the model English answer, ensuring it strictly adheres to the Eiken level's requirements.
+5.  **Verify Alignment**: Double-check that the problem is not too easy or too hard and that it reflects the typical style of the Eiken test.
+6.  **Format Output**: Present the result in the specified JSON format.
+</CHAIN_OF_THOUGHT_PROCESS>
 
-【避けるべき要素】:
-- レベルに対して簡単すぎる・難しすぎる表現
-- 古い表現や不自然な日本語
-- 英検の出題範囲を超えた複雑な文法構造
-- 文化的に不適切な内容
-- 実用性の低い表現
+<QUALITY_STANDARDS>
+- **Strict Adherence**: The problem MUST strictly follow the specified Eiken level's grammar and vocabulary.
+- **Test Relevance**: The content should be highly relevant to what is expected in the actual Eiken exam.
+- **Clarity and Precision**: The problem must be unambiguous and have a clear, correct answer.
+- **Avoid**: Using grammar or vocabulary from higher or lower levels. Avoid overly simplistic or obscure topics.
+</QUALITY_STANDARDS>
 
-【特別な指示】:
-- 英検{self._format_eiken_level(eiken_level)}の語彙・文法レベルを厳密に守る
-- 英検試験の実際の出題形式を意識する
-- 学習者がレベルアップを実感できる適切な難易度設定
-- 英検合格に直結する実用的な表現を優先
-
-【出力形式】:
-以下のJSON形式で翻訳(translation)問題とその解答を作成してください：
+<OUTPUT_FORMAT>
+You MUST respond with a single, valid JSON object. Do not include any other text or explanation.
 {{
-  "problem": "日本語の文章（翻訳問題）",
-  "solution": "対応する英語の文章（解答）"
+  "problem": "ここに日本語の文章（翻訳問題）",
+  "solution": "ここに英語の文章（解答）"
 }}
+</OUTPUT_FORMAT>
 
-例（英検3級レベルの場合）：
-{{
-  "problem": "私は毎日英語を勉強しています。",
-  "solution": "I study English every day."
-}}
-
-新しい英検{self._format_eiken_level(eiken_level)}レベルの問題を作成してください。"""
-
+<INSTRUCTION>
+Generate the new Eiken {self._format_eiken_level(eiken_level)} level problem now.
+</INSTRUCTION>
+"""
         return prompt.strip()
 
     def get_translation_check_prompt(
         self, japanese: str, correct_answer: str, user_answer: str
     ) -> str:
         """
-        翻訳回答評価・フィードバックプロンプト
+        Generates a prompt to evaluate a user's translation and provide feedback.
 
         Args:
-            japanese: 日本語の問題文
-            correct_answer: 正解の英語文
-            user_answer: ユーザーの回答
+            japanese: The original Japanese sentence.
+            correct_answer: The model English translation.
+            user_answer: The user's submitted English translation.
 
         Returns:
-            評価・フィードバック生成用プロンプト
+            A prompt for generating a detailed evaluation.
         """
-        prompt = f"""あなたは経験豊富な英語教師です。日本人学習者の瞬間英作文・翻訳(translation)問題の回答を評価してください。
+        prompt = f"""
+<ROLE>
+You are a meticulous and encouraging English teacher evaluating a Japanese learner's translation attempt.
+</ROLE>
 
-【問題】
-日本語: "{japanese}"
-正解: "{correct_answer}"
-学習者の回答: "{user_answer}"
+<TASK>
+Evaluate the user's answer against the correct answer and provide a score and constructive feedback. The feedback must be in JAPANESE to ensure the learner understands it perfectly.
+</TASK>
 
-【評価基準】
-- 意味が正確に伝わっているか
-- 文法が正しいか
-- 自然な英語表現か
-- 語彙の選択が適切か
-- コミュニケーション効果があるか
+<INPUT_DATA>
+- **Japanese Problem**: "{japanese}"
+- **Model Answer**: "{correct_answer}"
+- **Learner's Answer**: "{user_answer}"
+</INPUT_DATA>
 
-【評価レベル】
-- Excellent: 完璧または非常に良い回答
-- Good: 良い回答（小さな改善点があっても意味は通じる）
-- Not quite right: 改善が必要な回答
+<CHAIN_OF_THOUGHT_PROCESS>
+1.  **Analyze Meaning**: Compare the core meaning of the "Learner's Answer" to the "Model Answer". Does it convey the same essential message as the original "Japanese Problem"?
+2.  **Analyze Grammar & Vocabulary**: Check the "Learner's Answer" for grammatical errors, typos, or unnatural word choices.
+3.  **Determine Score**: Based on the analysis, assign a score:
+    - `excellent`: Perfect or near-perfect. Conveys the meaning accurately with correct grammar and natural phrasing.
+    - `good`: Mostly correct. The main idea is clear, but there are minor errors in grammar, word choice, or naturalness.
+    - `not_quite_right`: Significantly flawed. The meaning is unclear, or there are major grammatical errors.
+4.  **Formulate Feedback (in Japanese)**: Write a concise, positive, and helpful feedback message in Japanese.
+    - Start with encouragement (e.g., 「素晴らしい挑戦です！」, 「惜しい！いい線いっています」).
+    - If the score is 'excellent', praise the user.
+    - If 'good' or 'not_quite_right', clearly but gently point out the main area for improvement.
+    - Offer a corrected or more natural version.
+    - Keep it short (2-3 sentences) and focused on the most important learning point.
+5.  **Format Output**: Present the score and feedback in the specified JSON format.
+</CHAIN_OF_THOUGHT_PROCESS>
 
-【返答形式】
-以下のJSON形式で評価してください：
+<FEEDBACK_POLICY>
+- **Language**: Feedback MUST be in Japanese.
+- **Tone**: Positive, constructive, and motivating.
+- **Goal**: Help the learner understand the gap and feel encouraged to try again. Avoid making them feel bad about mistakes.
+</FEEDBACK_POLICY>
+
+<OUTPUT_FORMAT>
+You MUST respond with a single, valid JSON object. The `feedback` value must be a Japanese string.
 {{
-  "score": "excellent" | "good" | "not quite right",
-  "feedback": "具体的なフィードバック文（2-3文で簡潔に）"
+  "score": "excellent" | "good" | "not_quite_right",
+  "feedback": "ここに日本語での具体的で励みになるフィードバック文"
 }}
+</OUTPUT_FORMAT>
 
-評価のガイドライン：
-- 「Excellent!」「Good!」「Not quite right」のいずれかで評価
-- 具体的な改善点やアドバイスを含める（必要に応じて）
-- 代替表現の提案（適切な場合）
-- 励ましの言葉を含める
-- 学習者の努力を認める
-
-【教育方針】
-- ポジティブで建設的なフィードバック
-- 間違いを恐れない学習環境の構築
-- 実用的で覚えやすいアドバイス
-- 日本人学習者にとって理解しやすい説明
-
-日本人学習者にとって理解しやすく、学習意欲を高めるような評価をお願いします。"""
-
+<INSTRUCTION>
+Evaluate the learner's answer now.
+</INSTRUCTION>
+"""
         return prompt.strip()
 
     def get_error_recovery_prompt(self, error_context: str) -> str:
         """
-        エラー発生時の復旧メッセージプロンプト
+        Generates a prompt for a user-facing message when a technical error occurs.
 
         Args:
-            error_context: エラーの文脈情報
+            error_context: Context about the error.
 
         Returns:
-            エラー復旧メッセージ生成用プロンプト
+            A prompt to generate a friendly error message.
         """
-        prompt = f"""You are a helpful English teacher. There was a technical issue with the previous interaction.
+        prompt = f"""
+<PERSONA>
+You are 'Echo', a helpful and reassuring AI English teacher.
+</PERSONA>
 
-Context: {error_context}
+<SITUATION>
+A technical error occurred during the conversation. The student might be confused. Your task is to provide a friendly message to smooth over the issue and get the conversation back on track.
+</SITUATION>
 
-Please provide a brief, friendly message to the student that:
-- Acknowledges there was a technical issue
-- Reassures them it's not their fault
-- Encourages them to try again or continue the conversation
-- Maintains a positive learning atmosphere
-- Keeps the message short and clear
+<ERROR_CONTEXT>
+{error_context}
+</ERROR_CONTEXT>
 
-Respond as the friendly English teacher you are."""
+<GUIDELINES>
+- Acknowledge a small technical issue occurred.
+- Reassure the student that it was not their fault.
+- Encourage them to simply try again or continue the conversation.
+- Maintain a positive and calm learning atmosphere.
+- Keep the message short, clear, and in natural English.
+</GUIDELINES>
 
+<INSTRUCTION>
+Respond as 'Echo' to the student.
+</INSTRUCTION>
+"""
         return prompt.strip()
 
     def get_custom_lesson_prompt(
-        self,
+        self, 
         lesson_topic: str,
         student_level: str,
-        focus_skills: List[str] = None,
+        focus_skills: Optional[List[str]] = None,
     ) -> str:
         """
-        カスタムレッスン用プロンプト生成
+        Generates a prompt to start a custom lesson.
 
         Args:
-            lesson_topic: レッスンのトピック
-            student_level: 学習者のレベル
-            focus_skills: 重点的に練習したいスキル（オプション）
+            lesson_topic: The topic of the lesson.
+            student_level: The student's proficiency level.
+            focus_skills: Specific skills to focus on (optional).
 
         Returns:
-            カスタムレッスン用プロンプト
+            A prompt to generate a custom lesson introduction.
         """
         focus_text = ""
         if focus_skills:
-            focus_text = f"\nFOCUS SKILLS: {', '.join(focus_skills)}"
+            focus_text = f'\n- **Focus Skills**: {", ".join(focus_skills)}'
 
-        prompt = f"""You are creating a custom English lesson for a Japanese learner.
+        prompt = f"""
+<PERSONA>
+You are 'Echo', an expert AI English teacher, preparing to start a custom lesson for a Japanese learner.
+</PERSONA>
 
-LESSON DETAILS:
-- Topic: {lesson_topic}
-- Student Level: {student_level}
-- Learning Goals: Practical conversation skills{focus_text}
+<TASK>
+Create an engaging introduction for a custom English lesson based on the provided details.
+</TASK>
 
-LESSON APPROACH:
-- Start with relevant vocabulary introduction
-- Use real-life scenarios and examples
-- Encourage active participation
-- Provide immediate feedback
-- Keep explanations clear and concise
-- Build confidence through positive reinforcement
+<LESSON_PLAN>
+- **Topic**: {lesson_topic}
+- **Student Level**: {student_level}
+- **Learning Goals**: Improve practical conversation skills related to the topic.{focus_text}
+</LESSON_PLAN>
 
-Please begin the lesson with an engaging introduction to the topic and invite the student to participate actively."""
+<LESSON_APPROACH>
+- Start with a brief, engaging introduction to the topic.
+- Introduce 1-2 key vocabulary words or phrases.
+- Ask an open-ended question to invite the student to start talking.
+- Keep the tone light and encouraging.
+</LESSON_APPROACH>
 
+<INSTRUCTION>
+Generate the opening message for this custom lesson.
+</INSTRUCTION>
+"""
         return prompt.strip()
 
     def get_grammar_explanation_prompt(
-        self, grammar_point: str, example_sentence: str = None
+        self, grammar_point: str, example_sentence: Optional[str] = None
     ) -> str:
         """
-        文法説明用プロンプト
+        Generates a prompt to explain a grammar point.
 
         Args:
-            grammar_point: 説明したい文法項目
-            example_sentence: 例文（オプション）
+            grammar_point: The grammar point to explain.
+            example_sentence: An example sentence context (optional).
 
         Returns:
-            文法説明用プロンプト
+            A prompt for generating a grammar explanation.
         """
         example_text = ""
         if example_sentence:
-            example_text = f"\nExample sentence: {example_sentence}"
+            example_text = f'\n- **Example Context**: "{example_sentence}"'
 
-        prompt = f"""You are an English grammar expert helping Japanese learners.
+        prompt = f"""
+<ROLE>
+You are an English grammar expert who excels at making complex topics simple for Japanese learners.
+</ROLE>
 
-Please explain this grammar point: {grammar_point}{example_text}
+<TASK>
+Explain the following English grammar point clearly and concisely.
+</TASK>
 
-EXPLANATION GUIDELINES:
-- Use simple, clear language
-- Provide practical examples
-- Compare with Japanese grammar when helpful
-- Include common mistakes to avoid
-- Give usage tips for natural conversation
-- Keep the explanation concise but comprehensive
-- End with a question to check understanding
+<GRAMMAR_TOPIC>
+- **Grammar Point**: {grammar_point}{example_text}
+</GRAMMAR_TOPIC>
 
-Focus on practical usage rather than complex grammatical terminology."""
+<EXPLANATION_GUIDELINES>
+- **Simplicity**: Use simple language. Avoid overly technical grammatical terms.
+- **Practical Examples**: Provide 2-3 clear, practical example sentences.
+- **Usage Tips**: Explain *when* and *why* to use it in natural conversation.
+- **Common Mistakes**: Briefly mention common mistakes Japanese learners make with this grammar.
+- **Conciseness**: Keep the explanation focused and easy to digest.
+- **Check Understanding**: End with a simple question to check if the student understood (e.g., "Does that make sense?" or "Can you try making a sentence?").
+</EXPLANATION_GUIDELINES>
 
+<INSTRUCTION>
+Generate the grammar explanation now.
+</INSTRUCTION>
+"""
         return prompt.strip()
 
     def get_pronunciation_practice_prompt(
         self, target_words: List[str]
     ) -> str:
         """
-        発音練習用プロンプト
+        Generates a prompt for pronunciation practice.
 
         Args:
-            target_words: 練習対象の単語リスト
+            target_words: A list of words to practice.
 
         Returns:
-            発音練習用プロンプト
+            A prompt for generating pronunciation guidance.
         """
         words_text = ", ".join(target_words)
 
-        prompt = f"""You are a pronunciation coach for Japanese English learners.
+        prompt = f"""
+<ROLE>
+You are a friendly and effective pronunciation coach for Japanese English learners.
+</ROLE>
 
-TARGET WORDS: {words_text}
+<TASK>
+Provide clear and simple pronunciation guidance for the target words.
+</TASK>
 
-Please provide pronunciation guidance that includes:
-- Clear pronunciation tips for each word
-- Common pronunciation mistakes Japanese speakers make
-- Mouth position and tongue placement tips
-- Rhythm and stress patterns
-- Practice sentences using these words
-- Encouraging feedback approach
+<TARGET_WORDS>
+{words_text}
+</TARGET_WORDS>
 
-Focus on the most important pronunciation points that will help Japanese learners sound more natural."""
+<GUIDANCE_STRUCTURE>
+For each word, provide:
+1.  **Simple Tip**: A very simple tip focusing on the key sound (e.g., "For 'read', make sure your tongue doesn't touch your teeth for the 'r' sound.").
+2.  **Common Mistake**: A brief note on a common mistake for Japanese speakers (e.g., "Be careful not to say 'read-o'").
+3.  **Practice Sentence**: A simple sentence using the word.
+</GUIDANCE_STRUCTURE>
 
+<INSTRUCTION>
+Generate the pronunciation guidance now. Keep the advice for each word brief and focused on the most critical point for improving clarity.
+</INSTRUCTION>
+"""
         return prompt.strip()
 
 
-# プロンプトテンプレートのシングルトンインスタンス
+# Singleton instance of the prompt templates
 prompt_templates = PromptTemplates()
 
 
-# 便利な関数群（後方互換性のため）
+# --- Backward Compatibility Functions ---
+# These functions ensure that older parts of the application that might still
+# use the previous function names continue to work.
+
+
 def create_conversation_prompt(
-    user_text: str, chat_history: List[Dict] = None
+    user_text: str, chat_history: Optional[List[Dict]] = None
 ) -> str:
-    """後方互換性のための関数"""
+    """Backward compatibility wrapper for get_conversation_prompt."""
     history = None
     if chat_history:
         history = [
@@ -563,19 +635,19 @@ def create_conversation_prompt(
 
 
 def create_welcome_prompt() -> str:
-    """後方互換性のための関数"""
+    """Backward compatibility wrapper for get_welcome_prompt."""
     return prompt_templates.get_welcome_prompt()
 
 
 def get_welcome_prompt() -> str:
-    """後方互換性のための関数 - get_welcome_prompt"""
+    """Alternative backward compatibility wrapper for get_welcome_prompt."""
     return prompt_templates.get_welcome_prompt()
 
 
 def get_ai_problem_generation_prompt(
-    category: str, difficulty: str, eiken_level: str = None
+    category: str, difficulty: str, eiken_level: Optional[str] = None
 ) -> str:
-    """AI問題生成プロンプト（後方互換性）"""
+    """Backward compatibility wrapper for problem generation prompts."""
     if eiken_level:
         return create_eiken_problem_generation_prompt(eiken_level, category)
     else:
@@ -583,124 +655,104 @@ def get_ai_problem_generation_prompt(
 
 
 def create_problem_generation_prompt(difficulty: str, category: str) -> str:
-    """後方互換性のための関数"""
-    diff_level = getattr(
-        DifficultyLevel, difficulty.upper(), DifficultyLevel.MEDIUM
-    )
-    # Handle category mapping (daily_life -> daily, etc.)
+    """Backward compatibility wrapper for get_problem_generation_prompt."""
+    try:
+        diff_level = DifficultyLevel(difficulty.lower())
+    except ValueError:
+        diff_level = DifficultyLevel.MEDIUM
+
     category_mapping = {
-        "daily_life": "DAILY",
-        "daily": "DAILY",
-        "business": "BUSINESS",
-        "work": "BUSINESS",
-        "travel": "TRAVEL",
-        "food": "FOOD",
-        "hobby": "HOBBY",
+        "daily_life": CategoryType.DAILY,
+        "daily": CategoryType.DAILY,
+        "business": CategoryType.BUSINESS,
+        "work": CategoryType.BUSINESS,
+        "travel": CategoryType.TRAVEL,
+        "food": CategoryType.FOOD,
+        "hobby": CategoryType.HOBBY,
     }
-    category_key = category_mapping.get(category.lower(), "DAILY")
-    cat_type = getattr(CategoryType, category_key, CategoryType.DAILY)
+    cat_type = category_mapping.get(category.lower(), CategoryType.DAILY)
 
-    # Get the base prompt and add original category for backward compatibility
-    prompt = prompt_templates.get_problem_generation_prompt(
-        diff_level, cat_type
-    )
-
-    # Include original category term for tests
-    if category != cat_type.value:
-        prompt = prompt.replace(
-            f"【カテゴリ】: {cat_type.value}",
-            f"【カテゴリ】: {cat_type.value} ({category})",
-        )
-
-    return prompt
+    return prompt_templates.get_problem_generation_prompt(diff_level, cat_type)
 
 
 def create_translation_check_prompt(
     japanese: str, correct_answer: str, user_answer: str
 ) -> str:
-    """後方互換性のための関数"""
+    """Backward compatibility wrapper for get_translation_check_prompt."""
     return prompt_templates.get_translation_check_prompt(
         japanese, correct_answer, user_answer
     )
 
 
 def create_eiken_problem_generation_prompt(
-    eiken_level: str, category: str = None
+    eiken_level: str, category: Optional[str] = None
 ) -> str:
-    """英検レベル対応問題生成プロンプト（後方互換性）"""
-    # Handle eiken level mapping (pre-2 -> GRADE_PRE_2, etc.)
+    """Backward compatibility wrapper for get_eiken_problem_generation_prompt."""
     eiken_mapping = {
-        "5": "GRADE_5",
-        "4": "GRADE_4",
-        "3": "GRADE_3",
-        "pre-2": "GRADE_PRE_2",
-        "2": "GRADE_2",
-        "pre-1": "GRADE_PRE_1",
-        "1": "GRADE_1",
+        "5": EikenLevel.GRADE_5,
+        "4": EikenLevel.GRADE_4,
+        "3": EikenLevel.GRADE_3,
+        "pre-2": EikenLevel.GRADE_PRE_2,
+        "2": EikenLevel.GRADE_2,
+        "pre-1": EikenLevel.GRADE_PRE_1,
+        "1": EikenLevel.GRADE_1,
     }
-    eiken_key = eiken_mapping.get(eiken_level.lower(), "GRADE_3")
-    eiken_enum = getattr(EikenLevel, eiken_key, EikenLevel.GRADE_3)
+    eiken_enum = eiken_mapping.get(str(eiken_level).lower(), EikenLevel.GRADE_3)
 
     cat_enum = None
     if category:
-        # Use same category mapping as regular problem generation
         category_mapping = {
-            "daily_life": "DAILY",
-            "daily": "DAILY",
-            "business": "BUSINESS",
-            "work": "BUSINESS",
-            "travel": "TRAVEL",
-            "food": "FOOD",
-            "hobby": "HOBBY",
+            "daily_life": CategoryType.DAILY,
+            "daily": CategoryType.DAILY,
+            "business": CategoryType.BUSINESS,
+            "work": CategoryType.BUSINESS,
+            "travel": CategoryType.TRAVEL,
+            "food": CategoryType.FOOD,
+            "hobby": CategoryType.HOBBY,
         }
-        category_key = category_mapping.get(category.lower(), "DAILY")
-        cat_enum = getattr(CategoryType, category_key, CategoryType.DAILY)
+        cat_enum = category_mapping.get(category.lower())
 
-    # Get the base prompt
-    prompt = prompt_templates.get_eiken_problem_generation_prompt(
+    return prompt_templates.get_eiken_problem_generation_prompt(
         eiken_enum, cat_enum
     )
 
-    # Include original category term for tests if it was mapped
-    if category and cat_enum and category != cat_enum.value:
-        prompt = prompt.replace(
-            f"【カテゴリ】: {cat_enum.value}",
-            f"【カテゴリ】: {cat_enum.value} ({category})",
-        )
 
-    return prompt
-
-
-# 使用例とテスト用のサンプルコード
+# Example usage and testing code
 if __name__ == "__main__":
-    # 使用例
     templates = PromptTemplates()
 
-    # 会話プロンプトの例
+    print("=== Example: Conversation Prompt ===")
     conversation_prompt = templates.get_conversation_prompt(
-        user_text="I want to learn about cooking",
+        user_text="I want to learn about cooking.",
         chat_history=[
-            ChatMessage(role="user", content="Hello"),
-            ChatMessage(role="assistant", content="Hello! Nice to meet you!"),
+            ChatMessage(role="user", content="Hello!"),
+            ChatMessage(
+                role="assistant", content="Hi there! I'm Echo. Nice to meet you!"
+            ),
         ],
     )
-    print("=== 会話プロンプト例 ===")
     print(conversation_prompt)
-    print("\n")
+    print("\n" + "=" * 30 + "\n")
 
-    # 問題生成プロンプトの例
+    print("=== Example: Problem Generation Prompt ===")
     problem_prompt = templates.get_problem_generation_prompt(
-        difficulty=DifficultyLevel.MEDIUM, category=CategoryType.FOOD
+        difficulty=DifficultyLevel.MEDIUM, category=CategoryType.TRAVEL
     )
-    print("=== 問題生成プロンプト例 ===")
     print(problem_prompt)
-    print("\n")
+    print("\n" + "=" * 30 + "\n")
 
-    # 翻訳チェックプロンプトの例
-    check_prompt = templates.get_translation_check_prompt(
-        japanese="今日は忙しい一日でした。",
-        correct_answer="Today was a busy day.",
-        user_answer="Today is busy day.",
+    print("=== Example: Eiken Problem Generation Prompt ===")
+    eiken_prompt = templates.get_eiken_problem_generation_prompt(
+        eiken_level=EikenLevel.GRADE_PRE_2, category=CategoryType.DAILY
     )
-    print("=== 翻訳チェックプロンプト例 ===")
+    print(eiken_prompt)
+    print("\n" + "=" * 30 + "\n")
+
+    print("=== Example: Translation Check Prompt ===")
+    check_prompt = templates.get_translation_check_prompt(
+        japanese="この荷物を運ぶのを手伝ってもらえますか？",
+        correct_answer="Could you help me carry this luggage?",
+        user_answer="Can you help me to carry this baggage?",
+    )
     print(check_prompt)
+    print("\n" + "=" * 30 + "\n")

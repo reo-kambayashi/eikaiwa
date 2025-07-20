@@ -3,7 +3,7 @@
 // Text-to-Speech機能を管理します（Google TTS + ブラウザTTSフォールバック）
 // ============================================================================
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { convertTextToSpeech, fallbackTextToSpeech } from '../utils/api';
 
 /**
@@ -13,6 +13,7 @@ import { convertTextToSpeech, fallbackTextToSpeech } from '../utils/api';
  * @returns {Object} 音声出力関数
  */
 export const useVoiceOutput = (isEnabled, speakingRate = 1.0) => {
+  const [isSpeechLoading, setIsSpeechLoading] = useState(false);
 
   /**
    * テキストを音声で再生する関数
@@ -33,6 +34,8 @@ export const useVoiceOutput = (isEnabled, speakingRate = 1.0) => {
       return false;
     }
 
+    setIsSpeechLoading(true);
+
     try {
       console.log('🎵 Attempting to speak text:', text.substring(0, 50) + '...', 'at rate:', speakingRate);
       
@@ -46,6 +49,7 @@ export const useVoiceOutput = (isEnabled, speakingRate = 1.0) => {
         return new Promise((resolve) => {
           audioElement.onended = () => {
             console.log('Google TTS playback completed');
+            setIsSpeechLoading(false);
             resolve(true);
           };
           
@@ -54,6 +58,7 @@ export const useVoiceOutput = (isEnabled, speakingRate = 1.0) => {
             // フォールバックを実行
             console.log('Falling back to browser TTS');
             fallbackTextToSpeech(text, speakingRate);
+            setIsSpeechLoading(false);
             resolve(false);
           };
           
@@ -62,6 +67,7 @@ export const useVoiceOutput = (isEnabled, speakingRate = 1.0) => {
             // フォールバックを実行
             console.log('Audio play failed, falling back to browser TTS');
             fallbackTextToSpeech(text, speakingRate);
+            setIsSpeechLoading(false);
             resolve(false);
           });
         });
@@ -69,6 +75,7 @@ export const useVoiceOutput = (isEnabled, speakingRate = 1.0) => {
         // Google TTSが失敗した場合はブラウザTTSにフォールバック
         console.log('Google TTS failed, using browser TTS fallback');
         const success = await fallbackTextToSpeech(text, speakingRate);
+        setIsSpeechLoading(false);
         return success;
       }
       
@@ -79,9 +86,11 @@ export const useVoiceOutput = (isEnabled, speakingRate = 1.0) => {
       console.log('All TTS methods failed, attempting final browser TTS fallback');
       try {
         const success = await fallbackTextToSpeech(text, speakingRate);
+        setIsSpeechLoading(false);
         return success;
       } catch (fallbackError) {
         console.error('Final fallback TTS also failed:', fallbackError);
+        setIsSpeechLoading(false);
         return false;
       }
     }
@@ -127,6 +136,7 @@ export const useVoiceOutput = (isEnabled, speakingRate = 1.0) => {
     // 状態確認
     isAvailable: isAvailable(),
     isSpeaking,
+    isSpeechLoading,
     isEnabled
   };
 };

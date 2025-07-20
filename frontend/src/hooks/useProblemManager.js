@@ -40,7 +40,7 @@ export const useProblemManager = () => {
       };
 
       // API呼び出し（フォールバック付き）
-      const problem = await get(`/api/eiken-translation-problem?${params.toString()}`, {
+      const problem = await get(`/api/instant-translation/problem?${params.toString()}`, {
         fallbackData: fallbackProblem,
         onSuccess: (data) => {
           // 音声出力は無効化済み

@@ -46,6 +46,7 @@ const InstantTranslation = ({
   const { 
     feedback, 
     showAnswer, 
+    isChecking,
     checkAnswer, 
     resetAnswer 
   } = useAnswerChecker();
@@ -169,6 +170,8 @@ const InstantTranslation = ({
               onCheckAnswer={handleCheckAnswer}
               onNextProblem={handleNextProblem}
               showAnswer={showAnswer}
+              isChecking={isChecking}
+              isLoading={isLoading}
               isVoiceInputEnabled={isVoiceInputEnabled}
               isVoiceSupported={isVoiceSupported}
               isListening={isListening}

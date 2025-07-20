@@ -27,6 +27,8 @@ const AnswerInput = ({
   onCheckAnswer,
   onNextProblem,
   showAnswer,
+  isChecking,
+  isLoading,
   isVoiceInputEnabled,
   isVoiceSupported,
   isListening,
@@ -116,16 +118,17 @@ const AnswerInput = ({
           <button 
             className="next-btn"
             onClick={onNextProblem}
+            disabled={isLoading}
           >
-            Next Problem (Ctrl+Enter)
+            {isLoading ? 'Loading...' : 'Next Problem (Ctrl+Enter)'}
           </button>
         ) : (
           <button 
             className="check-btn"
             onClick={onCheckAnswer}
-            disabled={!userAnswer.trim()}
+            disabled={!userAnswer.trim() || isChecking}
           >
-            Check (Ctrl+Enter)
+            {isChecking ? 'Checking...' : 'Check (Ctrl+Enter)'}
           </button>
         )}
         
@@ -148,6 +151,8 @@ AnswerInput.propTypes = {
   onCheckAnswer: PropTypes.func.isRequired,
   onNextProblem: PropTypes.func.isRequired,
   showAnswer: PropTypes.bool.isRequired,
+  isChecking: PropTypes.bool.isRequired,
+  isLoading: PropTypes.bool.isRequired,
   isVoiceInputEnabled: PropTypes.bool.isRequired,
   isVoiceSupported: PropTypes.bool.isRequired,
   isListening: PropTypes.bool.isRequired,

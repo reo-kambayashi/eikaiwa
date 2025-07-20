@@ -53,7 +53,7 @@ function App() {
   } = useSettings();
 
   // 音声出力機能（読み上げ速度を含む）
-  const { speak } = useVoiceOutput(isVoiceOutputEnabled, speakingRate);
+  const { speak, isSpeechLoading } = useVoiceOutput(isVoiceOutputEnabled, speakingRate);
 
   // チャット機能（AI応答時に音声出力）
   const {
@@ -193,6 +193,7 @@ function App() {
                 voiceInputTimeout={voiceInputTimeout}
                 isVoiceSupported={isVoiceSupported}
                 isLoading={isLoading}
+                isSpeechLoading={isSpeechLoading}
                 onVoiceInputToggle={toggleVoiceInput}
                 onVoiceOutputToggle={toggleVoiceOutput}
                 onSpeakingRateChange={updateSpeakingRate}

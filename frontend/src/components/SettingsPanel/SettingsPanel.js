@@ -22,6 +22,7 @@ const SettingsPanel = memo(({
   voiceInputTimeout,
   isVoiceSupported,
   isLoading,
+  isSpeechLoading,
   onVoiceInputToggle,
   onVoiceOutputToggle,
   onSpeakingRateChange,
@@ -76,6 +77,11 @@ const SettingsPanel = memo(({
             />
             <span className="slider"></span>
           </label>
+          {isSpeechLoading && (
+            <div className="speech-loading-indicator">
+              <span className="speech-loading-text">Speaking...</span>
+            </div>
+          )}
         </div>
 
         {/* 音声認識タイムアウト設定 */}
@@ -145,6 +151,7 @@ SettingsPanel.propTypes = {
   // システム状態
   isVoiceSupported: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
+  isSpeechLoading: PropTypes.bool.isRequired,
   
   // コールバック関数
   onVoiceInputToggle: PropTypes.func.isRequired,

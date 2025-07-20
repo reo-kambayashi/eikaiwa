@@ -13,6 +13,7 @@ import { useApi } from './useApi';
 export const useAnswerChecker = () => {
   const [feedback, setFeedback] = useState('');
   const [showAnswer, setShowAnswer] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
   
   const { post } = useApi();
 
@@ -25,6 +26,8 @@ export const useAnswerChecker = () => {
     if (!userAnswer.trim() || !currentProblem) {
       return;
     }
+
+    setIsChecking(true);
 
     try {
       // フォールバック処理: 基本的な文字列比較
@@ -55,6 +58,8 @@ export const useAnswerChecker = () => {
 
     } catch (error) {
       console.error('予期しないエラー:', error);
+    } finally {
+      setIsChecking(false);
     }
   }, [post]);
 
@@ -64,6 +69,7 @@ export const useAnswerChecker = () => {
   const resetAnswer = useCallback(() => {
     setFeedback('');
     setShowAnswer(false);
+    setIsChecking(false);
   }, []);
 
   /**
@@ -76,6 +82,7 @@ export const useAnswerChecker = () => {
   return {
     feedback,
     showAnswer,
+    isChecking,
     checkAnswer,
     resetAnswer,
     clearFeedback
