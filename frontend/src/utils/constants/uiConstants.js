@@ -55,9 +55,9 @@ export const UI_MESSAGES = {
   
   // プレースホルダーバリエーション
   PLACEHOLDER: {
-    DEFAULT: "Type a message and press Enter",
-    VOICE_ENABLED: "Type a message or press Space to start voice input",
-    LISTENING: "Voice input active... (Press Enter to stop and send)"
+    DEFAULT: "Type a message",
+    VOICE_ENABLED: "Type a message or use voice input",
+    LISTENING: "Voice input active..."
   },
   
   // フォールバック

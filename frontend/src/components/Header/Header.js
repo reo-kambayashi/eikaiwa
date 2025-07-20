@@ -70,8 +70,8 @@ const Header = ({ currentMode, onModeChange }) => {
         <div className="header-actions">
           <button 
             className="help-button"
-            aria-label="Help and keyboard shortcuts"
-            title="Keyboard shortcuts: Space to start/stop voice, Enter to send"
+            aria-label="Help"
+            title="ヘルプ"
           >
             <span>?</span>
           </button>

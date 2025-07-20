@@ -85,11 +85,11 @@ const InputArea = ({
    */
   const getPlaceholder = () => {
     if (isListening) {
-      return '🎤 音声を認識中... (Spaceキーで停止)';
+      return '🎤 音声を認識中...';
     } else if (isVoiceInputEnabled) {
-      return 'メッセージを入力 (Spaceキーで音声入力、Enterで送信)';
+      return 'メッセージを入力';
     } else {
-      return 'メッセージを入力してください (Enterで送信)';
+      return 'メッセージを入力してください';
     }
   };
 
@@ -142,9 +142,6 @@ const InputArea = ({
         <div className={`input-status status-${getStatusText().status}`}>
           <span className="status-icon">{getStatusText().icon}</span>
           <span className="status-text">{getStatusText().text}</span>
-          {isVoiceInputEnabled && !isListening && (
-            <span className="voice-hint">Spaceキーで音声入力</span>
-          )}
         </div>
         <div className="input-controls">
           <div className="char-counter">
@@ -214,7 +211,7 @@ const InputArea = ({
             disabled={isSendDisabled}
             className={`send-button ${isSendDisabled ? 'disabled' : 'enabled'}`}
             aria-label="メッセージを送信"
-            title="Enterキーまたはクリックで送信"
+            title="メッセージを送信"
           >
             {isLoading ? (
               <>
@@ -229,14 +226,6 @@ const InputArea = ({
             )}
           </button>
         </div>
-      </div>
-
-      {/* キーボードショートカットヒント */}
-      <div className="keyboard-hints">
-        <span className="hint">💡 便利なキー操作:</span>
-        <span className="shortcut">Enter: 送信</span>
-        {isVoiceInputEnabled && <span className="shortcut">Space: 音声入力</span>}
-        <span className="shortcut">Shift+Enter: 改行</span>
       </div>
     </div>
   );
