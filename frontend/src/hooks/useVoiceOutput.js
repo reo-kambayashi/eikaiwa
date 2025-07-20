@@ -48,28 +48,78 @@ export const useVoiceOutput = (isEnabled, speakingRate = 1.0, voiceName = "Kore"
         console.log('Using Gemini 2.5 Flash Preview TTS');
         
         return new Promise((resolve) => {
+          let hasResolved = false;
+          
+          // タイムアウトを設定（音声の読み込みが失敗する場合）
+          const timeoutId = setTimeout(() => {
+            if (!hasResolved) {
+              console.warn('⏰ Audio loading timeout, falling back to browser TTS');
+              hasResolved = true;
+              fallbackTextToSpeech(text, speakingRate);
+              setIsSpeechLoading(false);
+              resolve(false);
+            }
+          }, 10000); // 10秒のタイムアウト
+          
+          // 音声データの読み込み完了を待つ
+          audioElement.addEventListener('loadeddata', () => {
+            console.log('✅ Audio data loaded, ready to play');
+          });
+          
+          audioElement.addEventListener('canplaythrough', () => {
+            console.log('✅ Audio can play through without buffering');
+          });
+          
           audioElement.onended = () => {
-            console.log('Gemini TTS playback completed');
-            setIsSpeechLoading(false);
-            resolve(true);
+            if (!hasResolved) {
+              console.log('Gemini TTS playback completed');
+              clearTimeout(timeoutId);
+              hasResolved = true;
+              setIsSpeechLoading(false);
+              resolve(true);
+            }
           };
           
           audioElement.onerror = (error) => {
-            console.error('Google TTS playback error:', error);
-            // フォールバックを実行
-            console.log('Falling back to browser TTS');
-            fallbackTextToSpeech(text, speakingRate);
-            setIsSpeechLoading(false);
-            resolve(false);
+            if (!hasResolved) {
+              console.error('🚨 Google TTS playback error:', error);
+              console.error('Audio element error details:', {
+                error: audioElement.error,
+                src: audioElement.src,
+                readyState: audioElement.readyState,
+                networkState: audioElement.networkState
+              });
+              
+              // フォールバックを実行
+              console.log('Falling back to browser TTS');
+              clearTimeout(timeoutId);
+              hasResolved = true;
+              fallbackTextToSpeech(text, speakingRate);
+              setIsSpeechLoading(false);
+              resolve(false);
+            }
           };
           
+          // 音声再生を開始
           audioElement.play().catch(playError => {
-            console.error('Failed to play audio:', playError);
-            // フォールバックを実行
-            console.log('Audio play failed, falling back to browser TTS');
-            fallbackTextToSpeech(text, speakingRate);
-            setIsSpeechLoading(false);
-            resolve(false);
+            if (!hasResolved) {
+              console.error('❌ Failed to play audio:', playError);
+              console.error('Play error details:', {
+                name: playError.name,
+                message: playError.message,
+                audioSrc: audioElement.src?.substring(0, 100),
+                readyState: audioElement.readyState,
+                networkState: audioElement.networkState
+              });
+              
+              // フォールバックを実行
+              console.log('Audio play failed, falling back to browser TTS');
+              clearTimeout(timeoutId);
+              hasResolved = true;
+              fallbackTextToSpeech(text, speakingRate);
+              setIsSpeechLoading(false);
+              resolve(false);
+            }
           });
         });
       } else {
@@ -81,21 +131,30 @@ export const useVoiceOutput = (isEnabled, speakingRate = 1.0, voiceName = "Kore"
       }
       
     } catch (error) {
-      console.error('TTS Error:', error);
+      console.error('❌ TTS Error:', error);
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack?.substring(0, 500),
+        isAppError: error instanceof Error
+      });
       
       // 全てが失敗した場合もブラウザTTSを試行
-      console.log('All TTS methods failed, attempting final browser TTS fallback');
+      console.log('🔄 All TTS methods failed, attempting final browser TTS fallback');
       try {
         const success = await fallbackTextToSpeech(text, speakingRate);
         setIsSpeechLoading(false);
+        if (!success) {
+          console.error('❌ Final fallback TTS also failed');
+        }
         return success;
       } catch (fallbackError) {
-        console.error('Final fallback TTS also failed:', fallbackError);
+        console.error('❌ Final fallback TTS exception:', fallbackError);
         setIsSpeechLoading(false);
         return false;
       }
     }
-  }, [isEnabled, speakingRate]);
+  }, [isEnabled, speakingRate, voiceName]);
 
   /**
    * 音声出力が利用可能かチェックする関数

@@ -1,5 +1,7 @@
 # English Communication App for Japanese People
 
+必ず日本語で解答
+
 ## Project Overview
 
 This is an AI-powered English conversation practice application designed specifically for Japanese learners. The app provides a comprehensive learning environment with Google Gemini AI integration, voice recognition, and text-to-speech capabilities.
@@ -7,7 +9,7 @@ This is an AI-powered English conversation practice application designed specifi
 **Key Features:**
 - AI conversation partner using Google Gemini 2.5 Flash
 - Voice input via Web Speech API
-- Voice output via Google Cloud TTS with browser fallback
+- Voice output via Google gemini TTS with browser fallback
 - Grammar checking and feedback
 - Beginner-friendly UI with extensive Japanese/English comments
 

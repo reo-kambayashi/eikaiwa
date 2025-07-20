@@ -226,20 +226,38 @@ async def text_to_speech(request: TTSRequest):
             if candidate.content and candidate.content.parts:
                 for part in candidate.content.parts:
                     if hasattr(part, "inline_data") and part.inline_data:
-                        # Found audio data - extract base64 directly
-                        import base64
+                        # Found audio data - extract properly
                         audio_data = part.inline_data.data
-                        # audio_data should already be base64 encoded bytes
-                        if isinstance(audio_data, bytes):
-                            audio_base64 = base64.b64encode(audio_data).decode("utf-8")
-                        else:
-                            # If already base64 string, use directly
-                            audio_base64 = audio_data
-                        
                         mime_type = part.inline_data.mime_type or "audio/wav"
+                        
+                        print(f"🎵 Audio data found: type={type(audio_data)}, mime_type={mime_type}")
+                        
+                        # Handle different data types from Gemini
+                        if isinstance(audio_data, bytes):
+                            # If bytes, encode to base64
+                            audio_base64 = base64.b64encode(audio_data).decode("utf-8")
+                            print(f"🔄 Encoded bytes to base64: {len(audio_data)} bytes -> {len(audio_base64)} chars")
+                        elif isinstance(audio_data, str):
+                            # If already string, assume it's base64
+                            audio_base64 = audio_data
+                            print(f"🔄 Using string as base64: {len(audio_base64)} chars")
+                        else:
+                            print(f"❌ Unexpected audio data type: {type(audio_data)}")
+                            raise ValueError(f"Unexpected audio data type: {type(audio_data)}")
+                        
+                        # Validate base64 data
+                        try:
+                            # Test decode to verify it's valid base64
+                            decoded_test = base64.b64decode(audio_base64)
+                            print(f"✅ Base64 validation successful: {len(decoded_test)} bytes decoded")
+                        except Exception as b64_error:
+                            print(f"❌ Base64 validation failed: {b64_error}")
+                            raise ValueError(f"Invalid base64 audio data: {b64_error}")
+                        
                         return {
                             "audio_data": audio_base64,
                             "content_type": mime_type,
+                            "original_size": len(audio_data) if isinstance(audio_data, (bytes, str)) else 0
                         }
 
         # If no audio data found, fallback to browser TTS

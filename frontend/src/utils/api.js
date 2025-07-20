@@ -12,6 +12,57 @@ const responseCache = new Map();
 const CACHE_TTL = 5 * 60 * 1000; // 5分
 
 /**
+ * PCM音声データをWAVフォーマットに変換する関数
+ * @param {Uint8Array} pcmData - PCM音声データ
+ * @param {number} sampleRate - サンプルレート（例：24000）
+ * @param {number} channels - チャンネル数（1=モノ、2=ステレオ）
+ * @param {number} bitsPerSample - サンプルあたりのビット数（16または24）
+ * @returns {Uint8Array} WAVフォーマットの音声データ
+ */
+const convertPCMToWAV = (pcmData, sampleRate = 24000, channels = 1, bitsPerSample = 16) => {
+  const bytesPerSample = bitsPerSample / 8;
+  const byteRate = sampleRate * channels * bytesPerSample;
+  const blockAlign = channels * bytesPerSample;
+  const dataSize = pcmData.length;
+  const fileSize = 44 + dataSize; // WAVヘッダー(44バイト) + データ
+
+  // WAVファイルヘッダーを作成
+  const buffer = new ArrayBuffer(fileSize);
+  const view = new DataView(buffer);
+  const uint8Array = new Uint8Array(buffer);
+
+  // RIFFヘッダー
+  const writeString = (offset, string) => {
+    for (let i = 0; i < string.length; i++) {
+      view.setUint8(offset + i, string.charCodeAt(i));
+    }
+  };
+
+  writeString(0, 'RIFF');                    // ChunkID
+  view.setUint32(4, fileSize - 8, true);    // ChunkSize
+  writeString(8, 'WAVE');                   // Format
+
+  // fmtサブチャンク
+  writeString(12, 'fmt ');                  // Subchunk1ID
+  view.setUint32(16, 16, true);             // Subchunk1Size (PCMの場合は16)
+  view.setUint16(20, 1, true);              // AudioFormat (PCM = 1)
+  view.setUint16(22, channels, true);       // NumChannels
+  view.setUint32(24, sampleRate, true);     // SampleRate
+  view.setUint32(28, byteRate, true);       // ByteRate
+  view.setUint16(32, blockAlign, true);     // BlockAlign
+  view.setUint16(34, bitsPerSample, true);  // BitsPerSample
+
+  // dataサブチャンク
+  writeString(36, 'data');                  // Subchunk2ID
+  view.setUint32(40, dataSize, true);       // Subchunk2Size
+
+  // PCMデータをコピー
+  uint8Array.set(pcmData, 44);
+
+  return uint8Array;
+};
+
+/**
  * フェッチリクエストのデフォルト設定
  */
 const defaultFetchOptions = {
@@ -399,20 +450,84 @@ export const textToSpeech = async (text, speakingRate = 1.0, voiceName = "Kore")
     }
     
     if (!jsonResponse.audio_data) {
+      console.warn('❌ No audio data in response:', jsonResponse);
       throw new AppError('No audio data in response', ERROR_TYPES.API);
     }
 
-    // base64デコードしてBlobに変換
-    const binaryString = atob(jsonResponse.audio_data);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
+    // base64デコードしてBlobに変換（エラーハンドリング強化）
+    let audioBlob;
+    try {
+      // Base64データの検証
+      const base64Data = jsonResponse.audio_data;
+      if (typeof base64Data !== 'string' || base64Data.length === 0) {
+        throw new Error(`Invalid base64 data: type=${typeof base64Data}, length=${base64Data?.length || 0}`);
+      }
+      
+      // 有効なbase64文字列かチェック
+      const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+      if (!base64Regex.test(base64Data)) {
+        throw new Error('Invalid base64 format detected');
+      }
+      
+      const binaryString = atob(base64Data);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      // 音声フォーマットを修正 - より一般的なフォーマットを使用
+      let contentType = jsonResponse.content_type || 'audio/wav';
+      let processedBytes = bytes;
+      
+      // PCM音声データをWAVフォーマットに変換（ブラウザ互換性向上）
+      if (contentType.toLowerCase().includes('l16') || contentType.toLowerCase().includes('pcm')) {
+        console.log('🔄 Converting PCM audio to WAV format for browser compatibility');
+        
+        try {
+          // PCMデータをWAVフォーマットに変換
+          const wavBytes = convertPCMToWAV(bytes, 24000, 1, 16); // 24kHz, mono, 16-bit
+          processedBytes = wavBytes;
+          contentType = 'audio/wav';
+          
+          console.log('✅ PCM to WAV conversion successful:', {
+            originalSize: bytes.length,
+            wavSize: wavBytes.length,
+            sampleRate: 24000,
+            channels: 1,
+            bitsPerSample: 16
+          });
+        } catch (conversionError) {
+          console.error('❌ PCM to WAV conversion failed:', conversionError);
+          // 変換失敗時は元のデータを使用し、フォールバックに期待
+          throw new AppError('Audio format conversion failed', ERROR_TYPES.API, {
+            conversionError: conversionError.message,
+            originalFormat: contentType
+          });
+        }
+      }
+      
+      audioBlob = new Blob([processedBytes], { type: contentType });
+      
+      console.log('🔄 Audio blob created:', {
+        originalDataLength: base64Data.length,
+        binaryStringLength: binaryString.length,
+        bytesLength: bytes.length,
+        blobSize: audioBlob.size,
+        contentType: contentType,
+        originalSize: jsonResponse.original_size || 'unknown'
+      });
+      
+    } catch (decodeError) {
+      console.error('❌ Base64 decode failed:', decodeError);
+      throw new AppError('Failed to decode audio data', ERROR_TYPES.API, { 
+        decodeError: decodeError.message,
+        dataPreview: jsonResponse.audio_data?.substring(0, 100),
+        responseKeys: Object.keys(jsonResponse)
+      });
     }
     
-    const audioBlob = new Blob([bytes], { type: jsonResponse.content_type || 'audio/mpeg' });
-    
     if (audioBlob.size === 0) {
-      throw new AppError('Received empty audio data', ERROR_TYPES.API);
+      throw new AppError('Received empty audio data after decoding', ERROR_TYPES.API);
     }
 
     console.log('✅ Gemini TTS conversion completed', {
@@ -457,21 +572,42 @@ export const convertTextToSpeech = async (text, speakingRate = 1.0, voiceName = 
   try {
     const audioBlob = await textToSpeech(text, speakingRate, voiceName);
     const audioUrl = URL.createObjectURL(audioBlob);
+    
+    console.log('🎵 Creating audio element:', {
+      blobSize: audioBlob.size,
+      blobType: audioBlob.type,
+      urlLength: audioUrl.length
+    });
+    
     const audioElement = new Audio(audioUrl);
+    
+    // 音声の基本設定（ブラウザ互換性向上）
+    audioElement.preload = 'auto';
+    audioElement.volume = 1.0;
     
     // メモリリーク防止のため、再生終了後にURLを開放
     audioElement.addEventListener('ended', () => {
+      console.log('🧹 Cleaning up audio URL after playback');
       URL.revokeObjectURL(audioUrl);
     });
     
     // エラーが発生した場合もURLを開放
-    audioElement.addEventListener('error', () => {
+    audioElement.addEventListener('error', (error) => {
+      console.error('🚨 Audio element error:', error);
       URL.revokeObjectURL(audioUrl);
+    });
+    
+    // ロード完了のログ
+    audioElement.addEventListener('loadeddata', () => {
+      console.log('✅ Audio data loaded successfully:', {
+        duration: audioElement.duration,
+        readyState: audioElement.readyState
+      });
     });
     
     return audioElement;
   } catch (error) {
-    console.error('convertTextToSpeech failed:', error.message);
+    console.error('❌ convertTextToSpeech failed:', error.message);
     logError(error, 'convertTextToSpeech');
     return null;
   }
@@ -486,21 +622,21 @@ export const convertTextToSpeech = async (text, speakingRate = 1.0, voiceName = 
 export const fallbackTextToSpeech = (text, rate = 1.0) => {
   return new Promise((resolve) => {
     if (!('speechSynthesis' in window)) {
-      console.warn('Speech synthesis not supported');
+      console.warn('❌ Speech synthesis not supported in this browser');
       resolve(false);
       return;
     }
 
     // 基本的な入力チェック
     if (!text || typeof text !== 'string') {
-      console.warn('fallbackTextToSpeech: Invalid text input:', typeof text);
+      console.warn('❌ fallbackTextToSpeech: Invalid text input:', typeof text);
       resolve(false);
       return;
     }
     
     const trimmedText = text.trim();
     if (!trimmedText) {
-      console.warn('fallbackTextToSpeech: Empty text after trim');
+      console.warn('❌ fallbackTextToSpeech: Empty text after trim');
       resolve(false);
       return;
     }
@@ -510,7 +646,7 @@ export const fallbackTextToSpeech = (text, rate = 1.0) => {
       const cleanedText = cleanTextForSpeech(trimmedText);
       
       if (!cleanedText || !cleanedText.trim()) {
-        console.warn('fallbackTextToSpeech: No valid text after cleaning');
+        console.warn('❌ fallbackTextToSpeech: No valid text after cleaning');
         resolve(false);
         return;
       }
@@ -520,34 +656,78 @@ export const fallbackTextToSpeech = (text, rate = 1.0) => {
         cleaned: cleanedText.substring(0, 50)
       });
 
-      const utterance = new SpeechSynthesisUtterance(cleanedText);
-      utterance.lang = 'en-US';
-      utterance.rate = Math.max(0.1, Math.min(10, rate)); // ブラウザの範囲制限
-      utterance.pitch = 1.0;
-      utterance.volume = 1.0;
-
-      utterance.onend = () => {
-        console.log('Fallback TTS completed');
-        resolve(true);
-      };
-
-      utterance.onerror = (error) => {
-        // 'canceled' errors are expected when stopping previous speech
-        if (error.error === 'canceled') {
-          console.log('Fallback TTS canceled (expected behavior)');
-          resolve(true);
-        } else {
-          console.error('Fallback TTS error:', error);
-          resolve(false);
-        }
-      };
-
       // 既存の音声を停止してから新しい音声を開始
       window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
+      
+      // 短い待機時間を追加（ブラウザによってはcancel()の完了を待つ必要がある）
+      setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(cleanedText);
+        utterance.lang = 'en-US';
+        utterance.rate = Math.max(0.1, Math.min(10, rate)); // ブラウザの範囲制限
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+
+        let hasFinished = false;
+        
+        utterance.onstart = () => {
+          console.log('🎵 Browser TTS started');
+        };
+
+        utterance.onend = () => {
+          if (!hasFinished) {
+            console.log('✅ Fallback TTS completed successfully');
+            hasFinished = true;
+            resolve(true);
+          }
+        };
+
+        utterance.onerror = (error) => {
+          if (!hasFinished) {
+            // 'canceled' errors are expected when stopping previous speech
+            if (error.error === 'canceled') {
+              console.log('🔄 Fallback TTS canceled (expected behavior)');
+              hasFinished = true;
+              resolve(true);
+            } else {
+              console.error('❌ Fallback TTS error:', error);
+              hasFinished = true;
+              resolve(false);
+            }
+          }
+        };
+
+        // エラーが発生した場合のタイムアウト
+        const timeoutId = setTimeout(() => {
+          if (!hasFinished) {
+            console.warn('⏰ Browser TTS timeout');
+            window.speechSynthesis.cancel();
+            hasFinished = true;
+            resolve(false);
+          }
+        }, 30000); // 30秒のタイムアウト
+
+        utterance.onend = () => {
+          if (!hasFinished) {
+            clearTimeout(timeoutId);
+            console.log('✅ Fallback TTS completed successfully');
+            hasFinished = true;
+            resolve(true);
+          }
+        };
+
+        try {
+          window.speechSynthesis.speak(utterance);
+          console.log('🎵 Browser TTS utterance queued');
+        } catch (speakError) {
+          clearTimeout(timeoutId);
+          console.error('❌ Failed to queue browser TTS:', speakError);
+          hasFinished = true;
+          resolve(false);
+        }
+      }, 100); // 100ms の待機時間
       
     } catch (error) {
-      console.error('Fallback TTS failed:', error);
+      console.error('❌ Fallback TTS setup failed:', error);
       resolve(false);
     }
   });
