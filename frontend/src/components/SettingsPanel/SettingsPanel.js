@@ -7,7 +7,8 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { 
-  SPEECH_RECOGNITION_CONFIG
+  SPEECH_RECOGNITION_CONFIG,
+  TTS_CONFIG
 } from '../../utils/constants';
 import './SettingsPanel.css';
 
@@ -20,6 +21,7 @@ const SettingsPanel = memo(({
   isVoiceOutputEnabled,
   speakingRate,
   voiceInputTimeout,
+  voiceName,
   isVoiceSupported,
   isLoading,
   isSpeechLoading,
@@ -27,7 +29,8 @@ const SettingsPanel = memo(({
   onVoiceOutputToggle,
   onSpeakingRateChange,
   onSpeakingRateReset,
-  onVoiceInputTimeoutChange
+  onVoiceInputTimeoutChange,
+  onVoiceNameChange
 }) => {
   // スピード説明テキストを取得（現在未使用）
   // const getSpeedDescription = (rate) => {
@@ -102,6 +105,25 @@ const SettingsPanel = memo(({
             </select>
           </div>
         )}
+
+        {/* 音声選択設定 */}
+        {isVoiceOutputEnabled && (
+          <div className="setting-item">
+            <span className="setting-name">Voice</span>
+            <select 
+              value={voiceName} 
+              onChange={(e) => onVoiceNameChange(e.target.value)}
+              disabled={isLoading}
+              className="compact-select"
+            >
+              {TTS_CONFIG.AVAILABLE_VOICES.map(voice => (
+                <option key={voice.value} value={voice.value}>
+                  {voice.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* 読み上げ速度セクション */}
@@ -147,6 +169,7 @@ SettingsPanel.propTypes = {
   isVoiceOutputEnabled: PropTypes.bool.isRequired,
   speakingRate: PropTypes.number.isRequired,
   voiceInputTimeout: PropTypes.number.isRequired,
+  voiceName: PropTypes.string.isRequired,
   
   // システム状態
   isVoiceSupported: PropTypes.bool.isRequired,
@@ -158,7 +181,8 @@ SettingsPanel.propTypes = {
   onVoiceOutputToggle: PropTypes.func.isRequired,
   onSpeakingRateChange: PropTypes.func.isRequired,
   onSpeakingRateReset: PropTypes.func.isRequired,
-  onVoiceInputTimeoutChange: PropTypes.func.isRequired
+  onVoiceInputTimeoutChange: PropTypes.func.isRequired,
+  onVoiceNameChange: PropTypes.func.isRequired
 };
 
 export default SettingsPanel;

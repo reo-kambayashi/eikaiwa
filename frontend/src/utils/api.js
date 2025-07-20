@@ -312,9 +312,10 @@ export const sendMessageToAI = async (
  * テキストを音声に変換する関数（最適化版）
  * @param {string} text - 音声化するテキスト
  * @param {number} speakingRate - 読み上げ速度
+ * @param {string} voiceName - 使用する音声名（Gemini TTS用）
  * @returns {Promise<Blob>} 音声データ
  */
-export const textToSpeech = async (text, speakingRate = 1.0) => {
+export const textToSpeech = async (text, speakingRate = 1.0, voiceName = "Kore") => {
   const context = `textToSpeech(${text?.substring(0, 50) || 'undefined'}...)`;
   
   // 厳密な入力チェック
@@ -353,13 +354,14 @@ export const textToSpeech = async (text, speakingRate = 1.0) => {
     console.log('🔗 Converting text to speech:', { 
       text: cleanedText.substring(0, 100), 
       speakingRate,
+      voiceName,
       textLength: cleanedText.length
     });
 
     // バックエンドのレスポンス形式に合わせたリクエストボディ
     const modifiedRequestBody = {
       text: cleanedText,
-      voice_name: TTS_CONFIG.VOICE_NAME || "en-US-Neural2-D",
+      voice_name: voiceName || TTS_CONFIG.VOICE_NAME || "Kore",
       language_code: TTS_CONFIG.LANG || 'en-US',
       speaking_rate: Math.max(0.25, Math.min(4.0, speakingRate))
     };
@@ -448,11 +450,12 @@ export const textToSpeech = async (text, speakingRate = 1.0) => {
  * テキストを音声に変換してHTMLAudioElementを返す関数（従来互換）
  * @param {string} text - 音声化するテキスト  
  * @param {number} speakingRate - 読み上げ速度
+ * @param {string} voiceName - 使用する音声名（Gemini TTS用）
  * @returns {Promise<HTMLAudioElement>} 音声要素
  */
-export const convertTextToSpeech = async (text, speakingRate = 1.0) => {
+export const convertTextToSpeech = async (text, speakingRate = 1.0, voiceName = "Kore") => {
   try {
-    const audioBlob = await textToSpeech(text, speakingRate);
+    const audioBlob = await textToSpeech(text, speakingRate, voiceName);
     const audioUrl = URL.createObjectURL(audioBlob);
     const audioElement = new Audio(audioUrl);
     
@@ -529,8 +532,14 @@ export const fallbackTextToSpeech = (text, rate = 1.0) => {
       };
 
       utterance.onerror = (error) => {
-        console.error('Fallback TTS error:', error);
-        resolve(false);
+        // 'canceled' errors are expected when stopping previous speech
+        if (error.error === 'canceled') {
+          console.log('Fallback TTS canceled (expected behavior)');
+          resolve(true);
+        } else {
+          console.error('Fallback TTS error:', error);
+          resolve(false);
+        }
       };
 
       // 既存の音声を停止してから新しい音声を開始

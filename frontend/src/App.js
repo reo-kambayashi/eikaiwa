@@ -45,15 +45,17 @@ function App() {
     isGrammarCheckEnabled, // 常にtrue
     speakingRate,
     voiceInputTimeout,
+    voiceName,
     toggleVoiceInput,
     toggleVoiceOutput,
     updateSpeakingRate,
     resetSpeakingRateToDefault,
-    updateVoiceInputTimeout
+    updateVoiceInputTimeout,
+    updateVoiceName
   } = useSettings();
 
-  // 音声出力機能（読み上げ速度を含む）
-  const { speak, isSpeechLoading } = useVoiceOutput(isVoiceOutputEnabled, speakingRate);
+  // 音声出力機能（読み上げ速度とvoiceNameを含む）
+  const { speak, isSpeechLoading } = useVoiceOutput(isVoiceOutputEnabled, speakingRate, voiceName);
 
   // チャット機能（AI応答時に音声出力）
   const {
@@ -191,6 +193,7 @@ function App() {
                 isVoiceOutputEnabled={isVoiceOutputEnabled}
                 speakingRate={speakingRate}
                 voiceInputTimeout={voiceInputTimeout}
+                voiceName={voiceName}
                 isVoiceSupported={isVoiceSupported}
                 isLoading={isLoading}
                 isSpeechLoading={isSpeechLoading}
@@ -199,6 +202,7 @@ function App() {
                 onSpeakingRateChange={updateSpeakingRate}
                 onSpeakingRateReset={resetSpeakingRateToDefault}
                 onVoiceInputTimeoutChange={updateVoiceInputTimeout}
+                onVoiceNameChange={updateVoiceName}
               />
             </aside>
 

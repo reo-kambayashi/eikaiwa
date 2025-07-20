@@ -33,5 +33,6 @@ export const STORAGE_KEYS = {
   TRANSLATION_VOICE_OUTPUT: 'eikaiwa_translation_voice_output',
   GRAMMAR_CHECK: 'eikaiwa_grammar_check',
   SPEAKING_RATE: 'eikaiwa_speaking_rate',
-  VOICE_TIMEOUT: 'eikaiwa_voice_timeout'
+  VOICE_TIMEOUT: 'eikaiwa_voice_timeout',
+  VOICE_NAME: 'eikaiwa_voice_name'
 };

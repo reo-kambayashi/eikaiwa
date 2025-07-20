@@ -80,6 +80,10 @@ export const useSettings = () => {
     getStoredValue(STORAGE_KEYS.VOICE_TIMEOUT, SPEECH_RECOGNITION_CONFIG.DEFAULT_TIMEOUT)
   );
 
+  const [voiceName, setVoiceName] = useState(() => 
+    getStoredValue(STORAGE_KEYS.VOICE_NAME, TTS_CONFIG.VOICE_NAME)
+  );
+
   // 設定変更関数（メモ化）
   const toggleVoiceInput = useCallback((enabled) => {
     console.log('Voice input toggled:', enabled);
@@ -130,6 +134,12 @@ export const useSettings = () => {
     setStoredValue(STORAGE_KEYS.VOICE_TIMEOUT, clampedTimeout);
   }, []);
 
+  const updateVoiceName = useCallback((newVoiceName) => {
+    console.log('Voice name changed to:', newVoiceName);
+    setVoiceName(newVoiceName);
+    setStoredValue(STORAGE_KEYS.VOICE_NAME, newVoiceName);
+  }, []);
+
   // デバッグ用：設定値をログ出力（開発環境のみ）
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
@@ -139,10 +149,11 @@ export const useSettings = () => {
         isTranslationVoiceOutputEnabled,
         isGrammarCheckEnabled, // 常にtrue
         speakingRate,
-        voiceInputTimeout
+        voiceInputTimeout,
+        voiceName
       });
     }
-  }, [isVoiceInputEnabled, isVoiceOutputEnabled, isTranslationVoiceOutputEnabled, isGrammarCheckEnabled, speakingRate, voiceInputTimeout]);
+  }, [isVoiceInputEnabled, isVoiceOutputEnabled, isTranslationVoiceOutputEnabled, isGrammarCheckEnabled, speakingRate, voiceInputTimeout, voiceName]);
 
   // 設定を全てリセットする関数
   const resetAllSettings = useCallback(() => {
@@ -154,6 +165,7 @@ export const useSettings = () => {
     // Grammar Check は常にtrue（リセットなし）
     setSpeakingRate(TTS_CONFIG.DEFAULT_SPEAKING_RATE || 1.0);
     setVoiceInputTimeout(SPEECH_RECOGNITION_CONFIG.DEFAULT_TIMEOUT);
+    setVoiceName(TTS_CONFIG.VOICE_NAME);
 
     // ローカルストレージからも削除
     Object.values(STORAGE_KEYS).forEach(key => {
@@ -172,8 +184,9 @@ export const useSettings = () => {
     isTranslationVoiceOutputEnabled,
     isGrammarCheckEnabled, // 常にtrue
     speakingRate,
-    voiceInputTimeout
-  }), [isVoiceInputEnabled, isVoiceOutputEnabled, isTranslationVoiceOutputEnabled, isGrammarCheckEnabled, speakingRate, voiceInputTimeout]);
+    voiceInputTimeout,
+    voiceName
+  }), [isVoiceInputEnabled, isVoiceOutputEnabled, isTranslationVoiceOutputEnabled, isGrammarCheckEnabled, speakingRate, voiceInputTimeout, voiceName]);
 
   return {
     // 現在の設定値
@@ -183,6 +196,7 @@ export const useSettings = () => {
     isGrammarCheckEnabled, // 常にtrue
     speakingRate,
     voiceInputTimeout,
+    voiceName,
     
     // 設定更新関数
     toggleVoiceInput,
@@ -191,6 +205,7 @@ export const useSettings = () => {
     updateSpeakingRate,
     resetSpeakingRateToDefault,
     updateVoiceInputTimeout,
+    updateVoiceName,
     
     // ユーティリティ関数
     resetAllSettings,

@@ -68,7 +68,7 @@ The app operates in two distinct modes:
 - **`useChat`**: Message handling, AI communication, conversation history management
 - **`useSettings`**: Settings persistence with localStorage integration
 - **`useVoiceInput`**: Web Speech API integration with timeout and error handling
-- **`useVoiceOutput`**: TTS functionality with Google Cloud + browser fallback
+- **`useVoiceOutput`**: TTS functionality with Gemini 2.5 Flash Preview TTS + browser fallback
 - **`useProblemManager`**: Translation problem generation and management
 - **`useAnswerChecker`**: AI-powered translation validation and feedback
 - **`useKeyboardShortcuts`**: Accessibility and keyboard navigation (Enter, Space, Shift+Enter)
@@ -89,7 +89,7 @@ components/
 - **Single File Design**: All FastAPI endpoints consolidated in `main.py` (1,044 lines) for beginner accessibility
 - **Advanced Prompt System**: Separate `prompts.py` (591 lines) with sophisticated AI prompt templating
 - **AI Integration**: Google Gemini 2.5 Flash with context management and graceful degradation
-- **TTS Service**: Google Cloud Text-to-Speech with browser fallback and flexible voice configuration
+- **TTS Service**: Gemini 2.5 Flash Preview TTS with browser fallback and multiple voice options
 - **Error Handling**: Multi-layer error handling with service availability checks and fallback responses
 
 #### Core API Endpoints
@@ -97,7 +97,7 @@ components/
 - `GET /api/status` - Detailed service configuration status (Gemini, TTS, credentials)
 - `GET /api/welcome` - AI-generated personalized welcome messages
 - `POST /api/respond` - Main conversation endpoint with context management
-- `POST /api/tts` - Text-to-speech with configurable voices and speaking rates
+- `POST /api/tts` - Text-to-speech using Gemini 2.5 Flash Preview TTS with multiple voice options (Kore, Puck, Charon, Zephyr, Aoede, Nova)
 - `GET /api/instant-translation/problem` - Dynamic problem generation with filtering
 - `POST /api/instant-translation/check` - AI-powered answer validation with detailed feedback
 

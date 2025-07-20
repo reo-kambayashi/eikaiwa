@@ -10,9 +10,10 @@ import { convertTextToSpeech, fallbackTextToSpeech } from '../utils/api';
  * 音声出力機能を管理するカスタムフック
  * @param {boolean} isEnabled - 音声出力が有効かどうか
  * @param {number} speakingRate - 読み上げ速度（0.5〜2.0の範囲）
+ * @param {string} voiceName - 使用する音声名（Gemini TTS用）
  * @returns {Object} 音声出力関数
  */
-export const useVoiceOutput = (isEnabled, speakingRate = 1.0) => {
+export const useVoiceOutput = (isEnabled, speakingRate = 1.0, voiceName = "Kore") => {
   const [isSpeechLoading, setIsSpeechLoading] = useState(false);
 
   /**
@@ -37,18 +38,18 @@ export const useVoiceOutput = (isEnabled, speakingRate = 1.0) => {
     setIsSpeechLoading(true);
 
     try {
-      console.log('🎵 Attempting to speak text:', text.substring(0, 50) + '...', 'at rate:', speakingRate);
+      console.log('🎵 Attempting to speak text:', text.substring(0, 50) + '...', 'at rate:', speakingRate, 'voice:', voiceName);
       
-      // Google Cloud TTSを試行（読み上げ速度を含める）
-      const audioElement = await convertTextToSpeech(text, speakingRate);
+      // Gemini TTSを試行（読み上げ速度と音声名を含める）
+      const audioElement = await convertTextToSpeech(text, speakingRate, voiceName);
       
       if (audioElement) {
-        // Google TTSが成功した場合
-        console.log('Using Google Cloud TTS');
+        // Gemini TTSが成功した場合
+        console.log('Using Gemini 2.5 Flash Preview TTS');
         
         return new Promise((resolve) => {
           audioElement.onended = () => {
-            console.log('Google TTS playback completed');
+            console.log('Gemini TTS playback completed');
             setIsSpeechLoading(false);
             resolve(true);
           };

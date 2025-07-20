@@ -89,11 +89,11 @@ class TTSRequest(BaseModel):
     Request model for text-to-speech synthesis.
 
     Defines parameters for converting text to natural-sounding speech
-    using Gemini TTS service.
+    using Gemini 2.5 Flash Preview TTS service.
     """
 
     text: str  # Text to convert to speech
-    voice_name: str = "kore"  # Default: female English voice for Gemini TTS
+    voice_name: str = "Kore"  # Default: bright female English voice for Gemini TTS
     language_code: str = "en-US"  # Language and region code
     speaking_rate: float = 1.0  # Speech speed (0.25-4.0, 1.0 = normal)
 
@@ -199,39 +199,43 @@ async def text_to_speech(request: TTSRequest):
         )
 
     try:
-        # Gemini TTS requires specific content format with modalities
-        content = {"parts": [{"text": request.text}]}
+        # Gemini 2.5 Flash Preview TTS with dictionary-based config
+        content = request.text
 
-        # Generate config with modalities for audio output
+        # Configure generation with dictionary format
         generation_config = {
             "response_modalities": ["AUDIO"],
             "speech_config": {
                 "voice_config": {
                     "prebuilt_voice_config": {
-                        "voice_name": "kore"  # Female English voice from available list
+                        "voice_name": request.voice_name
                     }
                 }
-            },
+            }
         }
 
         # Generate audio using Gemini TTS model
         response = tts_model.generate_content(
-            content, generation_config=generation_config
+            contents=content, 
+            generation_config=generation_config
         )
 
-        # Check if response contains audio data
-        if hasattr(response, "candidates") and response.candidates:
+        # Extract audio data from response
+        if response.candidates and len(response.candidates) > 0:
             candidate = response.candidates[0]
-            if hasattr(candidate, "content") and hasattr(
-                candidate.content, "parts"
-            ):
+            if candidate.content and candidate.content.parts:
                 for part in candidate.content.parts:
                     if hasattr(part, "inline_data") and part.inline_data:
-                        # Found audio data
-                        audio_bytes = part.inline_data.data
-                        audio_base64 = base64.b64encode(audio_bytes).decode(
-                            "utf-8"
-                        )
+                        # Found audio data - extract base64 directly
+                        import base64
+                        audio_data = part.inline_data.data
+                        # audio_data should already be base64 encoded bytes
+                        if isinstance(audio_data, bytes):
+                            audio_base64 = base64.b64encode(audio_data).decode("utf-8")
+                        else:
+                            # If already base64 string, use directly
+                            audio_base64 = audio_data
+                        
                         mime_type = part.inline_data.mime_type or "audio/wav"
                         return {
                             "audio_data": audio_base64,

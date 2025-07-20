@@ -33,7 +33,17 @@ export const TTS_CONFIG = {
   // 音声設定
   VOICE_LANGUAGE: 'en-US',
   VOICE_GENDER: 'female',
-  VOICE_NAME: "kore", // Gemini TTS使用時の音声名（女性音声）
+  VOICE_NAME: "Kore", // Gemini 2.5 Flash Preview TTS使用時の音声名（明るい女性音声）
+  
+  // 利用可能な音声オプション（Gemini 2.5 Flash Preview TTS）
+  AVAILABLE_VOICES: [
+    { value: "Kore", label: "Kore (明るい女性音声)" },
+    { value: "Puck", label: "Puck (元気な音声)" },
+    { value: "Charon", label: "Charon (情報的な音声)" },
+    { value: "Zephyr", label: "Zephyr (明るい音声)" },
+    { value: "Aoede", label: "Aoede (心地よい音声)" },
+    { value: "Nova", label: "Nova (表現豊かな音声)" }
+  ],
   
   // 読み上げ速度の設定
   SPEAKING_RATE: {
