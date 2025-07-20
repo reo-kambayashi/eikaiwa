@@ -18,9 +18,28 @@ make test-backend
 cd backend
 uv run pytest tests/ -v
 
+# 特定のテストを実行
+uv run pytest tests/test_main.py::TestBasicEndpoints::test_root_endpoint
+
 # カバレッジ付きで実行
 uv run pytest tests/ -v --cov=. --cov-report=html
 ```
+
+#### テスト開発ガイド / Test Development Guide
+
+**新しいテストの作成時**:
+1. `test_` プレフィックスでテストファイルを作成
+2. `test_` で始まる分かりやすいメソッド名を使用
+3. 各テストの目的を説明するdocstringを追加
+4. ポジティブケースとネガティブケース両方をテスト
+5. エラーハンドリングとエッジケースのテスト
+
+**テスト要件**:
+- `pytest` - テストフレームワーク
+- `pytest-asyncio` - 非同期エンドポイントテスト用
+- `httpx` - HTTPクライアント（FastAPI TestClientに含まれる）
+
+これらは `pyproject.toml` の開発用依存関係に含まれています。
 
 ### フロントエンドテスト / Frontend Tests
 

@@ -29,3 +29,40 @@ yarn-error.log*
 # Credentials and secrets
 backend/credentials.json
 **/credentials.json
+
+# Python cache and logs
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+*.log
+
+# Test artifacts and temporary files
+*.tmp
+*.bak
+*~
+test_audio_*.wav
+*_test.py
+*_test.html
+*_test.sh
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
