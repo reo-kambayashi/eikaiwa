@@ -157,3 +157,152 @@ export const withRetry = async (asyncFn, maxRetries = 3, delay = 1000) => {
   
   throw lastError;
 };
+
+/**
+ * サードパーティ拡張機能のエラーパターンを定義
+ * Third-party extension error patterns
+ */
+const EXTENSION_ERROR_PATTERNS = [
+  // Grammarly extension errors
+  /grm ERROR.*iterable.*Not supported.*in app messages/i,
+  /grammarly/i,
+  
+  // LastPass extension errors  
+  /lastpass/i,
+  /lp-.*error/i,
+  
+  // Adblock extension errors
+  /adblock/i,
+  /ublock/i,
+  
+  // Other common extension patterns
+  /extension.*error/i,
+  /chrome-extension/i,
+  /moz-extension/i,
+  /webkit-masked-url/i,
+  
+  // Generic content script errors
+  /content.*script.*error/i,
+  /injected.*script.*error/i
+];
+
+/**
+ * エラーがサードパーティ拡張機能によるものかを判定
+ * Check if error is caused by third-party browser extensions
+ */
+export const isExtensionError = (error) => {
+  if (!error) return false;
+  
+  const errorString = String(error.message || error.stack || error);
+  return EXTENSION_ERROR_PATTERNS.some(pattern => pattern.test(errorString));
+};
+
+/**
+ * コンソールエラーフィルタリングの設定
+ * Setup console error filtering to suppress extension errors
+ */
+export const setupConsoleErrorFiltering = () => {
+  // 元のconsole.errorを保存
+  const originalConsoleError = console.error;
+  
+  // カスタムconsole.errorでラップ
+  console.error = (...args) => {
+    // エラーメッセージを文字列として結合
+    const errorMessage = args.join(' ');
+    
+    // 拡張機能のエラーかチェック
+    if (isExtensionError({ message: errorMessage })) {
+      // 開発環境でのみ拡張機能エラーを表示（デバッグ用）
+      if (process.env.NODE_ENV === 'development') {
+        originalConsoleError('🔧 [Filtered Extension Error]:', ...args);
+      }
+      return; // エラーを表示しない
+    }
+    
+    // アプリケーション自体のエラーは通常通り表示
+    originalConsoleError(...args);
+  };
+  
+  // グローバルエラーハンドラーの設定
+  window.addEventListener('error', (event) => {
+    if (isExtensionError(event.error)) {
+      event.preventDefault(); // エラーの伝播を防ぐ
+      return;
+    }
+    
+    // アプリケーションエラーは通常通り処理
+    logError(event.error, 'Global error handler');
+  });
+  
+  // Promise rejectionのハンドラー
+  window.addEventListener('unhandledrejection', (event) => {
+    if (isExtensionError(event.reason)) {
+      event.preventDefault(); // エラーの伝播を防ぐ
+      return;
+    }
+    
+    // アプリケーションエラーは通常通り処理
+    logError(event.reason, 'Unhandled promise rejection');
+  });
+};
+
+/**
+ * ブラウザ拡張機能の検出
+ * Detect problematic browser extensions
+ */
+export const detectProblematicExtensions = () => {
+  const detectedExtensions = [];
+  
+  // Grammarly検出
+  if (document.querySelector('grammarly-desktop-integration') || 
+      window.grammarly || 
+      document.querySelector('[data-grammarly-extension]')) {
+    detectedExtensions.push('Grammarly');
+  }
+  
+  // LastPass検出
+  if (document.querySelector('[data-lastpass-extension]') ||
+      window.lpVault ||
+      document.querySelector('#lp-pom-root')) {
+    detectedExtensions.push('LastPass');
+  }
+  
+  // AdBlock系の検出
+  if (window.adblockSuspended || 
+      document.querySelector('[data-adblock-key]')) {
+    detectedExtensions.push('AdBlock');
+  }
+  
+  return detectedExtensions;
+};
+
+/**
+ * 拡張機能による干渉の警告表示
+ * Show warning about extension interference
+ */
+export const showExtensionWarning = (extensions) => {
+  if (extensions.length === 0) return;
+  
+  const warningMessage = `
+以下のブラウザ拡張機能が検出されました。
+アプリの動作に影響する可能性があります：
+
+${extensions.join(', ')}
+
+問題が発生する場合は、これらの拡張機能を一時的に無効にしてお試しください。
+
+The following browser extensions were detected.
+They may interfere with the app's functionality:
+
+${extensions.join(', ')}
+
+If you experience issues, please try temporarily disabling these extensions.
+  `;
+  
+  // 開発環境でのみ警告を表示
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('🔧 Extension Warning:', warningMessage);
+  }
+  
+  return warningMessage;
+};

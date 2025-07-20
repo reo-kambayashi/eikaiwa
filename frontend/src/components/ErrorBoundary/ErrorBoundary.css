@@ -1,0 +1,101 @@
+/* ============================================================================
+   エラーバウンダリーコンポーネントのスタイル
+   Error Boundary Component Styles
+   ============================================================================ */
+
+.error-boundary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  padding: 2rem;
+  background-color: var(--error-background, #fdf2f2);
+  border: 1px solid var(--error-border, #fca5a5);
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.error-boundary__container {
+  text-align: center;
+  max-width: 500px;
+}
+
+.error-boundary__title {
+  color: var(--error-color, #dc2626);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.error-boundary__message {
+  color: var(--text-color, #374151);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.error-boundary__button {
+  background-color: var(--primary-color, #3b82f6);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.error-boundary__button:hover {
+  background-color: var(--primary-color-hover, #2563eb);
+}
+
+.error-boundary__button:focus {
+  outline: 2px solid var(--primary-color, #3b82f6);
+  outline-offset: 2px;
+}
+
+.error-boundary__details {
+  margin-top: 1.5rem;
+  text-align: left;
+  background-color: var(--background-secondary, #f9fafb);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.error-boundary__details summary {
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-color, #374151);
+}
+
+.error-boundary__error-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--error-color, #dc2626);
+  background-color: var(--code-background, #1f2937);
+  color: var(--code-color, #f9fafb);
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+  .error-boundary {
+    padding: 1rem;
+    min-height: 200px;
+  }
+  
+  .error-boundary__title {
+    font-size: 1.25rem;
+  }
+  
+  .error-boundary__button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}

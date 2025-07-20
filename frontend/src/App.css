@@ -88,50 +88,53 @@
 }
 
 /* ============================================================================
-   改善されたメインレイアウト - モダンで使いやすいデザイン
+   改善されたメインレイアウト - PC画面全体を活用したデザイン
    ============================================================================ */
 
 .App {
   font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
   background: #000000;
   min-height: 100vh;
+  height: 100vh; /* 画面全体の高さを活用 */
   display: flex;
   flex-direction: column;
   color: var(--color-text-primary);
   line-height: 1.6;
+  overflow: hidden; /* スクロールを各コンポーネント内で管理 */
 }
 
-/* メインコンテナ - 改善されたレスポンシブレイアウト */
+/* メインコンテナ - PC画面全体を活用したレスポンシブレイアウト */
 .main-container {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 80px); /* ヘッダーの高さを除く */
+  height: calc(100vh - 60px); /* ヘッダーの高さを最小化 */
   overflow: hidden;
 }
 
-/* チャットモードレイアウト - 3カラムレスポンシブ */
+/* チャットモードレイアウト - PC画面を最大活用する3カラム */
 .chat-mode-layout {
   display: grid;
-  grid-template-columns: 300px 1fr 350px;
+  grid-template-columns: 280px 1fr 1fr; /* 左サイドバーを少し狭く、メインとGeminiを等幅に */
   grid-template-areas: "sidebar main gemini";
-  gap: var(--space-md);
+  gap: var(--space-sm); /* 無駄な余白を削減 */
   height: 100%;
-  padding: var(--space-md);
+  padding: var(--space-sm); /* パディングを最小化 */
 }
 
-/* 設定サイドバー - 折りたたみ可能 */
+/* 設定サイドバー - 効率的な表示 */
 .settings-sidebar {
   grid-area: sidebar;
   background: var(--color-bg-elevated);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md); /* 半径を小さく */
   box-shadow: var(--shadow-md);
   border: 1px solid var(--color-border);
   overflow-y: auto;
   transition: var(--transition-base);
+  padding: var(--space-sm); /* 内側の余白も削減 */
 }
 
-/* メインチャットエリア */
+/* メインチャットエリア - 画面領域を最大活用 */
 .chat-main {
   grid-area: main;
   display: flex;
@@ -142,40 +145,79 @@
 .chat-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 200px);
+  height: 100%; /* 利用可能な全高を使用 */
   background: var(--color-bg-elevated);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   border: 1px solid var(--color-border);
   overflow: hidden;
 }
 
-/* Geminiサイドバー - オプショナル */
+/* Geminiサイドバー - PC画面で常時表示 */
 .gemini-sidebar {
   grid-area: gemini;
   background: var(--color-bg-elevated);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   border: 1px solid var(--color-border);
   overflow-y: auto;
+  padding: var(--space-sm);
 }
 
-/* 瞬間英作文モードレイアウト */
+/* 瞬間英作文モードレイアウト - 画面全体を活用 */
 .translation-mode-layout {
   flex: 1;
-  padding: var(--space-md);
+  padding: var(--space-sm); /* 余白を最小化 */
+  height: 100%; /* 利用可能な全高を使用 */
 }
 
 .translation-main {
   height: 100%;
   background: var(--color-bg-elevated);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   border: 1px solid var(--color-border);
+  padding: var(--space-sm); /* 内側の余白も削減 */
+}
+
+/* PC向けレスポンシブデザイン - より広い画面での最適化 */
+@media (min-width: 1440px) {
+  .chat-mode-layout {
+    grid-template-columns: 320px 1fr 1fr; /* 大型画面ではサイドバーを少し広く */
+    gap: var(--space-md);
+    padding: var(--space-md);
+  }
+  
+  .settings-sidebar,
+  .gemini-sidebar {
+    padding: var(--space-md);
+  }
+  
+  .chat-container {
+    height: 100%; /* 大画面では高さ制限なし */
+  }
+}
+
+/* 超大型画面での最適化 */
+@media (min-width: 1920px) {
+  .chat-mode-layout {
+    grid-template-columns: 360px 1fr 1fr; /* 更に広いサイドバー */
+    max-width: 1800px; /* 最大幅制限 */
+    margin: 0 auto; /* 中央配置 */
+  }
+}
+
+/* 中型画面向け - タブレット横向き */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .chat-mode-layout {
+    grid-template-columns: 260px 1fr 1fr;
+    grid-template-areas: 
+      "sidebar main gemini";
+  }
 }
 
 /* レスポンシブデザイン - タブレット */
-@media (max-width: 1024px) {
+@media (max-width: 1024px) and (max-width: 768px) {
   .chat-mode-layout {
     grid-template-columns: 280px 1fr;
     grid-template-areas: 
@@ -200,166 +242,24 @@
       "main"
       "sidebar";
     grid-template-rows: 1fr auto;
+    padding: var(--space-xs);
+    gap: var(--space-xs);
   }
   
   .settings-sidebar {
-    max-height: 200px; /* モバイルでは高さ制限 */
+    max-height: 180px; /* モバイルでは高さ制限 */
     border-radius: var(--radius-md) var(--radius-md) 0 0;
+    order: 2; /* サイドバーを下部に配置 */
   }
   
   .chat-main {
     min-height: 400px;
-  }
-}
-.app-header {
-  background: var(--color-bg-primary);
-  padding: var(--space-xl) var(--space-lg);
-  text-align: center;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.app-header h1 {
-  margin: 0;
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-light);
-  letter-spacing: -0.02em;
-  color: var(--color-text-primary);
-}
-
-/* 3分割レイアウト - クリーン&モダン */
-.app-layout {
-  display: flex;
-  flex: 1;
-  gap: var(--space-lg);
-  padding: var(--space-xl);
-  height: calc(100vh - 120px);
-  background: linear-gradient(135deg, var(--color-bg-secondary) 0%, #f8fafc 100%);
-  animation: fadeIn var(--animation-duration-slow) ease-out;
-}
-
-/* 左側：設定セクション - ミニマル */
-.settings-section {
-  flex: 1;
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-xl);
-  padding: var(--space-xl);
-  box-shadow: var(--shadow-lg);
-  overflow-y: auto;
-  border: 1px solid var(--color-border);
-  transition: all var(--animation-duration-normal) ease-out;
-  backdrop-filter: blur(10px);
-}
-
-.settings-section:hover {
-  box-shadow: var(--shadow-xl);
-  transform: translateY(-2px);
-}
-
-/* 設定セクションヘッダー */
-.settings-section-header {
-  margin-bottom: var(--space-md); /* 縮小: lg → md */
-  padding-bottom: var(--space-sm); /* 縮小: md → sm */
-  border-bottom: 2px solid var(--color-border);
-}
-
-.settings-section-header h2 {
-  color: var(--color-primary);
-  font-size: var(--font-size-base); /* 縮小: lg → base */
-  font-weight: var(--font-weight-semibold);
-  margin: 0 0 var(--space-xs) 0;
-  letter-spacing: -0.01em;
-}
-
-.settings-section-header p {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  margin: 0;
-  line-height: 1.5;
-}
-
-/* 中央：チャットセクション - ミニマル */
-.chat-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-xl);
-  padding: var(--space-xl);
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--color-border);
-  transition: all var(--animation-duration-normal) ease-out;
-  backdrop-filter: blur(10px);
-}
-
-.chat-section:hover {
-  box-shadow: var(--shadow-xl);
-  transform: translateY(-2px);
-}
-
-/* 右側：Geminiチャットセクション - ミニマル */
-.gemini-chat-section {
-  flex: 1;
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  display: flex;
-  flex-direction: column;
-  transition: all var(--animation-duration-normal) ease-out;
-  backdrop-filter: blur(10px);
-}
-
-.gemini-chat-section:hover {
-  box-shadow: var(--shadow-xl);
-  transform: translateY(-2px);
-}
-
-/* ============================================================================
-   レスポンシブデザイン
-   ============================================================================ */
-
-@media (max-width: 1200px) {
-  .app-layout {
-    flex-direction: column;
-    height: auto;
+    order: 1; /* メインチャットを上部に配置 */
   }
   
-  .settings-section,
-  .chat-section,
-  .gemini-chat-section {
-    flex: none;
-    width: 100%;
-  }
-  
-  .settings-section {
-    order: 1;
-  }
-  
-  .chat-section {
-    order: 2;
-    min-height: 500px;
-  }
-  
-  .gemini-chat-section {
-    order: 3;
-  }
-}
-
-@media (max-width: 768px) {
-  .app-layout {
-    padding: var(--space-sm);
-    gap: var(--space-sm);
-  }
-  
-  .settings-section,
-  .chat-section,
-  .coming-soon-section {
-    padding: var(--space-lg);
-  }
-  
+  /* モバイルでは各セクションの余白を最小化 */
   .app-header {
-    padding: var(--space-md);
+    padding: var(--space-sm);
   }
   
   .app-header h1 {
@@ -371,14 +271,235 @@
     padding: var(--space-sm);
   }
 }
+.app-header {
+  background: var(--color-bg-primary);
+  padding: var(--space-md) var(--space-lg); /* ヘッダーの高さを削減 */
+  text-align: center;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0; /* ヘッダーサイズ固定 */
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: var(--font-size-2xl); /* サイズを少し縮小 */
+  font-weight: var(--font-weight-light);
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+}
+
+/* 3分割レイアウト - PC画面全体を最大活用 */
+.app-layout {
+  display: flex;
+  flex: 1;
+  gap: var(--space-sm); /* 余白を削減 */
+  padding: var(--space-sm); /* パディングを最小化 */
+  height: calc(100vh - 80px); /* ヘッダー分を差し引いた全高を活用 */
+  background: linear-gradient(135deg, var(--color-bg-secondary) 0%, #f8fafc 100%);
+  animation: fadeIn var(--animation-duration-slow) ease-out;
+  overflow: hidden; /* スクロールを各セクション内で管理 */
+}
+
+/* 左側：設定セクション - 画面領域を効率活用 */
+.settings-section {
+  flex: 0 0 280px; /* 固定幅でコンパクトに */
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md); /* パディングを削減 */
+  box-shadow: var(--shadow-lg);
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  transition: all var(--animation-duration-normal) ease-out;
+  backdrop-filter: blur(10px);
+  height: 100%; /* 利用可能な全高を使用 */
+}
+
+.settings-section:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-1px); /* ホバー効果を軽減 */
+}
+
+/* 設定セクションヘッダー - よりコンパクトに */
+.settings-section-header {
+  margin-bottom: var(--space-sm); /* 更に縮小 */
+  padding-bottom: var(--space-xs); /* 更に縮小 */
+  border-bottom: 2px solid var(--color-border);
+}
+
+.settings-section-header h2 {
+  color: var(--color-primary);
+  font-size: var(--font-size-sm); /* 更に縮小 */
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--space-xs) 0;
+  letter-spacing: -0.01em;
+}
+
+.settings-section-header p {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs); /* より小さく */
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* 中央：チャットセクション - 画面領域を最大活用 */
+.chat-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md); /* パディングを削減 */
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border);
+  transition: all var(--animation-duration-normal) ease-out;
+  backdrop-filter: blur(10px);
+  height: 100%; /* 利用可能な全高を使用 */
+  min-width: 400px; /* 最小幅を確保 */
+}
+
+.chat-section:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-1px); /* ホバー効果を軽減 */
+}
+
+/* 右側：Geminiチャットセクション - 効率的な表示 */
+.gemini-chat-section {
+  flex: 0 0 350px; /* 固定幅でバランス良く */
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  transition: all var(--animation-duration-normal) ease-out;
+  backdrop-filter: blur(10px);
+  height: 100%; /* 利用可能な全高を使用 */
+}
+
+.gemini-chat-section:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-1px); /* ホバー効果を軽減 */
+}
+
+/* ============================================================================
+   レスポンシブデザイン - PC画面を最大活用しつつ適切な縮退
+   ============================================================================ */
+
+/* 大型デスクトップ画面での最適化 */
+@media (min-width: 1600px) {
+  .app-layout {
+    padding: var(--space-md);
+    gap: var(--space-md);
+  }
+  
+  .settings-section {
+    flex: 0 0 320px; /* より広いサイドバー */
+    padding: var(--space-lg);
+  }
+  
+  .gemini-chat-section {
+    flex: 0 0 400px; /* より広いGeminiセクション */
+  }
+}
+
+/* 標準デスクトップ画面 */
+@media (max-width: 1200px) and (min-width: 1025px) {
+  .app-layout {
+    padding: var(--space-sm);
+    gap: var(--space-sm);
+  }
+  
+  .settings-section {
+    flex: 0 0 260px;
+  }
+  
+  .gemini-chat-section {
+    flex: 0 0 320px;
+  }
+}
+
+/* 小型デスクトップ・タブレット横向き */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .app-layout {
+    flex-direction: row; /* 横並びを維持 */
+    padding: var(--space-sm);
+    gap: var(--space-sm);
+  }
+  
+  .settings-section {
+    flex: 0 0 240px;
+    padding: var(--space-sm);
+  }
+  
+  .chat-section {
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  .gemini-chat-section {
+    flex: 0 0 280px;
+  }
+}
+
+/* タブレット縦向き */
+@media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+    height: auto;
+    padding: var(--space-xs);
+    gap: var(--space-xs);
+  }
+  
+  .settings-section {
+    flex: none;
+    width: 100%;
+    order: 1;
+    max-height: 200px; /* 高さ制限 */
+    overflow-y: auto;
+  }
+  
+  .chat-section {
+    flex: none;
+    width: 100%;
+    order: 2;
+    min-height: 400px; /* 十分な高さを確保 */
+  }
+  
+  .gemini-chat-section {
+    flex: none;
+    width: 100%;
+    order: 3;
+    min-height: 300px;
+  }
+}
 
 @media (max-width: 480px) {
+  .app-header {
+    padding: var(--space-sm);
+  }
+  
   .app-header h1 {
     font-size: var(--font-size-lg);
   }
   
+  .app-layout {
+    padding: var(--space-xs);
+    gap: var(--space-xs);
+  }
+  
+  .settings-section,
+  .chat-section,
+  .gemini-chat-section {
+    padding: var(--space-sm);
+  }
+  
   .setting-group {
-    padding: var(--space-md);
+    padding: var(--space-sm);
+  }
+  
+  .message {
+    max-width: 95%;
+    padding: var(--space-sm);
   }
 }
 
@@ -391,13 +512,13 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   overflow-y: auto;
-  padding: var(--space-md); /* 縮小: lg → md */
-  margin-bottom: var(--space-md); /* 縮小: lg → md */
+  padding: var(--space-sm); /* 更に縮小 */
+  margin-bottom: var(--space-sm); /* 更に縮小 */
   background-color: var(--color-bg-secondary);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
   scroll-behavior: smooth;
-  max-height: 400px; /* 最大高さを制限してスクロール可能に */
-  min-height: 200px; /* 最小高さを確保 */
+  height: 100%; /* 利用可能な全高を使用 */
+  min-height: 300px; /* 最小高さを調整 */
 }
 
 .message {
@@ -668,24 +789,22 @@ h1 {
   font-size: 2rem;
 }
 
-/* ============================================================================
-   シンプルな設定パネル
-   ============================================================================ */
-
-/* 設定パネル全体 */
+/* シンプルな設定パネル - よりコンパクトなデザイン */
 .settings-panel {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: var(--space-sm); /* 間隔を削減 */
   max-width: 100%;
+  height: 100%; /* 利用可能な全高を使用 */
+  overflow-y: auto;
 }
 
-/* 個別設定項目のコンテナ */
+/* 個別設定項目のコンテナ - よりコンパクト */
 .setting-group {
   background-color: var(--color-bg-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: var(--space-lg);
+  padding: var(--space-sm); /* パディングを削減 */
   box-shadow: var(--shadow-sm);
   transition: all var(--animation-duration-fast) ease-out;
 }
@@ -697,17 +816,18 @@ h1 {
   transform: translateY(-1px);
 }
 
-/* 設定ラベル */
+/* 設定ラベル - よりコンパクトな表示 */
 .setting-label {
   display: block;
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-sm); /* 間隔を削減 */
   text-align: center;
-  padding: var(--space-sm);
+  padding: var(--space-xs); /* パディングを削減 */
   background-color: var(--color-bg-primary);
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
+  font-size: var(--font-size-sm); /* フォントサイズを小さく */
 }
 
 /* 選択ボックス */
@@ -727,19 +847,19 @@ h1 {
   outline: none;
 }
 
-/* Voice Controlsコンテナ */
+/* Voice Controlsコンテナ - よりコンパクト */
 .voice-controls {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--space-xs); /* 間隔を削減 */
 }
 
-/* チェックボックス項目 */
+/* チェックボックス項目 - よりコンパクト */
 .voice-toggle {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-md);
+  gap: var(--space-xs); /* 間隔を削減 */
+  padding: var(--space-sm); /* パディングを削減 */
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background-color: var(--color-bg-primary);
@@ -758,23 +878,25 @@ h1 {
 .toggle-text {
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
+  font-size: var(--font-size-sm); /* フォントサイズを小さく */
 }
 
 /* ============================================================================
    入力エリアとメッセージ送信部分のスタイル
    ============================================================================ */
 
-/* 入力エリア全体のコンテナ */
+/* 入力エリア全体のコンテナ - よりコンパクト */
 .input-area {
   display: flex;
   gap: var(--space-sm);
   align-items: center;
-  padding: var(--space-md);
+  padding: var(--space-sm); /* パディングを削減 */
   background-color: var(--color-bg-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
-  margin-top: var(--space-md);
+  margin-top: var(--space-sm); /* マージンを削減 */
+  flex-shrink: 0; /* 縮小を防ぐ */
 }
 
 /* メッセージ入力フィールド */
@@ -959,30 +1081,29 @@ h1 {
   }
 }
 
-/* ============================================================================
-   瞬間英作文モード用レイアウト
-   ============================================================================ */
-
+/* 瞬間英作文モード用レイアウト - 画面全体を最大活用 */
 .instant-translation-layout {
   flex: 1;
-  padding: var(--space-xl);
+  padding: var(--space-sm); /* パディングを削減 */
   background: linear-gradient(135deg, var(--color-bg-secondary) 0%, #f8fafc 100%);
-  min-height: calc(100vh - 120px);
+  height: calc(100vh - 80px); /* 利用可能な全高を使用 */
   display: flex;
   align-items: flex-start;
   justify-content: center;
   animation: fadeIn var(--animation-duration-slow) ease-out;
+  overflow: hidden; /* スクロールをコンポーネント内で管理 */
 }
 
 @media (max-width: 768px) {
   .instant-translation-layout {
-    padding: var(--space-lg);
+    padding: var(--space-sm);
+    height: calc(100vh - 60px); /* モバイル用調整 */
   }
 }
 
 @media (max-width: 480px) {
   .instant-translation-layout {
-    padding: var(--space-md);
+    padding: var(--space-xs);
   }
 }
 

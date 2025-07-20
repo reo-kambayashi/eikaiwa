@@ -1,432 +1,640 @@
-/* Modern Settings Panel Component Styles */
+/* ============================================================================
+   最適化された設定パネル - モダンなカード形式レイアウト
+   効率的なスペース活用とスマートなグルーピングを実装
+   ============================================================================ */
 
-.settings-panel {
+.settings-panel-optimized {
   height: 100%;
   display: flex;
   flex-direction: column;
   background: transparent;
-  position: relative;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Panel Header */
-.panel-header {
-  padding: var(--space-4) var(--space-6);
-  background: var(--glass-background-strong);
-  border-bottom: 1px solid var(--glass-border);
-  backdrop-filter: blur(10px);
-  position: sticky;
-  top: 0;
-  z-index: 10;
+/* ============================================================================
+   コンパクトヘッダー
+   ============================================================================ */
+
+.panel-header-compact {
+  padding: var(--space-3) var(--space-4);
+  background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-2);
 }
 
-.panel-title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin: 0;
-  background: linear-gradient(135deg, var(--color-secondary-600), var(--color-primary-600));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Settings Body */
-.settings-body {
-  flex: 1;
-  padding: var(--space-4) var(--space-6);
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border-secondary) transparent;
-}
-
-.settings-body::-webkit-scrollbar {
-  width: 6px;
-}
-
-.settings-body::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.settings-body::-webkit-scrollbar-thumb {
-  background-color: var(--color-border-secondary);
-  border-radius: var(--radius-full);
-  opacity: 0.5;
-}
-
-.settings-body::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-border-tertiary);
-  opacity: 0.8;
-}
-
-/* Settings Sections */
-.settings-section {
-  margin-bottom: var(--space-8);
-}
-
-.settings-section:last-child {
-  margin-bottom: 0;
-}
-
-.section-title {
+.panel-title-compact {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
-  margin-bottom: var(--space-4);
+  margin: 0;
   display: flex;
   align-items: center;
   gap: var(--space-2);
+}
+
+.settings-icon {
+  font-size: var(--font-size-sm);
+  opacity: 0.8;
+}
+
+/* ============================================================================
+   設定コンテンツエリア
+   ============================================================================ */
+
+.settings-content {
+  flex: 1;
+  padding: 0 var(--space-4) var(--space-4);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ============================================================================
+   モダンなコントロールカード
+   ============================================================================ */
+
+.control-card {
+  background: linear-gradient(135deg, #1a1a1a 0%, #111111 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
   position: relative;
+  overflow: hidden;
 }
 
-.section-title::before {
+.control-card::before {
   content: '';
-  width: 4px;
-  height: 20px;
-  background: linear-gradient(135deg, var(--color-primary-500), var(--color-secondary-500));
-  border-radius: var(--radius-full);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #ffffff 0%, transparent 100%);
+  opacity: 0.3;
 }
 
-/* Setting Items */
-.setting-item {
-  margin-bottom: var(--space-6);
+.control-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* プライマリコントロール（主要設定） */
+.primary-controls::before {
+  background: linear-gradient(90deg, #4ade80 0%, #22c55e 50%, transparent 100%);
+  opacity: 0.6;
+}
+
+/* スピードコントロール */
+.speed-controls-card::before {
+  background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 50%, transparent 100%);
+  opacity: 0.6;
+}
+
+/* ============================================================================
+   カードヘッダー
+   ============================================================================ */
+
+.card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-surface-primary);
-  border: 1px solid var(--color-border-primary);
-  border-radius: var(--radius-xl);
-  transition: all var(--transition-fast);
+  margin-bottom: var(--space-3);
 }
 
-.setting-item:hover {
-  border-color: var(--color-border-secondary);
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-1px);
-}
-
-.setting-item:last-child {
-  margin-bottom: 0;
-}
-
-.setting-name {
+.card-title {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.voice-icon,
+.speed-icon {
+  font-size: var(--font-size-sm);
+  opacity: 0.9;
+}
+
+.current-speed {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  background: rgba(255, 255, 255, 0.1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ============================================================================
+   コントロールグリッド（主要設定）
+   ============================================================================ */
+
+.controls-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.control-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.control-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.control-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   flex: 1;
 }
 
-/* Modern Toggle Switch */
-.toggle-switch {
+.label-text {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.label-status {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.label-status {
+  background: #dc2626;
+  color: white;
+}
+
+.control-item:has(input:checked) .label-status {
+  background: #16a34a;
+  color: white;
+}
+
+.speaking-indicator {
+  animation: pulse 1.5s ease-in-out infinite;
+  font-size: var(--font-size-xs);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ============================================================================
+   モダンなトグルスイッチ
+   ============================================================================ */
+
+.modern-toggle {
   position: relative;
   display: inline-block;
-  width: 48px;
-  height: 24px;
+  width: 42px;
+  height: 22px;
   flex-shrink: 0;
 }
 
-.toggle-switch input {
+.modern-toggle input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-.slider {
+.toggle-slider {
   position: absolute;
   cursor: pointer;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--color-border-primary);
+  background: #374151;
   transition: var(--transition-fast);
   border-radius: var(--radius-full);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.slider:before {
+.toggle-slider:before {
   position: absolute;
   content: "";
-  height: 20px;
-  width: 20px;
+  height: 16px;
+  width: 16px;
   left: 2px;
   bottom: 2px;
-  background-color: var(--color-surface-primary);
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   transition: var(--transition-fast);
   border-radius: 50%;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-.toggle-switch input:checked + .slider {
-  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+.modern-toggle input:checked + .toggle-slider {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  border-color: #16a34a;
 }
 
-.toggle-switch input:focus + .slider {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), var(--shadow-sm);
+.modern-toggle input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
 }
 
-.toggle-switch input:checked + .slider:before {
-  transform: translateX(24px);
-}
-
-.toggle-switch input:disabled + .slider {
+.modern-toggle input:disabled + .toggle-slider {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* Compact Select */
-.compact-select {
-  min-width: 100px;
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--font-size-sm);
-  border: 1px solid var(--color-border-primary);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-primary);
+/* ============================================================================
+   スピードセレクター
+   ============================================================================ */
+
+.speed-selector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.speed-display {
+  text-align: center;
+  padding: var(--space-2);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.speed-value {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.speed-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-1);
+}
+
+.speed-btn-modern {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--color-text-primary);
   cursor: pointer;
   transition: all var(--transition-fast);
-}
-
-.compact-select:focus {
-  outline: none;
-  border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.compact-select:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Speed Controls */
-.speed-controls {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-2);
-  margin-top: var(--space-3);
-}
-
-.speed-btn {
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  border: 1px solid var(--color-border-primary);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-primary);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
   text-align: center;
-}
-
-.speed-btn:hover:not(:disabled) {
-  border-color: var(--color-primary-500);
-  color: var(--color-primary-600);
-  background: var(--color-primary-50);
-}
-
-.speed-btn.active {
-  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
-  border-color: var(--color-primary-600);
-  color: var(--color-text-inverse);
-  box-shadow: var(--shadow-sm);
-}
-
-.speed-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Warning Section */
-.warning-section {
-  margin-top: var(--space-6);
-  padding: var(--space-4);
-  background: var(--color-warning-50);
-  border: 1px solid var(--color-warning-200);
-  border-radius: var(--radius-xl);
-}
-
-.warning-message {
-  font-size: var(--font-size-sm);
-  color: var(--color-warning-700);
-  text-align: center;
-  font-weight: var(--font-weight-medium);
+  min-height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.speed-btn-modern:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+  color: #60a5fa;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.speed-btn-modern.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #2563eb;
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+.speed-btn-modern:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ============================================================================
+   アドバンス設定（折りたたみ）
+   ============================================================================ */
+
+.advanced-controls {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.advanced-controls::before {
+  background: linear-gradient(90deg, #8b5cf6 0%, #a855f7 50%, transparent 100%);
+  opacity: 0.5;
+}
+
+.advanced-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
   gap: var(--space-2);
-}
-
-.warning-message::before {
-  content: '⚠️';
-  font-size: var(--font-size-base);
-}
-
-/* Dark Mode Support */
-[data-theme="dark"] .setting-item {
-  background: var(--color-surface-secondary);
-  border-color: var(--color-border-primary);
-}
-
-[data-theme="dark"] .setting-item:hover {
-  border-color: var(--color-border-secondary);
-}
-
-[data-theme="dark"] .slider {
-  background-color: var(--color-border-secondary);
-}
-
-[data-theme="dark"] .slider:before {
-  background-color: var(--color-surface-primary);
-}
-
-[data-theme="dark"] .compact-select,
-[data-theme="dark"] .speed-btn {
-  background: var(--color-surface-secondary);
-  border-color: var(--color-border-primary);
+  padding: var(--space-2) 0;
+  background: none;
+  border: none;
   color: var(--color-text-primary);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast);
 }
 
-[data-theme="dark"] .speed-btn:hover:not(:disabled) {
-  background: var(--color-primary-900);
-  border-color: var(--color-primary-600);
-  color: var(--color-primary-400);
+.advanced-toggle:hover {
+  color: #a855f7;
 }
 
-[data-theme="dark"] .warning-section {
-  background: rgba(245, 158, 11, 0.1);
-  border-color: rgba(245, 158, 11, 0.3);
+.advanced-icon {
+  font-size: var(--font-size-xs);
+  opacity: 0.8;
 }
 
-[data-theme="dark"] .warning-message {
-  color: var(--color-warning-400);
+.advanced-text {
+  flex: 1;
+  text-align: left;
 }
 
-/* Responsive Design */
+.expand-icon {
+  font-size: var(--font-size-xs);
+  transition: transform var(--transition-fast);
+}
+
+.expand-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.advanced-content {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.advanced-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.advanced-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.advanced-select {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.advanced-select:focus {
+  outline: none;
+  border-color: #a855f7;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.advanced-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================================
+   警告カード
+   ============================================================================ */
+
+.warning-card {
+  background: linear-gradient(135deg, #451a03 0%, #7c2d12 100%);
+  border: 1px solid #ea580c;
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+}
+
+.warning-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #ea580c 0%, #fb923c 50%, transparent 100%);
+  opacity: 0.8;
+}
+
+.warning-content {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.warning-icon {
+  font-size: var(--font-size-base);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.warning-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.warning-text strong {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: #fed7aa;
+}
+
+.warning-detail {
+  font-size: var(--font-size-xs);
+  color: #fdba74;
+  opacity: 0.9;
+}
+
+/* ============================================================================
+   レスポンシブデザイン
+   ============================================================================ */
+
 @media (max-width: 768px) {
-  .panel-header {
-    padding: var(--space-3) var(--space-4);
+  .settings-panel-optimized {
+    height: auto;
+    max-height: 220px;
   }
   
-  .settings-body {
-    padding: var(--space-3) var(--space-4);
-  }
-  
-  .setting-item {
+  .panel-header-compact {
     padding: var(--space-2) var(--space-3);
-    flex-direction: column;
-    align-items: stretch;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+  }
+  
+  .settings-content {
+    padding: 0 var(--space-3) var(--space-3);
     gap: var(--space-2);
   }
   
-  .setting-name {
-    text-align: center;
+  .control-card {
+    padding: var(--space-3);
   }
   
-  .toggle-switch {
-    align-self: center;
+  .controls-grid {
+    gap: var(--space-2);
   }
   
-  .compact-select {
-    width: 100%;
-  }
-  
-  .speed-controls {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-1);
-  }
-  
-  .speed-btn {
+  .control-item {
     padding: var(--space-2);
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .speed-buttons {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .speed-btn-modern {
+    min-height: 28px;
+    font-size: var(--font-size-xs);
+  }
+  
+  .card-header {
+    margin-bottom: var(--space-2);
+  }
+  
+  .card-title {
     font-size: var(--font-size-xs);
   }
 }
 
 @media (max-width: 480px) {
-  .panel-header {
-    padding: var(--space-2) var(--space-3);
+  .settings-panel-optimized {
+    max-height: 200px;
   }
   
-  .settings-body {
-    padding: var(--space-2) var(--space-3);
+  .panel-header-compact {
+    padding: var(--space-1) var(--space-2);
   }
   
-  .settings-section {
-    margin-bottom: var(--space-6);
-  }
-  
-  .setting-item {
-    border-radius: var(--radius-lg);
-  }
-  
-  .panel-title {
-    font-size: var(--font-size-base);
-  }
-  
-  .section-title {
+  .panel-title-compact {
     font-size: var(--font-size-sm);
   }
   
-  .setting-name {
+  .settings-content {
+    padding: 0 var(--space-2) var(--space-2);
+    gap: var(--space-1);
+  }
+  
+  .control-card {
+    padding: var(--space-2);
+  }
+  
+  .control-item {
+    padding: var(--space-1) var(--space-2);
+  }
+  
+  .label-text {
     font-size: var(--font-size-xs);
   }
   
-  .toggle-switch {
-    width: 44px;
-    height: 22px;
+  .modern-toggle {
+    width: 36px;
+    height: 20px;
   }
   
-  .slider:before {
-    height: 18px;
-    width: 18px;
+  .toggle-slider:before {
+    height: 14px;
+    width: 14px;
   }
   
-  .toggle-switch input:checked + .slider:before {
-    transform: translateX(22px);
+  .modern-toggle input:checked + .toggle-slider:before {
+    transform: translateX(16px);
   }
 }
 
-/* High Contrast Mode */
-@media (prefers-contrast: high) {
-  .setting-item {
-    border-width: 2px;
-  }
-  
-  .toggle-switch input:checked + .slider {
-    background: var(--color-primary-700);
-  }
-  
-  .speed-btn.active {
-    background: var(--color-primary-700);
-    border-color: var(--color-primary-800);
-  }
-}
+/* ============================================================================
+   アクセシビリティと特殊対応
+   ============================================================================ */
 
-/* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
-  .setting-item,
-  .slider,
-  .slider:before,
-  .speed-btn,
-  .compact-select {
+  .control-card,
+  .toggle-slider,
+  .toggle-slider:before,
+  .speed-btn-modern,
+  .advanced-select,
+  .expand-icon {
     transition: none;
   }
   
-  .setting-item:hover {
+  .control-card:hover,
+  .speed-btn-modern:hover:not(:disabled) {
     transform: none;
+  }
+  
+  .speaking-indicator {
+    animation: none;
   }
 }
 
-/* Print Styles */
-@media print {
-  .settings-panel {
-    background: white;
-    color: black;
+@media (prefers-contrast: high) {
+  .control-card {
+    border-width: 2px;
+    border-color: var(--color-text-primary);
   }
   
-  .setting-item {
+  .modern-toggle input:checked + .toggle-slider {
+    background: #ffffff;
+    border-color: #000000;
+  }
+  
+  .speed-btn-modern.active {
+    background: #ffffff;
+    color: #000000;
+    border-color: #000000;
+  }
+}
+
+/* ============================================================================
+   印刷スタイル
+   ============================================================================ */
+
+@media print {
+  .settings-panel-optimized {
+    background: white;
+    color: black;
+    box-shadow: none;
+  }
+  
+  .control-card {
     border: 1px solid black;
     background: white;
+    box-shadow: none;
+  }
+  
+  .control-card::before {
+    display: none;
   }
 }

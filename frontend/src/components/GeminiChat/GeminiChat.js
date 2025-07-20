@@ -83,8 +83,16 @@ const GeminiChat = () => {
 
   return (
     <div className="gemini-chat-container">
+      {/* Geminiチャットヘッダー */}
+      <div className="gemini-chat-header">
+        <h3 className="gemini-chat-title">Gemini Chat</h3>
+        <div className="gemini-message-count">
+          {messages.length} messages
+        </div>
+      </div>
+
       {/* メッセージエリア - ChatBoxと同じスタイル */}
-      <div className="chat-box" style={{ flex: 1, marginBottom: 'var(--space-md)' }}>
+      <div className="chat-box">
         {messages.length === 0 ? (
           <div className="no-messages">
             <p>Geminiとのチャットを開始してください</p>
