@@ -25,15 +25,15 @@ class ErrorBoundary extends React.Component {
     // Update state when an error occurs
     return { 
       hasError: true,
+      error: error,
       isExtensionRelated: isExtensionError(error)
     };
   }
 
   componentDidCatch(error, errorInfo) {
-    // エラーの詳細を保存
-    // Store error details
+    // エラーの詳細を保存（getDerivedStateFromErrorで既にerrorは設定済み）
+    // Store error details (error is already set in getDerivedStateFromError)
     this.setState({
-      error,
       errorInfo
     });
 
@@ -89,7 +89,7 @@ class ErrorBoundary extends React.Component {
                 <pre className="error-boundary__error-text">
                   {this.state.error && this.state.error.toString()}
                   <br />
-                  {this.state.errorInfo.componentStack}
+                  {this.state.errorInfo && this.state.errorInfo.componentStack}
                 </pre>
               </details>
             )}

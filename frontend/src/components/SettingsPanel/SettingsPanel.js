@@ -37,10 +37,11 @@ const SettingsPanel = memo(({
 
   // スピード説明テキストを動的に取得
   const getSpeedDescription = (rate) => {
-    if (rate <= 1.0) return '標準';
-    if (rate <= 1.3) return '少し速い';
-    if (rate <= 1.6) return '速い';
-    if (rate <= 1.9) return 'とても速い';
+    const numRate = Number(rate || 1.0);
+    if (numRate <= 1.0) return '標準';
+    if (numRate <= 1.3) return '少し速い';
+    if (numRate <= 1.6) return '速い';
+    if (numRate <= 1.9) return 'とても速い';
     return '最高速';
   };
 
@@ -123,7 +124,7 @@ const SettingsPanel = memo(({
             
             <div className="speed-selector">
               <div className="speed-display">
-                <span className="speed-value">{speakingRate.toFixed(1)}x</span>
+                <span className="speed-value">{Number(speakingRate || 1.0).toFixed(1)}x</span>
               </div>
               <div className="speed-buttons">
                 {[1.0, 1.2, 1.4, 1.6, 1.8, 2.0].map(speed => (

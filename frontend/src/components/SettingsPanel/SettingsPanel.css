@@ -73,7 +73,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, #ffffff 0%, transparent 100%);
+  background: linear-gradient(90deg, #000000 0%, transparent 100%);
   opacity: 0.3;
 }
 
@@ -84,12 +84,32 @@
 }
 
 /* プライマリコントロール（主要設定） */
-.primary-controls::before {
+.control-card.primary-controls {
+  background: linear-gradient(135deg, #0a0a0a 0%, #000000 100%) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.control-card.primary-controls:hover {
+  background: linear-gradient(135deg, #121212 0%, #0a0a0a 100%) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.control-card.primary-controls::before {
   background: linear-gradient(90deg, #4ade80 0%, #22c55e 50%, transparent 100%);
   opacity: 0.6;
 }
 
 /* スピードコントロール */
+.control-card.speed-controls-card {
+  background: linear-gradient(135deg, #0a0a0a 0%, #000000 100%) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.control-card.speed-controls-card:hover {
+  background: linear-gradient(135deg, #121212 0%, #0a0a0a 100%) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
 .speed-controls-card::before {
   background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 50%, transparent 100%);
   opacity: 0.6;
@@ -104,6 +124,7 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--space-3);
+  background: transparent !important;
 }
 
 .card-title {
@@ -114,6 +135,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  background: transparent !important;
 }
 
 .voice-icon,
@@ -250,7 +272,7 @@
 
 .modern-toggle input:checked + .toggle-slider:before {
   transform: translateX(20px);
-  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+  background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
 }
 
 .modern-toggle input:disabled + .toggle-slider {
@@ -606,12 +628,12 @@
   }
   
   .modern-toggle input:checked + .toggle-slider {
-    background: #ffffff;
+    background: #000000;
     border-color: #000000;
   }
   
   .speed-btn-modern.active {
-    background: #ffffff;
+    background: #000000;
     color: #000000;
     border-color: #000000;
   }
@@ -623,14 +645,14 @@
 
 @media print {
   .settings-panel-optimized {
-    background: white;
+    background: #000000;
     color: black;
     box-shadow: none;
   }
   
   .control-card {
     border: 1px solid black;
-    background: white;
+    background: #000000;
     box-shadow: none;
   }
   

@@ -71,9 +71,12 @@ export const useSettings = () => {
     const storedRate = getStoredValue(STORAGE_KEYS.SPEAKING_RATE, null);
     
     // 保存された速度があればそれを使用、なければデフォルト値
-    return storedRate !== null 
+    // 数値であることを保証する
+    const rate = storedRate !== null 
       ? storedRate 
       : TTS_CONFIG.DEFAULT_SPEAKING_RATE || 1.0;
+    
+    return Number(rate) || 1.0;
   });
 
   const [voiceInputTimeout, setVoiceInputTimeout] = useState(() => 
@@ -104,9 +107,16 @@ export const useSettings = () => {
   }, []);
 
   const updateSpeakingRate = useCallback((newRate) => {
+    // 数値であることを保証
+    const numRate = Number(newRate);
+    if (isNaN(numRate)) {
+      console.warn('Invalid speaking rate provided:', newRate);
+      return;
+    }
+    
     // 範囲チェック
     const clampedRate = Math.min(
-      Math.max(newRate, TTS_CONFIG.SPEAKING_RATE.MIN), 
+      Math.max(numRate, TTS_CONFIG.SPEAKING_RATE.MIN), 
       TTS_CONFIG.SPEAKING_RATE.MAX
     );
     
