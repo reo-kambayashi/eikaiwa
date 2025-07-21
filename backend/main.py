@@ -18,7 +18,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import google.generativeai as genai
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from pydantic import BaseModel
@@ -1152,6 +1152,7 @@ async def get_instant_translation_problem(
 async def get_listening_problem(
     category: str = "any",
     difficulty: str = "medium",
+    _t: str = None,  # キャッシュバスティング用タイムスタンプパラメータ（使用しない）
 ):
     """
     Trivia APIを使用してリスニング問題を取得するエンドポイント
@@ -1159,6 +1160,7 @@ async def get_listening_problem(
     Args:
         category: 問題のカテゴリ (any, sports, science, history, etc.)
         difficulty: 難易度 (easy, medium, hard)
+        _t: キャッシュバスティング用タイムスタンプ（内部では使用しない）
 
     Returns:
         ListeningProblem: 問題文、選択肢、正解、難易度、カテゴリを含む
@@ -1202,8 +1204,8 @@ async def get_listening_problem(
             params["category"] = category_mapping[category]
 
         # Trivia APIから問題を取得（レート制限考慮）
-        import time
         import asyncio
+        import time
 
         # レート制限チェック（5秒間隔）
         current_time = time.time()

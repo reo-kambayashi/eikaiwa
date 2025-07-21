@@ -11,15 +11,19 @@ import PropTypes from 'prop-types';
  * @param {Object} props - コンポーネントのプロパティ
  * @param {string} props.currentCategory - 現在のカテゴリ
  * @param {string} props.currentDifficulty - 現在の難易度
+ * @param {boolean} props.showQuestionText - 問題文表示設定
  * @param {Function} props.onCategoryChange - カテゴリ変更ハンドラー
  * @param {Function} props.onDifficultyChange - 難易度変更ハンドラー
+ * @param {Function} props.onQuestionTextToggle - 問題文表示切り替えハンドラー
  * @param {Function} props.onClose - 設定パネル閉じるハンドラー
  */
 const ListeningSettings = ({
   currentCategory,
   currentDifficulty,
+  showQuestionText,
   onCategoryChange,
   onDifficultyChange,
+  onQuestionTextToggle,
   onClose
 }) => {
   // ============================================================================
@@ -130,6 +134,33 @@ const ListeningSettings = ({
               ))}
             </div>
           </div>
+
+          {/* 問題文表示設定 */}
+          <div className="listening-settings__section">
+            <h4 className="listening-settings__section-title">
+              👁️ 表示設定
+            </h4>
+            <div className="listening-settings__toggle-section">
+              <div className="listening-settings__toggle-item">
+                <div className="listening-settings__toggle-info">
+                  <div className="listening-settings__toggle-label">
+                    問題文を表示
+                  </div>
+                  <div className="listening-settings__toggle-desc">
+                    音声と一緒に問題文も表示します
+                  </div>
+                </div>
+                <label className="listening-settings__toggle">
+                  <input
+                    type="checkbox"
+                    checked={showQuestionText}
+                    onChange={(e) => onQuestionTextToggle(e.target.checked)}
+                  />
+                  <span className="listening-settings__toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="listening-settings__footer">
@@ -145,8 +176,10 @@ const ListeningSettings = ({
 ListeningSettings.propTypes = {
   currentCategory: PropTypes.string.isRequired,
   currentDifficulty: PropTypes.string.isRequired,
+  showQuestionText: PropTypes.bool.isRequired,
   onCategoryChange: PropTypes.func.isRequired,
   onDifficultyChange: PropTypes.func.isRequired,
+  onQuestionTextToggle: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired
 };
 

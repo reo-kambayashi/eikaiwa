@@ -13,12 +13,16 @@ import PropTypes from 'prop-types';
  * @param {boolean} props.isLoading - ローディング状態
  * @param {boolean} props.isSpeechLoading - 音声読み込み状態
  * @param {Function} props.onPlayQuestion - 音声再生ハンドラー
+ * @param {boolean} props.showQuestionText - 問題文の表示/非表示
+ * @param {Function} props.onToggleQuestionText - 問題文表示切り替えハンドラー
  */
 const ListeningProblem = ({
   problem,
   isLoading,
   isSpeechLoading,
-  onPlayQuestion
+  onPlayQuestion,
+  showQuestionText = false,
+  onToggleQuestionText
 }) => {
   // ============================================================================
   // ローディング状態の表示
@@ -77,19 +81,40 @@ const ListeningProblem = ({
         </button>
       </div>
 
-      {/* 問題文（後で表示/非表示切り替えできるように） */}
-      <div className="listening-problem__text">
-        <h3 className="listening-problem__title">
-          Listen and choose the correct answer:
-        </h3>
-        <div className="listening-problem__question">
-          {problem.question}
-        </div>
+      {/* 問題文表示切り替えボタン */}
+      <div className="listening-problem__toggle">
+        <button
+          className="listening-problem__toggle-btn"
+          onClick={onToggleQuestionText}
+          aria-label={showQuestionText ? "問題文を隠す" : "問題文を表示"}
+        >
+          {showQuestionText ? (
+            <>👁️ 問題文を隠す</>
+          ) : (
+            <>👀 問題文を表示</>
+          )}
+        </button>
       </div>
+
+      {/* 問題文（条件付き表示） */}
+      {showQuestionText && (
+        <div className="listening-problem__text">
+          <h3 className="listening-problem__title">
+            Listen and choose the correct answer:
+          </h3>
+          <div className="listening-problem__question">
+            {problem.question}
+          </div>
+        </div>
+      )}
 
       {/* ヒント */}
       <div className="listening-problem__hint">
-        💡 音声ボタンを押して問題を聞いてから、下から正しい答えを選んでください。
+        {showQuestionText ? (
+          <>💡 問題文を確認して、下から正しい答えを選んでください。</>
+        ) : (
+          <>💡 音声ボタンを押して問題を聞いてから、下から正しい答えを選んでください。</>
+        )}
       </div>
     </div>
   );
@@ -104,7 +129,9 @@ ListeningProblem.propTypes = {
   }),
   isLoading: PropTypes.bool.isRequired,
   isSpeechLoading: PropTypes.bool.isRequired,
-  onPlayQuestion: PropTypes.func.isRequired
+  onPlayQuestion: PropTypes.func.isRequired,
+  showQuestionText: PropTypes.bool,
+  onToggleQuestionText: PropTypes.func.isRequired
 };
 
 export default ListeningProblem;

@@ -38,6 +38,12 @@ const ListeningMode = ({
   const [currentCategory, setCurrentCategory] = useState('any');
   const [currentDifficulty, setCurrentDifficulty] = useState('medium');
   const [showSettings, setShowSettings] = useState(false);
+  
+  // 問題文表示設定（デフォルトは非表示、localStorageから復元）
+  const [showQuestionText, setShowQuestionText] = useState(() => {
+    const saved = localStorage.getItem('listening-show-question-text');
+    return saved ? JSON.parse(saved) : false; // デフォルトは非表示
+  });
 
   // カスタムフック
   const { 
@@ -70,6 +76,11 @@ const ListeningMode = ({
     // コンポーネントマウント時に最初の問題を取得
     fetchNewProblem(currentCategory, currentDifficulty);
   }, [fetchNewProblem, currentCategory, currentDifficulty]);
+
+  // 問題文表示設定をlocalStorageに保存
+  useEffect(() => {
+    localStorage.setItem('listening-show-question-text', JSON.stringify(showQuestionText));
+  }, [showQuestionText]);
 
   // ============================================================================
   // イベントハンドラー
@@ -130,6 +141,20 @@ const ListeningMode = ({
     setShowSettings(false);
   }, []);
 
+  /**
+   * 問題文表示切り替え
+   */
+  const handleToggleQuestionText = useCallback(() => {
+    setShowQuestionText(prev => !prev);
+  }, []);
+
+  /**
+   * 問題文表示設定変更（設定パネルから）
+   */
+  const handleQuestionTextToggle = useCallback((show) => {
+    setShowQuestionText(show);
+  }, []);
+
   // ============================================================================
   // レンダリング
   // ============================================================================
@@ -153,8 +178,10 @@ const ListeningMode = ({
         <ListeningSettings
           currentCategory={currentCategory}
           currentDifficulty={currentDifficulty}
+          showQuestionText={showQuestionText}
           onCategoryChange={handleCategoryChange}
           onDifficultyChange={handleDifficultyChange}
+          onQuestionTextToggle={handleQuestionTextToggle}
           onClose={() => setShowSettings(false)}
         />
       )}
@@ -173,6 +200,8 @@ const ListeningMode = ({
           isLoading={isLoading}
           isSpeechLoading={isSpeechLoading}
           onPlayQuestion={handlePlayQuestion}
+          showQuestionText={showQuestionText}
+          onToggleQuestionText={handleToggleQuestionText}
         />
 
         {/* 回答入力 */}

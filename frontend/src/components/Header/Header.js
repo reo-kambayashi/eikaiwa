@@ -78,17 +78,6 @@ const Header = ({ currentMode, onModeChange }) => {
             </span>
           </button>
         </nav>
-
-        {/* ヘルプボタン（将来の拡張用） */}
-        <div className="header-actions">
-          <button 
-            className="help-button"
-            aria-label="Help"
-            title="ヘルプ"
-          >
-            <span>?</span>
-          </button>
-        </div>
       </div>
     </header>
   );

@@ -640,7 +640,13 @@ export const fetchListeningProblem = async (category = 'any', difficulty = 'medi
   
   try {
     const url = `${API_CONFIG.BASE_URL}/api/listening/problem`;
-    const params = new URLSearchParams({ category, difficulty });
+    // タイムスタンプを追加してキャッシュバスティングを実行
+    // Add timestamp for cache busting to ensure new problems each time
+    const params = new URLSearchParams({ 
+      category, 
+      difficulty,
+      _t: Date.now().toString() // キャッシュバスティング用タイムスタンプ
+    });
     
     console.log('🎯 Fetching listening problem:', { category, difficulty });
     

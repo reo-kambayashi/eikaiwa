@@ -24,7 +24,7 @@
 .listening-mode__title {
   font-size: 1.8rem;
   font-weight: 600;
-  color: var(--color-primary, #1976d2);
+  color: white;
   margin: 0;
 }
 
@@ -120,10 +120,12 @@
 
 .listening-problem__category,
 .listening-problem__difficulty {
-  background: var(--color-surface, #f5f5f5);
+  background: black;
+  color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 16px;
   font-weight: 500;
+  border: 1px solid #444;
 }
 
 .listening-problem__audio {
@@ -161,6 +163,30 @@
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
+}
+
+/* 問題文表示切り替えボタン */
+.listening-problem__toggle {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.listening-problem__toggle-btn {
+  background: linear-gradient(135deg, #2196f3, #1976d2);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px rgba(33, 150, 243, 0.3);
+}
+
+.listening-problem__toggle-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
 }
 
 .listening-problem__text {
@@ -563,6 +589,87 @@
   text-align: center;
 }
 
+/* 問題文表示設定トグル */
+.listening-settings__toggle-section {
+  margin-top: 1rem;
+}
+
+.listening-settings__toggle-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #222;
+  border: 2px solid #444;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.listening-settings__toggle-item:hover {
+  border-color: var(--color-primary, #1976d2);
+  background: #333;
+}
+
+.listening-settings__toggle-info {
+  flex: 1;
+}
+
+.listening-settings__toggle-label {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: white;
+}
+
+.listening-settings__toggle-desc {
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.listening-settings__toggle {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.listening-settings__toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.listening-settings__toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #555;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.listening-settings__toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+.listening-settings__toggle input:checked + .listening-settings__toggle-slider {
+  background-color: var(--color-primary, #1976d2);
+}
+
+.listening-settings__toggle input:checked + .listening-settings__toggle-slider:before {
+  transform: translateX(26px);
+}
+
 /* ============================================================================
    レスポンシブ対応
    ============================================================================ */
@@ -596,5 +703,20 @@
   .listening-problem__play-btn {
     padding: 0.75rem 1.5rem;
     font-size: 1rem;
+  }
+  
+  .listening-problem__toggle-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+  
+  .listening-settings__toggle-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .listening-settings__toggle {
+    align-self: flex-end;
   }
 }
