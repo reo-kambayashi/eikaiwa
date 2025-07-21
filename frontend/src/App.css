@@ -1,91 +1,10 @@
 /* ============================================================================
-   デザインシステム - 色とタイポグラフィの統一
+   メインアプリケーションスタイル
+   App.cssはdesign-system.cssに依存し、変数の重複を避ける
    ============================================================================ */
 
-:root {
-  /* 黒白テーマの配色パレット */
-  --color-primary: #000000;
-  --color-primary-hover: #333333;
-  --color-primary-light: rgba(255, 255, 255, 0.1);
-  --color-primary-dark: #000000;
-  
-  --color-secondary: #ffffff;
-  --color-secondary-hover: #cccccc;
-  
-  --color-accent: #ffffff;
-  --color-accent-hover: #cccccc;
-  
-  --color-warning: #ffffff;
-  --color-warning-hover: #cccccc;
-  
-  --color-error: #ffffff;
-  --color-success: #ffffff;
-  
-  /* 黒ベースの背景色 */
-  --color-bg-primary: #000000;
-  --color-bg-secondary: #111111;
-  --color-bg-surface: #222222;
-  --color-bg-elevated: #111111;
-  
-  /* 白ベースのテキスト色 */
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #cccccc;
-  --color-text-disabled: #999999;
-  --color-text-on-primary: #ffffff;
-  
-  /* 白ベースのボーダー色 */
-  --color-border: rgba(255, 255, 255, 0.2);
-  --color-border-focus: #ffffff;
-  --color-border-hover: rgba(255, 255, 255, 0.3);
-  
-  /* 黒ベースのシャドウ */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
-  
-  /* モダンなボーダー半径 */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 20px;
-  
-  /* 洗練された間隔 */
-  --space-xs: 0.25rem;
-  --space-sm: 0.5rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
-  --space-2xl: 3rem;
-  --space-3xl: 4rem;
-  
-  /* 新しいアニメーション変数 */
-  --animation-duration-fast: 0.2s;
-  --animation-duration-normal: 0.3s;
-  --animation-duration-slow: 0.5s;
-  
-  /* タイポグラフィスケール */
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.25rem;
-  --font-size-2xl: 1.5rem;
-  --font-size-3xl: 1.875rem;
-  
-  /* 洗練されたフォントウェイト */
-  --font-weight-light: 300;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-  
-  /* トランジション */
-  --transition-fast: 0.15s ease-out;
-  --transition-base: 0.3s ease-out;
-  --transition-slow: 0.5s ease-out;
-}
+/* design-system.cssをインポート - 統一されたデザインシステムを使用 */
+@import './styles/design-system.css';
 
 /* ============================================================================
    改善されたメインレイアウト - PC画面全体を活用したデザイン
@@ -93,14 +12,14 @@
 
 .App {
   font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #000000;
+  background: var(--color-bg-primary);
   min-height: 100vh;
   height: 100vh; /* 画面全体の高さを活用 */
   max-height: 100vh;
   display: flex;
   flex-direction: column;
   color: var(--color-text-primary);
-  line-height: 1.6;
+  line-height: var(--line-height-normal);
   overflow: hidden; /* スクロールを各コンポーネント内で管理 */
   position: fixed;
   top: 0;
@@ -123,21 +42,21 @@
   display: grid;
   grid-template-columns: 280px 1fr 1fr; /* 左サイドバーを少し狭く、メインとGeminiを等幅に */
   grid-template-areas: "sidebar main gemini";
-  gap: var(--space-sm); /* 無駄な余白を削減 */
+  gap: var(--space-sm); /* 統一されたスペーシング変数を使用 */
   height: 100%;
-  padding: var(--space-sm); /* パディングを最小化 */
+  padding: var(--space-sm); /* 統一されたスペーシング変数を使用 */
 }
 
 /* 設定サイドバー - 効率的な表示 */
 .settings-sidebar {
   grid-area: sidebar;
   background: var(--color-bg-elevated);
-  border-radius: var(--radius-md); /* 半径を小さく */
+  border-radius: var(--radius-md); /* 統一されたボーダー半径を使用 */
   box-shadow: var(--shadow-md);
   border: 1px solid var(--color-border);
   overflow-y: auto;
-  transition: var(--transition-base);
-  padding: var(--space-sm); /* 内側の余白も削減 */
+  transition: var(--transition-normal);
+  padding: var(--space-sm); /* 統一されたスペーシング変数を使用 */
 }
 
 /* メインチャットエリア - 画面領域を最大活用 */

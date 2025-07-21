@@ -1,4 +1,12 @@
-/* Global Reset and Base Styles */
+/* ============================================================================
+   グローバルベーススタイル - デザインシステムに基づく
+   Global Base Styles based on Design System
+   ============================================================================ */
+
+/* デザインシステムをインポート */
+@import './styles/design-system.css';
+
+/* グローバルリセット（design-system.cssと重複を避けるため、最小限に） */
 * {
   margin: 0;
   padding: 0;
@@ -11,9 +19,9 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #000000;
-  color: #ffffff;
-  line-height: 1.6;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-normal);
 }
 
 html {

@@ -1,9 +1,10 @@
 // ============================================================================
-// Geminiチャットコンポーネント
-// 右側パネルでGeminiとの直接チャットを提供します
+// Geminiチャットコンポーネント - 表現相談・辞書機能
+// 英語表現や文法について日本語で相談できるチャット機能を提供します
 // ============================================================================
 
 import React, { useState, useRef, useEffect } from 'react';
+import MarkdownRenderer from '../MarkdownRenderer';
 import './GeminiChat.css';
 
 const GeminiChat = () => {
@@ -11,6 +12,15 @@ const GeminiChat = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // 初期メッセージを表示
+  useEffect(() => {
+    setMessages([{
+      type: 'assistant',
+      content: 'こんにちは！英語表現や文法について簡潔にお答えします。\n\n例：「〇〇って英語でどう言うの？」',
+      timestamp: new Date()
+    }]);
+  }, []);
 
   // メッセージの最下部にスクロール
   const scrollToBottom = () => {
@@ -29,7 +39,7 @@ const GeminiChat = () => {
   }, [messages]);
 
   /**
-   * メッセージ送信処理
+   * メッセージ送信処理 - 日本語相談用APIを使用
    */
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -41,16 +51,27 @@ const GeminiChat = () => {
     };
     
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = input;
     setInput('');
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/respond`, {
+      // 会話履歴を準備（最新10件のみ）
+      const conversationHistory = messages.slice(-10).map(msg => ({
+        sender: msg.type === 'user' ? 'User' : 'Assistant',
+        text: msg.content
+      }));
+
+      // 日本語相談用APIエンドポイントを使用
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/japanese-consultation`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: input }),
+        body: JSON.stringify({ 
+          text: currentInput,
+          conversation_history: conversationHistory
+        }),
       });
 
       if (!response.ok) {
@@ -66,10 +87,10 @@ const GeminiChat = () => {
       
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
-      console.error('Gemini chat error:', error);
+      console.error('Japanese consultation error:', error);
       const errorMessage = { 
         type: 'error', 
-        content: 'エラーが発生しました。もう一度お試しください。', 
+        content: '申し訳ありませんが、エラーが発生しました。もう一度お試しください。', 
         timestamp: new Date() 
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -90,44 +111,40 @@ const GeminiChat = () => {
 
   return (
     <div className="gemini-chat-container">
-      {/* Geminiチャットヘッダー */}
+      {/* 相談チャットヘッダー */}
       <div className="gemini-chat-header">
-        <h3 className="gemini-chat-title">Gemini Chat</h3>
+        <h3 className="gemini-chat-title">英語表現相談</h3>
         <div className="gemini-message-count">
-          {messages.length} messages
+          {messages.filter(msg => msg.type === 'user').length} 回の相談 {/* ユーザーメッセージのみをカウント */}
         </div>
       </div>
 
       {/* メッセージエリア - ChatBoxと同じスタイル */}
       <div className="chat-box">
-        {messages.length === 0 ? (
-          <div className="no-messages">
-            <p>Geminiとのチャットを開始してください</p>
-            <small>Start typing a message to chat with Gemini</small>
-          </div>
-        ) : (
-          messages.map((message, index) => (
-            <div 
-              key={index} 
-              className={`message ${message.type === 'user' ? 'you' : message.type === 'assistant' ? 'ai-tutor' : 'error'}`}
-            >
-              <strong>{message.type === 'user' ? 'You' : message.type === 'assistant' ? 'Gemini' : 'Error'}: </strong>
-              <span className="message-text">{message.content}</span>
-              <small className="timestamp">
-                {message.timestamp.toLocaleTimeString()}
-              </small>
+        {messages.map((message, index) => (
+          <div 
+            key={index} 
+            className={`message ${message.type === 'user' ? 'you' : message.type === 'assistant' ? 'ai-tutor' : 'error'}`}
+          >
+            <div className="message-text">
+              <MarkdownRenderer 
+                content={message.content}
+                className="gemini-message-markdown"
+              />
             </div>
-          ))
-        )}
+            <small className="timestamp">
+              {message.timestamp.toLocaleTimeString()}
+            </small>
+          </div>
+        ))}
         
         {isLoading && (
           <div className="message ai-tutor loading">
-            <strong>Gemini: </strong>
             <span className="typing-indicator">
               <span className="dot"></span>
               <span className="dot"></span>
               <span className="dot"></span>
-              Typing...
+              考え中...
             </span>
           </div>
         )}
@@ -142,7 +159,7 @@ const GeminiChat = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="Geminiにメッセージを入力してください..."
+          placeholder="英語表現や文法について質問してください（日本語でOK）..."
           disabled={isLoading}
           className="message-input"
         />
@@ -154,7 +171,7 @@ const GeminiChat = () => {
           {isLoading ? (
             <div className="loading-spinner"></div>
           ) : (
-            '送信'
+            '相談'
           )}
         </button>
       </div>

@@ -5,6 +5,7 @@
 
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
+import MarkdownRenderer from '../MarkdownRenderer';
 import './ChatBox.css';
 
 /**
@@ -89,16 +90,26 @@ const ChatBox = ({ messages, isLoading, messagesEndRef }) => {
                 <div className="message-text">
                   {(() => {
                     // 安全なテキスト表示のための処理
+                    let messageContent = '';
                     if (typeof message.text === 'string') {
-                      return message.text;
+                      messageContent = message.text;
                     } else if (typeof message.text === 'object' && message.text !== null) {
                       if (message.text.reply && typeof message.text.reply === 'string') {
-                        return message.text.reply;
+                        messageContent = message.text.reply;
+                      } else {
+                        messageContent = JSON.stringify(message.text);
                       }
-                      return JSON.stringify(message.text);
                     } else {
-                      return String(message.text || 'No message content');
+                      messageContent = String(message.text || 'No message content');
                     }
+                    
+                    // マークダウンレンダラーで表示
+                    return (
+                      <MarkdownRenderer 
+                        content={messageContent}
+                        className="chat-message-markdown"
+                      />
+                    );
                   })()}
                 </div>
               </div>

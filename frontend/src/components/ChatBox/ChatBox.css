@@ -1,4 +1,7 @@
-/* Modern ChatBox Component Styles */
+/* ============================================================================
+   Modern ChatBox Component Styles
+   統一されたデザインシステムに基づくChatBoxコンポーネント
+   ============================================================================ */
 
 .enhanced-chat-box {
   display: flex;
@@ -7,7 +10,7 @@
   max-height: calc(100vh - 200px);
   background: transparent;
   position: relative;
-  color: #ffffff;
+  color: var(--color-text-primary);
   overflow: hidden;
   flex: 1;
   min-height: 0;
@@ -16,23 +19,23 @@
 /* Chat Header */
 .chat-header {
   padding: var(--space-3) var(--space-4);
-  background: #222222;
-  border-bottom: 2px solid #ffffff;
+  background: var(--color-bg-tertiary);
+  border-bottom: 2px solid var(--color-border-primary);
   flex-shrink: 0;
-  z-index: 10;
+  z-index: var(--z-index-sticky);
 }
 
 .chat-title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
-  color: #ffffff;
+  color: var(--color-text-primary);
   margin: 0;
   margin-bottom: var(--space-1);
 }
 
 .message-count {
   font-size: var(--font-size-sm);
-  color: #cccccc;
+  color: var(--color-text-secondary);
   font-weight: var(--font-weight-medium);
 }
 
@@ -407,4 +410,59 @@
   .message-content {
     transition: none;
   }
+}
+
+/* ============================================================================
+   マークダウンレンダラー統合スタイル
+   ============================================================================ */
+
+.chat-message-markdown {
+  margin: 0;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* チャットメッセージ内でのマークダウン要素の調整 */
+.chat-message-markdown .markdown-p:first-child {
+  margin-top: 0;
+}
+
+.chat-message-markdown .markdown-p:last-child {
+  margin-bottom: 0;
+}
+
+.chat-message-markdown .markdown-h1,
+.chat-message-markdown .markdown-h2,
+.chat-message-markdown .markdown-h3,
+.chat-message-markdown .markdown-h4,
+.chat-message-markdown .markdown-h5,
+.chat-message-markdown .markdown-h6 {
+  color: inherit;
+  margin: 0.5em 0 0.3em 0;
+}
+
+.chat-message-markdown .inline-code {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffeb3b;
+}
+
+.chat-message-markdown .code-block {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  border-radius: 4px !important;
+  margin: 0.5em 0 !important;
+}
+
+.chat-message-markdown .markdown-blockquote {
+  border-left-color: #4caf50;
+  background-color: rgba(76, 175, 80, 0.1);
+  color: inherit;
+}
+
+.chat-message-markdown .markdown-link {
+  color: #81c784;
+}
+
+.chat-message-markdown .markdown-link:hover {
+  color: #a5d6a7;
 }

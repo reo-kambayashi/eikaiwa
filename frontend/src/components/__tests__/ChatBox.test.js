@@ -3,6 +3,7 @@
  * 
  * Tests the chat message display functionality including
  * message rendering, auto-scrolling, and typing indicators.
+ * Updated to include markdown rendering tests.
  */
 
 import React from 'react';
@@ -17,6 +18,17 @@ mockIntersectionObserver.mockReturnValue({
   disconnect: () => null
 });
 window.IntersectionObserver = mockIntersectionObserver;
+
+// Mock MarkdownRenderer component to isolate ChatBox testing
+jest.mock('../MarkdownRenderer', () => {
+  return function MockMarkdownRenderer({ content, className }) {
+    return (
+      <div data-testid="markdown-renderer" className={className}>
+        {content}
+      </div>
+    );
+  };
+});
 
 describe('ChatBox Component', () => {
   const mockMessages = [
@@ -35,45 +47,52 @@ describe('ChatBox Component', () => {
   ];
 
   test('renders without crashing', () => {
-    render(<ChatBox messages={[]} isLoading={false} />);
-    expect(screen.getByRole('log')).toBeInTheDocument();
+    const mockRef = { current: null };
+    render(<ChatBox messages={[]} isLoading={false} messagesEndRef={mockRef} />);
+    expect(screen.getByText('English Conversation')).toBeInTheDocument();
   });
 
   test('displays messages correctly', () => {
-    render(<ChatBox messages={mockMessages} isLoading={false} />);
+    const mockRef = { current: null };
+    render(<ChatBox messages={mockMessages} isLoading={false} messagesEndRef={mockRef} />);
     
     expect(screen.getByText('Hello, how are you?')).toBeInTheDocument();
     expect(screen.getByText('I am doing well, thank you! How can I help you today?')).toBeInTheDocument();
   });
 
   test('applies correct CSS classes for user messages', () => {
-    render(<ChatBox messages={mockMessages} isLoading={false} />);
+    const mockRef = { current: null };
+    render(<ChatBox messages={mockMessages} isLoading={false} messagesEndRef={mockRef} />);
     
-    const userMessage = screen.getByText('Hello, how are you?').closest('.message');
-    expect(userMessage).toHaveClass('user-message');
+    const userMessage = screen.getByText('Hello, how are you?').closest('.enhanced-message');
+    expect(userMessage).toHaveClass('user');
   });
 
   test('applies correct CSS classes for AI messages', () => {
-    render(<ChatBox messages={mockMessages} isLoading={false} />);
+    const mockRef = { current: null };
+    render(<ChatBox messages={mockMessages} isLoading={false} messagesEndRef={mockRef} />);
     
-    const aiMessage = screen.getByText('I am doing well, thank you! How can I help you today?').closest('.message');
-    expect(aiMessage).toHaveClass('ai-message');
+    const aiMessage = screen.getByText('I am doing well, thank you! How can I help you today?').closest('.enhanced-message');
+    expect(aiMessage).toHaveClass('ai');
   });
 
   test('shows loading indicator when isLoading is true', () => {
-    render(<ChatBox messages={mockMessages} isLoading={true} />);
+    const mockRef = { current: null };
+    render(<ChatBox messages={mockMessages} isLoading={true} messagesEndRef={mockRef} />);
     
-    expect(screen.getByText(/thinking/i)).toBeInTheDocument();
+    expect(screen.getByText('Typing...')).toBeInTheDocument();
   });
 
   test('does not show loading indicator when isLoading is false', () => {
-    render(<ChatBox messages={mockMessages} isLoading={false} />);
+    const mockRef = { current: null };
+    render(<ChatBox messages={mockMessages} isLoading={false} messagesEndRef={mockRef} />);
     
-    expect(screen.queryByText(/thinking/i)).not.toBeInTheDocument();
+    expect(screen.queryByText('Typing...')).not.toBeInTheDocument();
   });
 
   test('displays timestamps correctly', () => {
-    render(<ChatBox messages={mockMessages} isLoading={false} />);
+    const mockRef = { current: null };
+    render(<ChatBox messages={mockMessages} isLoading={false} messagesEndRef={mockRef} />);
     
     // Check that timestamp elements exist
     const timestamps = screen.getAllByText(/10:00/);
@@ -81,14 +100,14 @@ describe('ChatBox Component', () => {
   });
 
   test('handles empty messages array', () => {
-    render(<ChatBox messages={[]} isLoading={false} />);
+    const mockRef = { current: null };
+    render(<ChatBox messages={[]} isLoading={false} messagesEndRef={mockRef} />);
     
-    const chatContainer = screen.getByRole('log');
-    expect(chatContainer).toBeInTheDocument();
-    expect(chatContainer.children).toHaveLength(0);
+    expect(screen.getByText("Let's start English conversation practice!")).toBeInTheDocument();
   });
 
   test('handles messages with special characters', () => {
+    const mockRef = { current: null };
     const specialMessages = [
       {
         id: '1',
@@ -104,7 +123,7 @@ describe('ChatBox Component', () => {
       }
     ];
 
-    render(<ChatBox messages={specialMessages} isLoading={false} />);
+    render(<ChatBox messages={specialMessages} isLoading={false} messagesEndRef={mockRef} />);
     
     expect(screen.getByText('Hello! 👋 How are you? 🌟')).toBeInTheDocument();
     expect(screen.getByText('私は元気です！ありがとう 😊')).toBeInTheDocument();
@@ -271,5 +290,74 @@ describe('ChatBox Component', () => {
     render(<ChatBox messages={[]} isLoading={false} error="Connection failed" />);
     
     expect(screen.getByText(/Connection failed/i)).toBeInTheDocument();
+  });
+
+  // ============================================================================
+  // マークダウンレンダラー統合テスト
+  // ============================================================================
+
+  test('uses MarkdownRenderer for message content', () => {
+    const markdownMessage = [
+      {
+        id: '1',
+        text: 'This is **bold** text with *italic* words.',
+        sender: 'user',
+        timestamp: new Date()
+      }
+    ];
+
+    render(<ChatBox messages={markdownMessage} isLoading={false} />);
+    
+    // MarkdownRendererコンポーネントが使用されていることを確認
+    expect(screen.getByTestId('markdown-renderer')).toBeInTheDocument();
+    expect(screen.getByTestId('markdown-renderer')).toHaveClass('chat-message-markdown');
+  });
+
+  test('passes correct content to MarkdownRenderer', () => {
+    const testMessage = [
+      {
+        id: '1',
+        text: 'Test markdown content',
+        sender: 'ai',
+        timestamp: new Date()
+      }
+    ];
+
+    render(<ChatBox messages={testMessage} isLoading={false} />);
+    
+    const markdownRenderer = screen.getByTestId('markdown-renderer');
+    expect(markdownRenderer).toHaveTextContent('Test markdown content');
+  });
+
+  test('handles object-type message text correctly', () => {
+    const objectMessage = [
+      {
+        id: '1',
+        text: { reply: 'This is a reply from object' },
+        sender: 'ai',
+        timestamp: new Date()
+      }
+    ];
+
+    render(<ChatBox messages={objectMessage} isLoading={false} />);
+    
+    const markdownRenderer = screen.getByTestId('markdown-renderer');
+    expect(markdownRenderer).toHaveTextContent('This is a reply from object');
+  });
+
+  test('handles invalid message text gracefully', () => {
+    const invalidMessage = [
+      {
+        id: '1',
+        text: null,
+        sender: 'user',
+        timestamp: new Date()
+      }
+    ];
+
+    render(<ChatBox messages={invalidMessage} isLoading={false} />);
+    
+    const markdownRenderer = screen.getByTestId('markdown-renderer');
+    expect(markdownRenderer).toHaveTextContent('No message content');
   });
 });

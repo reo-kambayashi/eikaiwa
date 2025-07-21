@@ -1,6 +1,6 @@
 /* ============================================================================
    Modern GeminiChat Component Styles
-   ChatBoxコンポーネントのスタイルをベースに作成
+   統一されたデザインシステムに基づくGeminiChatコンポーネント
    ============================================================================ */
 
 .gemini-chat-container {
@@ -9,17 +9,17 @@
   height: 100%;
   background: transparent;
   position: relative;
-  color: #ffffff;
+  color: var(--color-text-primary);
 }
 
-/* Chat Box部分 - ChatBoxと同じスタイル */
+/* Chat Box部分 - 統一されたスタイル */
 .gemini-chat-container .chat-box {
   display: flex;
   flex-direction: column;
   flex: 1;
   background: transparent;
   position: relative;
-  color: #ffffff;
+  color: var(--color-text-primary);
   padding: var(--space-4) var(--space-6);
   overflow-y: auto;
   scroll-behavior: smooth;
@@ -30,24 +30,24 @@
 /* Gemini Chat Header */
 .gemini-chat-header {
   padding: var(--space-4) var(--space-6);
-  background: #222222;
-  border-bottom: 2px solid #ffffff;
+  background: var(--color-bg-tertiary);
+  border-bottom: 2px solid var(--color-border-primary);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: var(--z-index-sticky);
 }
 
 .gemini-chat-title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
-  color: #ffffff;
+  color: var(--color-text-primary);
   margin: 0;
   margin-bottom: var(--space-1);
 }
 
 .gemini-message-count {
   font-size: var(--font-size-sm);
-  color: #cccccc;
+  color: var(--color-text-secondary);
   font-weight: var(--font-weight-medium);
 }
 
@@ -411,4 +411,68 @@
   .gemini-chat-container .message-content {
     transition: none;
   }
+}
+
+/* ============================================================================
+   マークダウンレンダラー統合スタイル（Gemini Chat用）
+   ============================================================================ */
+
+.gemini-message-markdown {
+  margin: 0;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* Geminiチャットメッセージ内でのマークダウン要素の調整 */
+.gemini-message-markdown .markdown-p:first-child {
+  margin-top: 0;
+}
+
+.gemini-message-markdown .markdown-p:last-child {
+  margin-bottom: 0;
+}
+
+.gemini-message-markdown .markdown-h1,
+.gemini-message-markdown .markdown-h2,
+.gemini-message-markdown .markdown-h3,
+.gemini-message-markdown .markdown-h4,
+.gemini-message-markdown .markdown-h5,
+.gemini-message-markdown .markdown-h6 {
+  color: inherit;
+  margin: 0.5em 0 0.3em 0;
+}
+
+.gemini-message-markdown .inline-code {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffeb3b;
+}
+
+.gemini-message-markdown .code-block {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  border-radius: 4px !important;
+  margin: 0.5em 0 !important;
+}
+
+.gemini-message-markdown .markdown-blockquote {
+  border-left-color: #4caf50;
+  background-color: rgba(76, 175, 80, 0.1);
+  color: inherit;
+}
+
+.gemini-message-markdown .markdown-link {
+  color: #81c784;
+}
+
+.gemini-message-markdown .markdown-link:hover {
+  color: #a5d6a7;
+}
+
+/* 日本語テキストとマークダウンの調和 */
+.gemini-message-markdown .markdown-strong {
+  color: #ffeb3b;
+}
+
+.gemini-message-markdown .markdown-em {
+  color: #81c784;
 }

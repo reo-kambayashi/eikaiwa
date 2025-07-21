@@ -82,6 +82,18 @@ class Request(BaseModel):
     enable_grammar_check: bool = True  # Whether to enable grammar checking
 
 
+class JapaneseConsultationRequest(BaseModel):
+    """
+    Request model for Japanese consultation and dictionary features.
+    
+    For asking questions about English expressions, grammar, or vocabulary
+    with responses in Japanese.
+    """
+    
+    text: str  # User's question in Japanese or English
+    conversation_history: list = []  # Previous consultation messages
+
+
 class Response(BaseModel):
     """
     Response model returned by the API to the frontend.
@@ -440,6 +452,59 @@ async def respond(req: Request):
         )
 
 
+@app.post("/api/japanese-consultation", response_model=Response)
+async def japanese_consultation(req: JapaneseConsultationRequest):
+    """Generate Japanese consultation response for English expression and grammar questions."""
+
+    print(f"🔔 Japanese consultation request: text='{req.text[:50]}...'")
+
+    try:
+        if not model:
+            # Fallback response if Gemini API is not configured
+            return Response(
+                reply="申し訳ありませんが、APIキーが設定されていません。GEMINI_API_KEYを設定してください。"
+            )
+
+        # キャッシュチェック
+        cache_key = (
+            f"consultation_{hash(req.text)}_{hash(str(req.conversation_history))}"
+        )
+        import time
+
+        if cache_key in response_cache:
+            cached_data, timestamp = response_cache[cache_key]
+            if time.time() - timestamp < CACHE_TTL:
+                print(f"✅ Cache hit for consultation: {req.text[:30]}...")
+                return Response(reply=cached_data)
+
+        # Create Japanese consultation prompt
+        prompt = create_japanese_consultation_prompt(
+            req.text, "general", req.conversation_history
+        )
+
+        # Generate response using Gemini (非同期実行)
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            executor, lambda: model.generate_content(prompt)
+        )
+
+        if response.text:
+            # レスポンスをキャッシュに保存
+            response_cache[cache_key] = (response.text, time.time())
+            return Response(reply=response.text)
+        else:
+            return Response(
+                reply="申し訳ありませんが、回答を生成できませんでした。もう一度お試しください。"
+            )
+
+    except Exception as e:
+        # Log the error in production, but don't expose internal details
+        print(f"Error generating Japanese consultation response: {str(e)}")
+        return Response(
+            reply="申し訳ありませんが、エラーが発生しました。もう一度お試しください。"
+        )
+
+
 @app.post("/api/respond-with-audio", response_model=CombinedResponse)
 async def respond_with_audio(
     req: Request, voice_name: str = "Kore", speaking_rate: float = 1.0
@@ -695,6 +760,58 @@ GUIDELINES:
 - Use clear, natural English
 
 Please respond with a welcoming message to get the conversation started.
+"""
+
+    return prompt
+
+
+def create_japanese_consultation_prompt(
+    user_text: str, consultation_type: str = "general", conversation_history: list = None
+) -> str:
+    """
+    Create prompts for Japanese consultation about English expressions and grammar.
+
+    Args:
+        user_text: The user's question in Japanese or English
+        consultation_type: Type of consultation (kept for API compatibility)
+        conversation_history: Previous consultation messages for context
+
+    Returns:
+        A formatted prompt string optimized for Japanese consultation responses
+    """
+
+    # Format conversation history for context
+    history_context = ""
+    if conversation_history and len(conversation_history) > 0:
+        history_context = "\n\n相談履歴（参考情報）:\n"
+        # Show last 8 messages to avoid token limit issues
+        recent_history = (
+            conversation_history[-8:]
+            if len(conversation_history) > 8
+            else conversation_history
+        )
+        for msg in recent_history:
+            sender = msg.get("sender", "Unknown")
+            text = msg.get("text", "")
+            history_context += f"{sender}: {text}\n"
+        history_context += "\n"
+
+    # Simple Japanese consultation prompt
+    prompt = f"""
+あなたは日本人の英語学習者を専門とする、経験豊富で親切な英語教師です。
+
+【重要な指示】:
+- 必ず日本語で回答してください
+- 簡潔で分かりやすい説明を心がけてください（2-3文程度）
+- 1つの具体的な例文を含めてください
+- 一目で読める短さにしてください
+- 要点だけを簡潔に答えてください
+{history_context}
+
+【学習者からの質問】:
+"{user_text}"
+
+上記の質問に対して、日本語で簡潔に回答してください。例文は1つだけ、説明は2-3文以内でお願いします。
 """
 
     return prompt

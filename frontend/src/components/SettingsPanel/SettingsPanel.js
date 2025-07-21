@@ -35,16 +35,6 @@ const SettingsPanel = memo(({
   // 展開状態を管理（アドバンス設定）
   const [isAdvancedExpanded, setIsAdvancedExpanded] = useState(false);
 
-  // スピード説明テキストを動的に取得
-  const getSpeedDescription = (rate) => {
-    const numRate = Number(rate || 1.0);
-    if (numRate <= 1.0) return '標準';
-    if (numRate <= 1.3) return '少し速い';
-    if (numRate <= 1.6) return '速い';
-    if (numRate <= 1.9) return 'とても速い';
-    return '最高速';
-  };
-
   return (
     <div className="settings-panel-optimized" role="form" aria-label="Voice Settings">
       {/* コンパクトヘッダー */}
@@ -119,7 +109,6 @@ const SettingsPanel = memo(({
                 <span className="speed-icon">⚡</span>
                 Speech Speed
               </h4>
-              <span className="current-speed">{getSpeedDescription(speakingRate)}</span>
             </div>
             
             <div className="speed-selector">
