@@ -14,7 +14,14 @@ const GeminiChat = () => {
 
   // メッセージの最下部にスクロール
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // DOMの更新を待ってからスクロールを実行
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'end',
+        inline: 'nearest'
+      });
+    }, 100);
   };
 
   useEffect(() => {

@@ -190,6 +190,10 @@ body {
   line-height: var(--line-height-normal);
   color: var(--color-text-primary);
   background-color: var(--color-background-primary);
+  overflow: hidden;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
 /* Focus Management - High Contrast */

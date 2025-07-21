@@ -26,7 +26,14 @@ export const useChat = (isGrammarCheckEnabled, onAIResponse) => {
    * メッセージリストの最下部にスクロールする関数
    */
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // DOMの更新を待ってからスクロールを実行
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ 
+        behavior: "smooth",
+        block: "end",
+        inline: "nearest"
+      });
+    }, 100);
   }, []);
 
   /**

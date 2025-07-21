@@ -76,10 +76,22 @@ const defaultFetchOptions = {
 
 /**
  * レスポンスキャッシュのキーを生成
+ * UTF-8対応のbase64エンコーディングを使用
  */
 const getCacheKey = (url, options = {}) => {
   const key = url + JSON.stringify(options);
-  return btoa(key).replace(/[^a-zA-Z0-9]/g, '');
+  try {
+    // UTF-8文字列をbase64エンコード（日本語対応）
+    return btoa(encodeURIComponent(key).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+      return String.fromCharCode('0x' + p1);
+    })).replace(/[^a-zA-Z0-9]/g, '');
+  } catch (error) {
+    // フォールバック：エラー時はシンプルなハッシュを生成
+    console.warn('Cache key generation failed, using fallback hash:', error);
+    return Array.from(key).reduce((hash, char) => {
+      return hash ^ char.charCodeAt(0);
+    }, 0).toString(36);
+  }
 };
 
 /**
@@ -610,6 +622,79 @@ export const convertTextToSpeech = async (text, speakingRate = 1.0, voiceName = 
     console.error('❌ convertTextToSpeech failed:', error.message);
     logError(error, 'convertTextToSpeech');
     return null;
+  }
+};
+
+// ============================================================================
+// リスニング問題API関数
+// ============================================================================
+
+/**
+ * リスニング問題を取得する関数
+ * @param {string} category - 問題のカテゴリ
+ * @param {string} difficulty - 難易度
+ * @returns {Promise<Object>} リスニング問題データ
+ */
+export const fetchListeningProblem = async (category = 'any', difficulty = 'medium') => {
+  const context = `fetchListeningProblem(${category}, ${difficulty})`;
+  
+  try {
+    const url = `${API_CONFIG.BASE_URL}/api/listening/problem`;
+    const params = new URLSearchParams({ category, difficulty });
+    
+    console.log('🎯 Fetching listening problem:', { category, difficulty });
+    
+    const data = await withRetry(
+      () => safeFetch(`${url}?${params}`, {
+        method: 'GET'
+      }),
+      API_CONFIG.MAX_RETRIES
+    );
+    
+    console.log('✅ Listening problem fetched:', data);
+    return data;
+  } catch (error) {
+    console.error('❌ Error fetching listening problem:', error);
+    logError(error, context);
+    throw error;
+  }
+};
+
+/**
+ * リスニング問題の回答をチェックする関数
+ * @param {Object} answerData - 回答データ
+ * @param {string} answerData.question - 問題文
+ * @param {string} answerData.user_answer - ユーザーの回答
+ * @param {string} answerData.correct_answer - 正解
+ * @param {Array} answerData.choices - 選択肢
+ * @returns {Promise<Object>} 回答チェック結果
+ */
+export const checkListeningAnswer = async (answerData) => {
+  const context = `checkListeningAnswer`;
+  
+  if (!answerData || !answerData.question || !answerData.user_answer) {
+    throw new AppError('Answer data is incomplete', ERROR_TYPES.VALIDATION);
+  }
+  
+  try {
+    const url = `${API_CONFIG.BASE_URL}/api/listening/check`;
+    
+    console.log('🔍 Checking listening answer:', answerData);
+    
+    const data = await withRetry(
+      () => safeFetch(url, {
+        method: 'POST',
+        body: JSON.stringify(answerData)
+      }),
+      API_CONFIG.MAX_RETRIES
+    );
+    
+    console.log('✅ Answer check result:', data);
+    return data;
+  } catch (error) {
+    console.error('❌ Error checking listening answer:', error);
+    logError(error, context);
+    throw error;
   }
 };
 

@@ -52,12 +52,8 @@ const InstantTranslation = ({
   } = useAnswerChecker();
 
   const {
-    difficulty,
-    category,
     eikenLevel,
     longTextMode,
-    handleDifficultyChange,
-    handleCategoryChange,
     handleEikenLevelChange,
     handleLongTextModeChange,
     applySettings
@@ -97,15 +93,15 @@ const InstantTranslation = ({
     setUserAnswer('');
     resetAnswer();
     clearTranscript();
-    fetchNewProblem(difficulty, category, eikenLevel, longTextMode);
-  }, [resetAnswer, clearTranscript, fetchNewProblem, difficulty, category, eikenLevel, longTextMode]);
+    fetchNewProblem(undefined, undefined, eikenLevel, longTextMode);
+  }, [resetAnswer, clearTranscript, fetchNewProblem, eikenLevel, longTextMode]);
 
   /**
    * 新しい問題を開始
    */
   const handleStartNewProblem = useCallback(() => {
-    fetchNewProblem(difficulty, category, eikenLevel, longTextMode);
-  }, [fetchNewProblem, difficulty, category, eikenLevel, longTextMode]);
+    fetchNewProblem(undefined, undefined, eikenLevel, longTextMode);
+  }, [fetchNewProblem, eikenLevel, longTextMode]);
 
   // ============================================================================
   // 初期化
@@ -128,12 +124,8 @@ const InstantTranslation = ({
         <SettingsPanel
           showSettings={true}  // 常に表示
           eikenLevel={eikenLevel}
-          difficulty={difficulty}
-          category={category}
           longTextMode={longTextMode}
           onEikenLevelChange={handleEikenLevelChange}
-          onDifficultyChange={handleDifficultyChange}
-          onCategoryChange={handleCategoryChange}
           onLongTextModeChange={handleLongTextModeChange}
           onApplySettings={applySettings}
         />

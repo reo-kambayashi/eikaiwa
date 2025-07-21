@@ -7,10 +7,13 @@
   border-top: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: none;
   position: relative;
-  padding: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+  flex-shrink: 0;
+  max-height: 180px;
+  min-height: 120px;
 }
 
 /* 改善された入力ヘッダー */

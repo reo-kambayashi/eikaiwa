@@ -111,7 +111,7 @@ const InputArea = ({
       };
     } else {
       return {
-        icon: '✏️',
+        icon: '',
         text: 'メッセージ入力',
         status: 'ready'
       };

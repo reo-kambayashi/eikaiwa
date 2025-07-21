@@ -9,7 +9,7 @@ import './Header.css';
 /**
  * アプリケーションのヘッダーコンポーネント（改善版）
  * @param {Object} props - コンポーネントのプロパティ
- * @param {string} props.currentMode - 現在のモード ('chat' または 'translation')
+ * @param {string} props.currentMode - 現在のモード ('chat', 'translation', 'listening')
  * @param {function} props.onModeChange - モード変更時のコールバック関数
  */
 const Header = ({ currentMode, onModeChange }) => {
@@ -31,7 +31,6 @@ const Header = ({ currentMode, onModeChange }) => {
           <div className="app-logo">🗣️</div>
           <div className="app-title-section">
             <h1 className="app-title">English Communication</h1>
-            <p className="app-subtitle">AI-powered conversation practice</p>
           </div>
         </div>
         
@@ -62,6 +61,20 @@ const Header = ({ currentMode, onModeChange }) => {
             <span className="mode-text">
               <span className="mode-title">Quick Practice</span>
               <span className="mode-description">Instant translation</span>
+            </span>
+          </button>
+          
+          <button
+            className={`mode-button ${currentMode === 'listening' ? 'active' : ''}`}
+            onClick={() => handleModeClick('listening')}
+            aria-label="Switch to Listening Mode - Practice listening with trivia questions"
+            role="tab"
+            aria-selected={currentMode === 'listening'}
+          >
+            <span className="mode-icon">🎧</span>
+            <span className="mode-text">
+              <span className="mode-title">Listening</span>
+              <span className="mode-description">Trivia questions</span>
             </span>
           </button>
         </nav>

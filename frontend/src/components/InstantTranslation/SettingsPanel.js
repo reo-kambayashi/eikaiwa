@@ -1,6 +1,6 @@
 // ============================================================================
 // InstantTranslation設定パネルコンポーネント
-// 英検レベル、難易度、カテゴリの選択UI
+// 英検レベルと長文モードの選択UI
 // ============================================================================
 
 import React, { memo } from 'react';
@@ -11,22 +11,14 @@ import PropTypes from 'prop-types';
  * @param {Object} props - コンポーネントのプロパティ
  * @param {boolean} props.showSettings - 設定パネルの表示状態
  * @param {string} props.eikenLevel - 現在の英検レベル
- * @param {string} props.difficulty - 現在の難易度
- * @param {string} props.category - 現在のカテゴリ
  * @param {Function} props.onEikenLevelChange - 英検レベル変更ハンドラー
- * @param {Function} props.onDifficultyChange - 難易度変更ハンドラー
- * @param {Function} props.onCategoryChange - カテゴリ変更ハンドラー
  * @param {Function} props.onApplySettings - 設定適用ハンドラー
  */
 const SettingsPanel = ({
   showSettings,
   eikenLevel,
-  difficulty,
-  category,
   longTextMode,
   onEikenLevelChange,
-  onDifficultyChange,
-  onCategoryChange,
   onLongTextModeChange,
   onApplySettings
 }) => {
@@ -54,38 +46,6 @@ const SettingsPanel = ({
         </select>
       </div>
 
-      <div className="setting-group">
-        <label htmlFor="difficulty-select">Difficulty:</label>
-        <select 
-          id="difficulty-select"
-          value={difficulty} 
-          onChange={onDifficultyChange}
-        >
-          <option value="all">All</option>
-          <option value="basic">Basic</option>
-          <option value="intermediate">Intermediate</option>
-          <option value="advanced">Advanced</option>
-        </select>
-      </div>
-
-      <div className="setting-group">
-        <label htmlFor="category-select">Category:</label>
-        <select 
-          id="category-select"
-          value={category} 
-          onChange={onCategoryChange}
-        >
-          <option value="all">All</option>
-          <option value="daily_life">Daily Life</option>
-          <option value="work">Work</option>
-          <option value="travel">Travel</option>
-          <option value="education">Education</option>
-          <option value="technology">Technology</option>
-          <option value="health">Health</option>
-          <option value="culture">Culture</option>
-          <option value="environment">Environment</option>
-        </select>
-      </div>
 
       <div className="setting-group">
         <label htmlFor="long-text-mode-checkbox">
@@ -112,12 +72,8 @@ const SettingsPanel = ({
 SettingsPanel.propTypes = {
   showSettings: PropTypes.bool.isRequired,
   eikenLevel: PropTypes.string.isRequired,
-  difficulty: PropTypes.string.isRequired,
-  category: PropTypes.string.isRequired,
   longTextMode: PropTypes.bool.isRequired,
   onEikenLevelChange: PropTypes.func.isRequired,
-  onDifficultyChange: PropTypes.func.isRequired,
-  onCategoryChange: PropTypes.func.isRequired,
   onLongTextModeChange: PropTypes.func.isRequired,
   onApplySettings: PropTypes.func.isRequired
 };

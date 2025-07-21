@@ -96,11 +96,17 @@
   background: #000000;
   min-height: 100vh;
   height: 100vh; /* 画面全体の高さを活用 */
+  max-height: 100vh;
   display: flex;
   flex-direction: column;
   color: var(--color-text-primary);
   line-height: 1.6;
   overflow: hidden; /* スクロールを各コンポーネント内で管理 */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 /* メインコンテナ - PC画面全体を活用したレスポンシブレイアウト */
@@ -151,6 +157,7 @@
   box-shadow: var(--shadow-md);
   border: 1px solid var(--color-border);
   overflow: hidden;
+  min-height: 0;
 }
 
 /* Geminiサイドバー - PC画面で常時表示 */
@@ -178,6 +185,23 @@
   box-shadow: var(--shadow-md);
   border: 1px solid var(--color-border);
   padding: var(--space-sm); /* 内側の余白も削減 */
+}
+
+/* リスニングモードレイアウト - 画面全体を活用 */
+.listening-mode-layout {
+  flex: 1;
+  padding: var(--space-sm); /* 余白を最小化 */
+  height: 100%; /* 利用可能な全高を使用 */
+}
+
+.listening-main {
+  height: 100%;
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
+  padding: var(--space-sm); /* 内側の余白も削減 */
+  overflow: auto;
 }
 
 /* PC向けレスポンシブデザイン - より広い画面での最適化 */

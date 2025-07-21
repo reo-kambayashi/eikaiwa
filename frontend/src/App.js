@@ -30,6 +30,7 @@ import ChatBox from './components/ChatBox';
 import InputArea from './components/InputArea';
 import GeminiChat from './components/GeminiChat';
 import InstantTranslation from './components/InstantTranslation';
+import ListeningMode from './components/ListeningMode';
 
 function App() {
   // ============================================================================
@@ -39,7 +40,7 @@ function App() {
   // ユーザー入力テキストの状態
   const [input, setInput] = useState('');
   
-  // モード切り替えの状態（'chat' または 'translation'）
+  // モード切り替えの状態（'chat', 'translation', 'listening'）
   const [currentMode, setCurrentMode] = useState('chat');
 
   // ============================================================================
@@ -159,7 +160,7 @@ function App() {
 
   /**
    * モード切り替えの処理
-   * @param {string} mode - 切り替え先のモード（'chat' または 'translation'）
+   * @param {string} mode - 切り替え先のモード（'chat', 'translation', 'listening'）
    */
   const handleModeChange = (mode) => {
     setCurrentMode(mode);
@@ -270,7 +271,7 @@ function App() {
                 </ErrorBoundary>
               </aside>
             </div>
-          ) : (
+          ) : currentMode === 'translation' ? (
             // 瞬間英作文モード - フルワイドレイアウト
             <div className="translation-mode-layout">
               <main className="translation-main">
@@ -279,6 +280,19 @@ function App() {
                     isVoiceInputEnabled={isVoiceInputEnabled}
                     isVoiceSupported={isVoiceSupported}
                     voiceInputTimeout={voiceInputTimeout}
+                  />
+                </ErrorBoundary>
+              </main>
+            </div>
+          ) : (
+            // リスニングモード - フルワイドレイアウト
+            <div className="listening-mode-layout">
+              <main className="listening-main">
+                <ErrorBoundary fallbackComponent="ListeningMode">
+                  <ListeningMode 
+                    isVoiceOutputEnabled={isVoiceOutputEnabled}
+                    speakingRate={speakingRate}
+                    voiceName={voiceName}
                   />
                 </ErrorBoundary>
               </main>

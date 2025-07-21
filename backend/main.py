@@ -11,12 +11,14 @@ Key features:
 - Voice input and output customization
 """
 
+import asyncio
 import base64
 import os
+from concurrent.futures import ThreadPoolExecutor
 
 import google.generativeai as genai
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from pydantic import BaseModel
@@ -43,6 +45,13 @@ if GEMINI_API_KEY:
 else:
     model = None
     tts_model = None
+
+# スレッドプールエグゼキューターを設定（AI処理を非同期化するため）
+executor = ThreadPoolExecutor(max_workers=4)
+
+# メモリキャッシュ（単一ユーザー用の高速化）
+response_cache = {}
+CACHE_TTL = 300  # 5分間のキャッシュ
 
 # Create FastAPI application instance
 app = FastAPI()
@@ -93,7 +102,9 @@ class TTSRequest(BaseModel):
     """
 
     text: str  # Text to convert to speech
-    voice_name: str = "Kore"  # Default: bright female English voice for Gemini TTS
+    voice_name: str = (
+        "Kore"  # Default: bright female English voice for Gemini TTS
+    )
     language_code: str = "en-US"  # Language and region code
     speaking_rate: float = 1.0  # Speech speed (0.25-4.0, 1.0 = normal)
 
@@ -137,8 +148,26 @@ class InstantTranslationCheckResponse(BaseModel):
     suggestions: list = []  # Alternative translations or improvements
 
 
+class CombinedResponse(BaseModel):
+    """
+    Combined response model for simultaneous text and audio generation.
+
+    Contains both AI text response and TTS audio data for optimized performance.
+    """
+
+    reply: str  # The AI's text response
+    audio_data: str = ""  # Base64 encoded audio data
+    content_type: str = "text/plain"  # Audio MIME type
+    use_browser_tts: bool = False  # Whether to fallback to browser TTS
+    fallback_text: str = ""  # Text for browser TTS fallback
+    processing_time: float = 0.0  # Total processing time in seconds
+
+
 # API Endpoints
 # These endpoints handle communication between the frontend and backend
+
+# 必要なモジュールのインポートを追加
+import time
 
 
 @app.get("/")
@@ -199,6 +228,16 @@ async def text_to_speech(request: TTSRequest):
         )
 
     try:
+        # TTSキャッシュチェック
+        import time
+
+        tts_cache_key = f"tts_{hash(request.text)}_{request.voice_name}_{request.speaking_rate}"
+        if tts_cache_key in response_cache:
+            cached_data, timestamp = response_cache[tts_cache_key]
+            if time.time() - timestamp < CACHE_TTL:
+                print(f"✅ TTS Cache hit for: {request.text[:30]}...")
+                return cached_data
+
         # Gemini 2.5 Flash Preview TTS with dictionary-based config
         content = request.text
 
@@ -207,17 +246,18 @@ async def text_to_speech(request: TTSRequest):
             "response_modalities": ["AUDIO"],
             "speech_config": {
                 "voice_config": {
-                    "prebuilt_voice_config": {
-                        "voice_name": request.voice_name
-                    }
+                    "prebuilt_voice_config": {"voice_name": request.voice_name}
                 }
-            }
+            },
         }
 
-        # Generate audio using Gemini TTS model
-        response = tts_model.generate_content(
-            contents=content, 
-            generation_config=generation_config
+        # Generate audio using Gemini TTS model (非同期実行)
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            executor,
+            lambda: tts_model.generate_content(
+                contents=content, generation_config=generation_config
+            ),
         )
 
         # Extract audio data from response
@@ -229,45 +269,71 @@ async def text_to_speech(request: TTSRequest):
                         # Found audio data - extract properly
                         audio_data = part.inline_data.data
                         mime_type = part.inline_data.mime_type or "audio/wav"
-                        
-                        print(f"🎵 Audio data found: type={type(audio_data)}, mime_type={mime_type}")
-                        
+
+                        print(
+                            f"🎵 Audio data found: type={type(audio_data)}, mime_type={mime_type}"
+                        )
+
                         # Handle different data types from Gemini
                         if isinstance(audio_data, bytes):
                             # If bytes, encode to base64
-                            audio_base64 = base64.b64encode(audio_data).decode("utf-8")
-                            print(f"🔄 Encoded bytes to base64: {len(audio_data)} bytes -> {len(audio_base64)} chars")
+                            audio_base64 = base64.b64encode(audio_data).decode(
+                                "utf-8"
+                            )
+                            print(
+                                f"🔄 Encoded bytes to base64: {len(audio_data)} bytes -> {len(audio_base64)} chars"
+                            )
                         elif isinstance(audio_data, str):
                             # If already string, assume it's base64
                             audio_base64 = audio_data
-                            print(f"🔄 Using string as base64: {len(audio_base64)} chars")
+                            print(
+                                f"🔄 Using string as base64: {len(audio_base64)} chars"
+                            )
                         else:
-                            print(f"❌ Unexpected audio data type: {type(audio_data)}")
-                            raise ValueError(f"Unexpected audio data type: {type(audio_data)}")
-                        
+                            print(
+                                f"❌ Unexpected audio data type: {type(audio_data)}"
+                            )
+                            raise ValueError(
+                                f"Unexpected audio data type: {type(audio_data)}"
+                            )
+
                         # Validate base64 data
                         try:
                             # Test decode to verify it's valid base64
                             decoded_test = base64.b64decode(audio_base64)
-                            print(f"✅ Base64 validation successful: {len(decoded_test)} bytes decoded")
+                            print(
+                                f"✅ Base64 validation successful: {len(decoded_test)} bytes decoded"
+                            )
                         except Exception as b64_error:
                             print(f"❌ Base64 validation failed: {b64_error}")
-                            raise ValueError(f"Invalid base64 audio data: {b64_error}")
-                        
-                        return {
+                            raise ValueError(
+                                f"Invalid base64 audio data: {b64_error}"
+                            )
+
+                        result = {
                             "audio_data": audio_base64,
                             "content_type": mime_type,
-                            "original_size": len(audio_data) if isinstance(audio_data, (bytes, str)) else 0
+                            "original_size": (
+                                len(audio_data)
+                                if isinstance(audio_data, (bytes, str))
+                                else 0
+                            ),
                         }
+                        # TTSレスポンスをキャッシュに保存
+                        response_cache[tts_cache_key] = (result, time.time())
+                        return result
 
         # If no audio data found, fallback to browser TTS
         print("No audio data found in Gemini TTS response")
-        return {
+        fallback_result = {
             "audio_data": "",
             "content_type": "text/plain",
             "fallback_text": request.text,
             "use_browser_tts": True,
         }
+        # フォールバック結果もキャッシュ
+        response_cache[tts_cache_key] = (fallback_result, time.time())
+        return fallback_result
 
     except HTTPException:
         # Propagate HTTP errors such as 503 without modification
@@ -275,13 +341,19 @@ async def text_to_speech(request: TTSRequest):
     except Exception as e:
         print(f"Gemini TTS Error: {str(e)}")
         # Fallback to browser TTS
-        return {
+        error_result = {
             "audio_data": "",
             "content_type": "text/plain",
             "fallback_text": request.text,
             "use_browser_tts": True,
             "error": str(e),
         }
+        # エラー結果は短時間キャッシュ（30秒）
+        response_cache[tts_cache_key] = (
+            error_result,
+            time.time() - CACHE_TTL + 30,
+        )
+        return error_result
 
 
 @app.get("/api/welcome", response_model=Response)
@@ -297,7 +369,11 @@ async def get_welcome_message():
             )
 
         welcome_prompt = create_welcome_prompt()
-        response = model.generate_content(welcome_prompt)
+        # AI生成を非同期実行
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            executor, lambda: model.generate_content(welcome_prompt)
+        )
 
         if response.text:
             return Response(reply=response.text)
@@ -326,13 +402,30 @@ async def respond(req: Request):
                 reply="API key not configured. Please set GEMINI_API_KEY environment variable."
             )
 
+        # キャッシュチェック
+        cache_key = (
+            f"response_{hash(req.text)}_{hash(str(req.conversation_history))}"
+        )
+        import time
+
+        if cache_key in response_cache:
+            cached_data, timestamp = response_cache[cache_key]
+            if time.time() - timestamp < CACHE_TTL:
+                print(f"✅ Cache hit for response: {req.text[:30]}...")
+                return Response(reply=cached_data)
+
         # Create conversation prompt
         prompt = create_conversation_prompt(req.text, req.conversation_history)
 
-        # Generate response using Gemini
-        response = model.generate_content(prompt)
+        # Generate response using Gemini (非同期実行)
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            executor, lambda: model.generate_content(prompt)
+        )
 
         if response.text:
+            # レスポンスをキャッシュに保存
+            response_cache[cache_key] = (response.text, time.time())
             return Response(reply=response.text)
         else:
             return Response(
@@ -344,6 +437,191 @@ async def respond(req: Request):
         print(f"Error generating response: {str(e)}")
         return Response(
             reply="Sorry, there was an error processing your request. Please try again."
+        )
+
+
+@app.post("/api/respond-with-audio", response_model=CombinedResponse)
+async def respond_with_audio(
+    req: Request, voice_name: str = "Kore", speaking_rate: float = 1.0
+):
+    """
+    Generate both text response and audio simultaneously for optimal performance.
+
+    This endpoint combines conversation generation and TTS processing
+    to reduce total response time for single-user scenarios.
+    """
+
+    print(
+        f"🔔 Combined response request: text='{req.text[:50]}...', voice={voice_name}"
+    )
+    start_time = time.time()
+
+    try:
+        if not model:
+            return CombinedResponse(
+                reply="API key not configured. Please set GEMINI_API_KEY environment variable.",
+                use_browser_tts=True,
+                fallback_text="API key not configured. Please set GEMINI_API_KEY environment variable.",
+            )
+
+        # キャッシュチェック
+        import time
+
+        cache_key = (
+            f"response_{hash(req.text)}_{hash(str(req.conversation_history))}"
+        )
+
+        # テキストレスポンスを生成
+        prompt = create_conversation_prompt(req.text, req.conversation_history)
+        loop = asyncio.get_event_loop()
+
+        # AIレスポンス生成を非同期実行
+        response_future = loop.run_in_executor(
+            executor, lambda: model.generate_content(prompt)
+        )
+
+        # AIレスポンスを待つ
+        ai_response = await response_future
+
+        if not ai_response.text:
+            return CombinedResponse(
+                reply="Sorry, I couldn't generate a response. Please try again.",
+                use_browser_tts=True,
+                fallback_text="Sorry, I couldn't generate a response. Please try again.",
+            )
+
+        reply_text = ai_response.text
+
+        # TTS生成を並列実行（AIレスポンス後）
+        if tts_model:
+            tts_cache_key = (
+                f"tts_{hash(reply_text)}_{voice_name}_{speaking_rate}"
+            )
+
+            # TTSキャッシュチェック
+            if tts_cache_key in response_cache:
+                cached_tts, timestamp = response_cache[tts_cache_key]
+                if time.time() - timestamp < CACHE_TTL:
+                    print(f"✅ TTS Cache hit for combined response")
+                    processing_time = time.time() - start_time
+                    return CombinedResponse(
+                        reply=reply_text,
+                        audio_data=cached_tts.get("audio_data", ""),
+                        content_type=cached_tts.get(
+                            "content_type", "text/plain"
+                        ),
+                        use_browser_tts=cached_tts.get(
+                            "use_browser_tts", False
+                        ),
+                        fallback_text=cached_tts.get(
+                            "fallback_text", reply_text
+                        ),
+                        processing_time=processing_time,
+                    )
+
+            # TTS生成設定
+            generation_config = {
+                "response_modalities": ["AUDIO"],
+                "speech_config": {
+                    "voice_config": {
+                        "prebuilt_voice_config": {"voice_name": voice_name}
+                    }
+                },
+            }
+
+            try:
+                # TTS生成を非同期実行
+                tts_response = await loop.run_in_executor(
+                    executor,
+                    lambda: tts_model.generate_content(
+                        contents=reply_text,
+                        generation_config=generation_config,
+                    ),
+                )
+
+                # TTSオーディオデータを抽出
+                audio_data = ""
+                content_type = "text/plain"
+                use_browser_tts = True
+
+                if (
+                    tts_response.candidates
+                    and len(tts_response.candidates) > 0
+                ):
+                    candidate = tts_response.candidates[0]
+                    if candidate.content and candidate.content.parts:
+                        for part in candidate.content.parts:
+                            if (
+                                hasattr(part, "inline_data")
+                                and part.inline_data
+                            ):
+                                raw_audio = part.inline_data.data
+                                content_type = (
+                                    part.inline_data.mime_type or "audio/wav"
+                                )
+
+                                if isinstance(raw_audio, bytes):
+                                    audio_data = base64.b64encode(
+                                        raw_audio
+                                    ).decode("utf-8")
+                                elif isinstance(raw_audio, str):
+                                    audio_data = raw_audio
+
+                                if audio_data:
+                                    use_browser_tts = False
+                                    break
+
+                # TTS結果をキャッシュ
+                tts_result = {
+                    "audio_data": audio_data,
+                    "content_type": content_type,
+                    "use_browser_tts": use_browser_tts,
+                    "fallback_text": reply_text if use_browser_tts else "",
+                }
+                response_cache[tts_cache_key] = (tts_result, time.time())
+
+                processing_time = time.time() - start_time
+                print(
+                    f"⚙️ Combined processing completed in {processing_time:.2f}s"
+                )
+
+                return CombinedResponse(
+                    reply=reply_text,
+                    audio_data=audio_data,
+                    content_type=content_type,
+                    use_browser_tts=use_browser_tts,
+                    fallback_text=reply_text if use_browser_tts else "",
+                    processing_time=processing_time,
+                )
+
+            except Exception as tts_error:
+                print(f"TTS Error in combined response: {str(tts_error)}")
+                # TTSエラー時はブラウザTTSにフォールバック
+                processing_time = time.time() - start_time
+                return CombinedResponse(
+                    reply=reply_text,
+                    use_browser_tts=True,
+                    fallback_text=reply_text,
+                    processing_time=processing_time,
+                )
+
+        # TTSモデルが無い場合
+        processing_time = time.time() - start_time
+        return CombinedResponse(
+            reply=reply_text,
+            use_browser_tts=True,
+            fallback_text=reply_text,
+            processing_time=processing_time,
+        )
+
+    except Exception as e:
+        print(f"Error in combined response: {str(e)}")
+        processing_time = time.time() - start_time
+        return CombinedResponse(
+            reply="Sorry, there was an error processing your request. Please try again.",
+            use_browser_tts=True,
+            fallback_text="Sorry, there was an error processing your request. Please try again.",
+            processing_time=processing_time,
         )
 
 
@@ -422,9 +700,85 @@ Please respond with a welcoming message to get the conversation started.
     return prompt
 
 
+def optimize_cache_cleanup():
+    """
+    キャッシュのクリーンアップを実行（メモリ使用量を最適化）
+    """
+    import time
+
+    current_time = time.time()
+    expired_keys = []
+
+    for key, (data, timestamp) in response_cache.items():
+        if current_time - timestamp > CACHE_TTL:
+            expired_keys.append(key)
+
+    for key in expired_keys:
+        del response_cache[key]
+
+    print(f"🧹 Cache cleanup: removed {len(expired_keys)} expired entries")
+
+
+# アプリケーション起動時にキャッシュクリーンアップを定期実行するためのタスク
+import threading
+import time
+
+
+def periodic_cache_cleanup():
+    """定期的なキャッシュクリーンアップ"""
+    while True:
+        time.sleep(300)  # 5分毎に実行
+        optimize_cache_cleanup()
+
+
+# バックグラウンドでキャッシュクリーンアップを開始
+cleanup_thread = threading.Thread(target=periodic_cache_cleanup, daemon=True)
+cleanup_thread.start()
+
+
 # ============================================================================
 # 瞬間英作文モード用のAPI エンドポイント
 # ============================================================================
+
+# ============================================================================
+# リスニング問題モード用のAPI エンドポイント
+# ============================================================================
+
+
+# リスニング問題の応答モデル
+class ListeningProblem(BaseModel):
+    """
+    リスニング問題のレスポンスモデル
+    """
+
+    question: str  # 問題文（音声で読み上げる）
+    choices: list  # 選択肢のリスト
+    correct_answer: str  # 正解
+    difficulty: str  # 難易度（easy, medium, hard）
+    category: str  # カテゴリ
+    explanation: str  # 解説（任意）
+
+
+class ListeningAnswerRequest(BaseModel):
+    """
+    リスニング問題の回答チェック用リクエストモデル
+    """
+
+    question: str  # 問題文
+    user_answer: str  # ユーザーの回答
+    correct_answer: str  # 正解
+    choices: list  # 選択肢
+
+
+class ListeningAnswerResponse(BaseModel):
+    """
+    リスニング問題の回答チェック用レスポンスモデル
+    """
+
+    is_correct: bool  # 正解かどうか
+    feedback: str  # フィードバック
+    explanation: str  # 解説
+
 
 # 瞬間英作文の問題パターン
 TRANSLATION_PROBLEMS = [
@@ -622,8 +976,11 @@ async def get_instant_translation_problem(
                     eiken_level, category_for_ai, long_text_mode
                 )
 
-                # AIに問題生成を依頼
-                ai_response = model.generate_content(ai_prompt)
+                # AIに問題生成を依頼（非同期実行）
+                loop = asyncio.get_event_loop()
+                ai_response = await loop.run_in_executor(
+                    executor, lambda: model.generate_content(ai_prompt)
+                )
 
                 if ai_response.text:
                     # AIの応答をパースしてJSONを抽出
@@ -786,6 +1143,302 @@ async def get_instant_translation_problem(
         )
 
 
+# ============================================================================
+# リスニング問題取得エンドポイント
+# ============================================================================
+
+
+@app.get("/api/listening/problem", response_model=ListeningProblem)
+async def get_listening_problem(
+    category: str = "any",
+    difficulty: str = "medium",
+):
+    """
+    Trivia APIを使用してリスニング問題を取得するエンドポイント
+
+    Args:
+        category: 問題のカテゴリ (any, sports, science, history, etc.)
+        difficulty: 難易度 (easy, medium, hard)
+
+    Returns:
+        ListeningProblem: 問題文、選択肢、正解、難易度、カテゴリを含む
+    """
+    try:
+        import httpx
+
+        # Open Trivia Database APIのパラメータ設定
+        base_url = "https://opentdb.com/api.php"
+        params = {
+            "amount": 1,  # 1問取得
+            "type": "multiple",  # 多肢選択問題
+            "difficulty": difficulty,
+            "encode": "url3986",  # RFC 3986 URL エンコーディング
+        }
+
+        # カテゴリマッピング（Open Trivia DBのカテゴリID）
+        category_mapping = {
+            "any": None,
+            "general": 9,
+            "books": 10,
+            "film": 11,
+            "music": 12,
+            "television": 14,
+            "science": 17,
+            "computers": 18,
+            "math": 19,
+            "mythology": 20,
+            "sports": 21,
+            "geography": 22,
+            "history": 23,
+            "politics": 24,
+            "art": 25,
+            "celebrities": 26,
+            "animals": 27,
+            "vehicles": 28,
+        }
+
+        # カテゴリが指定されている場合はパラメータに追加
+        if category != "any" and category in category_mapping:
+            params["category"] = category_mapping[category]
+
+        # Trivia APIから問題を取得（レート制限考慮）
+        import time
+        import asyncio
+
+        # レート制限チェック（5秒間隔）
+        current_time = time.time()
+        if hasattr(get_listening_problem, "_last_request_time"):
+            time_since_last = (
+                current_time - get_listening_problem._last_request_time
+            )
+            if time_since_last < 5.0:
+                wait_time = 5.0 - time_since_last
+                print(f"⏳ Rate limit: waiting {wait_time:.1f} seconds")
+                await asyncio.sleep(wait_time)
+
+        get_listening_problem._last_request_time = time.time()
+
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.get(base_url, params=params)
+            response.raise_for_status()
+            data = response.json()
+
+        # レスポンスコードチェック
+        response_code = data.get("response_code", -1)
+
+        if response_code == 1:
+            raise Exception(
+                "API Error: Not enough questions for the specified criteria"
+            )
+        elif response_code == 2:
+            raise Exception("API Error: Invalid parameters")
+        elif response_code == 3:
+            raise Exception("API Error: Token not found")
+        elif response_code == 4:
+            raise Exception("API Error: Token exhausted")
+        elif response_code == 5:
+            raise Exception("API Error: Rate limit exceeded")
+        elif response_code != 0:
+            raise Exception(
+                f"API Error: Unknown response code {response_code}"
+            )
+
+        if not data.get("results"):
+            raise Exception("No questions returned from API")
+
+        # 問題データを抽出
+        question_data = data["results"][0]
+
+        # URL エンコーディングをデコード
+        import urllib.parse
+
+        question = urllib.parse.unquote(question_data["question"])
+        correct_answer = urllib.parse.unquote(question_data["correct_answer"])
+        incorrect_answers = [
+            urllib.parse.unquote(ans)
+            for ans in question_data["incorrect_answers"]
+        ]
+
+        # 選択肢をシャッフル
+        import random
+
+        choices = [correct_answer] + incorrect_answers
+        random.shuffle(choices)
+
+        return ListeningProblem(
+            question=question,
+            choices=choices,
+            correct_answer=correct_answer,
+            difficulty=question_data["difficulty"],
+            category=question_data["category"],
+            explanation="",  # Trivia APIには解説がないため空文字
+        )
+
+    except Exception as e:
+        print(f"Error fetching listening problem: {str(e)}")
+
+        # 充実したフォールバック問題セット
+        fallback_problems = [
+            {
+                "question": "What is the capital of Japan?",
+                "choices": ["Tokyo", "Osaka", "Kyoto", "Hiroshima"],
+                "correct_answer": "Tokyo",
+                "difficulty": "easy",
+                "category": "Geography",
+            },
+            {
+                "question": "Which planet is known as the Red Planet?",
+                "choices": ["Venus", "Mars", "Jupiter", "Saturn"],
+                "correct_answer": "Mars",
+                "difficulty": "easy",
+                "category": "Science",
+            },
+            {
+                "question": "How many continents are there on Earth?",
+                "choices": ["5", "6", "7", "8"],
+                "correct_answer": "7",
+                "difficulty": "medium",
+                "category": "Geography",
+            },
+            {
+                "question": "What is the largest mammal in the world?",
+                "choices": [
+                    "Elephant",
+                    "Blue Whale",
+                    "Giraffe",
+                    "Hippopotamus",
+                ],
+                "correct_answer": "Blue Whale",
+                "difficulty": "medium",
+                "category": "Science",
+            },
+        ]
+
+        # 難易度に応じてフォールバック問題を選択
+        suitable_problems = [
+            p for p in fallback_problems if p["difficulty"] == difficulty
+        ]
+        if not suitable_problems:
+            suitable_problems = (
+                fallback_problems  # 適切な難易度がない場合は全て
+            )
+
+        import random
+
+        selected_problem = random.choice(suitable_problems)
+
+        return ListeningProblem(
+            question=selected_problem["question"],
+            choices=selected_problem["choices"],
+            correct_answer=selected_problem["correct_answer"],
+            difficulty=selected_problem["difficulty"],
+            category=selected_problem["category"],
+            explanation="This is a fallback question due to external API issues.",
+        )
+
+
+# ============================================================================
+# リスニング問題回答チェックエンドポイント
+# ============================================================================
+
+
+@app.post("/api/listening/check", response_model=ListeningAnswerResponse)
+async def check_listening_answer(req: ListeningAnswerRequest):
+    """
+    リスニング問題の回答をチェックし、フィードバックを提供するエンドポイント
+
+    Args:
+        req: ユーザーの回答データ
+
+    Returns:
+        ListeningAnswerResponse: 正解判定、フィードバック、解説
+    """
+    try:
+        # 正解判定（大文字小文字を無視）
+        is_correct = (
+            req.user_answer.strip().lower()
+            == req.correct_answer.strip().lower()
+        )
+
+        # AIを使用してフィードバック生成
+        if model:
+            prompt = f"""
+あなたは英語学習者向けのリスニング問題チューターです。
+以下のリスニング問題の回答について、励ましとともにフィードバックを提供してください。
+
+問題: {req.question}
+選択肢: {', '.join(req.choices)}
+正解: {req.correct_answer}
+ユーザーの回答: {req.user_answer}
+正解判定: {'正解' if is_correct else '不正解'}
+
+フィードバックは以下の要素を含めてください：
+1. 正解・不正解の判定
+2. 正解の理由や背景知識
+3. 学習者への励ましの言葉
+4. 日本語で100文字以内
+
+回答形式：JSON
+{{
+    "feedback": "フィードバック文",
+    "explanation": "解説文"
+}}
+"""
+
+            try:
+                ai_response = model.generate_content(prompt)
+                if ai_response.text:
+                    import json
+                    import re
+
+                    # JSONを抽出
+                    json_match = re.search(
+                        r"\{.*\}", ai_response.text, re.DOTALL
+                    )
+                    if json_match:
+                        response_data = json.loads(json_match.group())
+                        feedback = response_data.get("feedback", "")
+                        explanation = response_data.get("explanation", "")
+                    else:
+                        raise Exception("No JSON found in AI response")
+                else:
+                    raise Exception("Empty AI response")
+
+            except Exception as e:
+                print(f"AI feedback generation failed: {e}")
+                # フォールバックフィードバック
+                if is_correct:
+                    feedback = "正解です！よくできました。"
+                    explanation = f"答えは「{req.correct_answer}」です。"
+                else:
+                    feedback = (
+                        f"惜しい！正解は「{req.correct_answer}」でした。"
+                    )
+                    explanation = "次回も頑張りましょう！"
+        else:
+            # Gemini APIが利用できない場合のシンプルなフィードバック
+            if is_correct:
+                feedback = "正解です！素晴らしい！"
+                explanation = f"答えは「{req.correct_answer}」です。"
+            else:
+                feedback = (
+                    f"不正解です。正解は「{req.correct_answer}」でした。"
+                )
+                explanation = "次回も頑張ってください！"
+
+        return ListeningAnswerResponse(
+            is_correct=is_correct, feedback=feedback, explanation=explanation
+        )
+
+    except Exception as e:
+        print(f"Error checking listening answer: {str(e)}")
+        return ListeningAnswerResponse(
+            is_correct=False,
+            feedback="回答の確認中にエラーが発生しました。",
+            explanation="もう一度お試しください。",
+        )
+
+
 @app.post(
     "/api/instant-translation/check",
     response_model=InstantTranslationCheckResponse,
@@ -819,12 +1472,15 @@ async def check_instant_translation_answer(
                 suggestions=[],
             )
 
-        # AIを使って詳細な回答チェック
+        # AIを使って詳細な回答チェック（非同期実行）
         check_prompt = create_translation_check_prompt(
             req.japanese, req.correctAnswer, req.userAnswer
         )
 
-        response = model.generate_content(check_prompt)
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            executor, lambda: model.generate_content(check_prompt)
+        )
 
         if response.text:
             # AI応答から情報を抽出

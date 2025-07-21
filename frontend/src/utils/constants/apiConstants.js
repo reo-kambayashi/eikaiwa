@@ -15,8 +15,8 @@ export const API_CONFIG = {
   },
 
   // リクエスト設定
-  TIMEOUT: 30000, // 30秒
-  MAX_RETRIES: 3,
+  TIMEOUT: 60000, // 60秒（外部API用に延長）
+  MAX_RETRIES: 2, // リトライ回数を減らして高速化
   
   // HTTPヘッダー
   HEADERS: {

@@ -323,7 +323,9 @@ Generate the new problem now.
         category_text = ""
         if category:
             category_desc = self.category_descriptions[category]
-            category_text = f'\n- **Category**: {category.value} ({category_desc})'
+            category_text = (
+                f"\n- **Category**: {category.value} ({category_desc})"
+            )
 
         prompt = f"""
 <ROLE>
@@ -476,7 +478,7 @@ Respond as 'Echo' to the student.
         return prompt.strip()
 
     def get_custom_lesson_prompt(
-        self, 
+        self,
         lesson_topic: str,
         student_level: str,
         focus_skills: Optional[List[str]] = None,
@@ -697,7 +699,9 @@ def create_eiken_problem_generation_prompt(
         "pre-1": EikenLevel.GRADE_PRE_1,
         "1": EikenLevel.GRADE_1,
     }
-    eiken_enum = eiken_mapping.get(str(eiken_level).lower(), EikenLevel.GRADE_3)
+    eiken_enum = eiken_mapping.get(
+        str(eiken_level).lower(), EikenLevel.GRADE_3
+    )
 
     cat_enum = None
     if category:
@@ -727,7 +731,8 @@ if __name__ == "__main__":
         chat_history=[
             ChatMessage(role="user", content="Hello!"),
             ChatMessage(
-                role="assistant", content="Hi there! I'm Echo. Nice to meet you!"
+                role="assistant",
+                content="Hi there! I'm Echo. Nice to meet you!",
             ),
         ],
     )
