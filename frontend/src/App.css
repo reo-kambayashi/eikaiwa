@@ -486,8 +486,9 @@
 }
 
 .message.you {
-  background-color: var(--color-primary);
-  color: var(--color-text-on-primary);
+  background-color: #ffffff;
+  border: 2px solid #000000;
+  color: #000000;
   margin-left: auto;
   text-align: right;
   border-bottom-right-radius: var(--radius-sm);

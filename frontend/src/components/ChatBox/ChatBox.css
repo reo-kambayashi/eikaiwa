@@ -146,8 +146,9 @@
 }
 
 .enhanced-message.you .message-content {
-  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
-  color: var(--color-text-inverse);
+  background: #ffffff;
+  border: 2px solid #000000;
+  color: #000000;
   margin-left: var(--space-12);
   margin-right: 0;
 }
@@ -392,7 +393,8 @@
   }
   
   .enhanced-message.you .message-content {
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+    border-width: 3px;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.3);
   }
 }
 
