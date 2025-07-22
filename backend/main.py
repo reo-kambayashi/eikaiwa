@@ -1558,6 +1558,82 @@ async def check_listening_answer(req: ListeningAnswerRequest):
         )
 
 
+# ============================================================================
+# リスニング問題翻訳エンドポイント
+# ============================================================================
+
+
+class ListeningTranslateRequest(BaseModel):
+    """
+    リスニング問題翻訳用リクエストモデル
+    """
+    question: str  # 翻訳する英語の問題文
+
+
+class ListeningTranslateResponse(BaseModel):
+    """
+    リスニング問題翻訳用レスポンスモデル
+    """
+    japanese_translation: str  # 日本語翻訳
+
+
+@app.post("/api/listening/translate", response_model=ListeningTranslateResponse)
+async def translate_listening_question(req: ListeningTranslateRequest):
+    """
+    リスニング問題の英語文を日本語に翻訳するエンドポイント
+
+    Args:
+        req: 翻訳する英語の問題文
+
+    Returns:
+        ListeningTranslateResponse: 日本語翻訳
+    """
+    try:
+        if not model:
+            # Gemini APIが利用できない場合のフォールバック
+            return ListeningTranslateResponse(
+                japanese_translation="翻訳機能は現在利用できません。"
+            )
+
+        # Gemini AIを使用して翻訳
+        translate_prompt = f"""
+あなたは英語から日本語への翻訳の専門家です。
+以下の英語の問題文を自然で理解しやすい日本語に翻訳してください。
+
+英語の問題文: {req.question}
+
+翻訳の要件:
+1. 自然で読みやすい日本語
+2. 問題の意味を正確に伝える
+3. 日本語学習者にとって理解しやすい表現
+4. 1つの完結した文章で回答
+
+回答形式: 翻訳された日本語のみを返してください。
+"""
+
+        try:
+            ai_response = model.generate_content(translate_prompt)
+            if ai_response.text:
+                japanese_translation = ai_response.text.strip()
+            else:
+                raise Exception("Empty AI response")
+
+        except Exception as e:
+            print(f"AI translation failed: {e}")
+            # フォールバック翻訳
+            japanese_translation = f"問題文: {req.question}（翻訳準備中）"
+
+        return ListeningTranslateResponse(
+            japanese_translation=japanese_translation
+        )
+
+    except Exception as e:
+        print(f"Error translating listening question: {str(e)}")
+        return ListeningTranslateResponse(
+            japanese_translation="翻訳中にエラーが発生しました。"
+        )
+
+
 @app.post(
     "/api/instant-translation/check",
     response_model=InstantTranslationCheckResponse,

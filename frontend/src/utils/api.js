@@ -705,6 +705,44 @@ export const checkListeningAnswer = async (answerData) => {
 };
 
 /**
+ * リスニング問題の英語文を日本語に翻訳する関数
+ * @param {string} question - 翻訳する英語の問題文
+ * @returns {Promise<Object>} 翻訳結果
+ */
+export const translateListeningQuestion = async (question) => {
+  const context = `translateListeningQuestion`;
+  
+  if (!question || typeof question !== 'string') {
+    throw new AppError('Question is required and must be a string', ERROR_TYPES.VALIDATION);
+  }
+  
+  try {
+    const url = `${API_CONFIG.BASE_URL}/api/listening/translate`;
+    
+    console.log('🌐 Translating listening question:', question);
+    
+    const data = await withRetry(
+      () => safeFetch(url, {
+        method: 'POST',
+        body: JSON.stringify({ question })
+      }),
+      API_CONFIG.MAX_RETRIES
+    );
+    
+    console.log('✅ Translation result:', data);
+    return data;
+  } catch (error) {
+    console.error('❌ Error translating listening question:', error);
+    logError(error, context);
+    
+    // フォールバック：翻訳に失敗した場合は元の英語を返す
+    return {
+      japanese_translation: `${question}（翻訳準備中）`
+    };
+  }
+};
+
+/**
  * ブラウザの標準音声合成APIを使用するフォールバック関数
  * @param {string} text - 音声化するテキスト
  * @param {number} rate - 読み上げ速度

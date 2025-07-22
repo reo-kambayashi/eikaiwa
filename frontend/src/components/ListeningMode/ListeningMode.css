@@ -405,6 +405,39 @@
   color: var(--color-primary, #1976d2);
 }
 
+/* 問題文和訳表示スタイル */
+.listening-result__question-translation {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.listening-result__translation-label {
+  font-weight: 600;
+  color: #4caf50;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.listening-result__translation-text {
+  color: white;
+  line-height: 1.5;
+  font-size: 1rem;
+}
+
+.listening-result__loading {
+  color: #ffb74d;
+  font-style: italic;
+}
+
+.listening-result__error {
+  color: #ff8a80;
+  font-style: italic;
+}
+
 .listening-result__feedback {
   text-align: left;
   margin-bottom: 1.5rem;

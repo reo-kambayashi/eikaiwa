@@ -221,6 +221,7 @@ const ListeningMode = ({
             feedback={feedback}
             isCorrect={isCorrect}
             correctAnswer={currentProblem?.correct_answer}
+            questionText={currentProblem?.question}
             onNextProblem={handleNewProblem}
           />
         )}
