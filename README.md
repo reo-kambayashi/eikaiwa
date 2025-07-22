@@ -1,53 +1,88 @@
-# 🎯 Eikaiwa - AI-Powered English Learning Platform
+# 🎯 Eikaiwa - AI英語学習アプリ
 
-**日本人向けAI英語学習プラットフォーム | AI-powered English communication platform for Japanese learners**
+**Google Gemini AIを活用した日本人向け英語会話練習アプリ**
 
-Google Gemini AIを活用した包括的な英語学習プラットフォームです。音声認識・音声合成・リアルタイム会話練習を組み合わせ、日本人学習者のための効果的な英語コミュニケーション環境を提供します。
-
-![Eikaiwa Platform](https://img.shields.io/badge/Platform-Web_App-blue) 
-![AI](https://img.shields.io/badge/AI-Google_Gemini-green)
-![Backend](https://img.shields.io/badge/Backend-FastAPI-red)
-![Frontend](https://img.shields.io/badge/Frontend-React_19-blue)
-![Python](https://img.shields.io/badge/Python-3.12+-yellow)
+音声認識・音声合成・AI会話を組み合わせた効果的な英語学習環境を提供します。
 
 ## ✨ 主要機能
 
-### 🤖 AI会話パートナー
-- **Google Gemini AI**による自然で知的な英語会話
-- **コンテキスト理解**：会話の流れを記憶し、継続的な対話をサポート
-- **レベル適応**：学習者のレベルに応じた適切な応答生成
-- **日本語サポート**：必要に応じて日本語での説明・解説
+- **🤖 AI会話**: Google Gemini AIによる自然な英語会話練習
+- **🎤 音声機能**: リアルタイム音声認識・AI音声合成
+- **⚡ 瞬間英作文**: 日→英翻訳練習
+- **🎧 リスニング**: Trivia API連携のクイズ形式学習
+- ** 文法チェック**: AIによるリアルタイム添削
 
-### 🎤 音声機能
-- **リアルタイム音声認識**：Web Speech APIによる高精度音声入力
-- **AI音声合成**：Gemini TTSによる自然な英語音声出力
-- **視覚フィードバック**：音声認識中の波形アニメーション
-- **カスタマイズ設定**：音声速度、入力タイムアウト調整
+## 🚀 クイックスタート
 
-### 📚 学習モード
-- **⚡ 瞬間英作文**：日本語から英語への瞬時翻訳練習（24問収録）
-- **🎧 リスニング練習**：Trivia APIと連携した19カテゴリのクイズ形式学習
-- **💬 自由会話**：トピック制限なしのオープン英語会話
-- **📝 文法チェック**：AIによるリアルタイム文法確認とフィードバック
+### 前提条件
+- Node.js 18+, Python 3.12+, uv
+- Google Gemini API Key
 
-### 🎨 モダンなUI/UX
-- **レスポンシブデザイン**：デスクトップ・タブレット・モバイル完全対応
-- **統一デザインシステム**：8ptグリッド、モノクロームテーマ
-- **アクセシビリティ対応**：キーボードナビゲーション、ARIA属性完備
-- **直感的操作**：3カラムレイアウトによる効率的な学習環境
+### セットアップ
+```bash
+git clone https://github.com/reo-kambayashi/eikaiwa.git
+cd eikaiwa
 
-## 🏗️ アーキテクチャ
+# 環境変数設定
+cp .env.example .env
+# .envにGemini API Keyを設定
 
-### バックエンド（FastAPI）
+# バックエンド起動
+cd backend
+uv sync
+uv run uvicorn main:app --reload --port 8000
+
+# フロントエンド起動
+cd frontend  
+npm install
+npm start
 ```
-backend/
-├── main.py                 # FastAPIアプリケーション本体
-├── models.py              # Pydanticデータモデル定義
-├── config.py              # 環境設定・AI初期化
-├── services/              # 機能別サービス層
-│   ├── ai_service.py      # AI関連機能（プロンプト生成）
-│   ├── tts_service.py     # 音声合成サービス
-│   ├── listening_service.py # リスニング練習サービス
+
+### アクセス
+- フロントエンド: http://localhost:3000
+- API文書: http://localhost:8000/docs
+
+## 🛠️ 技術スタック
+
+**バックエンド**: FastAPI, Google Gemini AI, Python 3.12+
+**フロントエンド**: React 19, Web Speech API, CSS Variables
+**インフラ**: Docker, uv
+
+## 📊 プロジェクト構造
+
+```
+eikaiwa/
+├── backend/              # FastAPI サーバー
+│   ├── main.py          # アプリケーション本体
+│   ├── models.py        # データモデル
+│   ├── config.py        # 設定・AI初期化
+│   └── services/        # 機能別サービス
+├── frontend/            # React アプリ
+│   ├── src/components/  # UIコンポーネント
+│   ├── src/hooks/       # カスタムフック
+│   └── src/styles/      # デザインシステム
+└── docker-compose.yml   # Docker構成
+```
+
+## 🧪 開発
+
+```bash
+# Docker環境
+docker-compose up -d
+
+# テスト実行
+cd backend && uv run pytest
+cd frontend && npm test
+```
+
+## 📞 サポート
+
+- **Issues**: [GitHub Issues](https://github.com/reo-kambayashi/eikaiwa/issues)
+- **開発者**: [@reo-kambayashi](https://github.com/reo-kambayashi)
+
+---
+
+**Made with ❤️ for Japanese English learners**
 │   └── translation_service.py # 翻訳練習サービス
 └── tests/                 # テストスイート
 ```
