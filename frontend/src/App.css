@@ -70,13 +70,15 @@
 .chat-container {
   display: flex;
   flex-direction: column;
-  height: 100%; /* 利用可能な全高を使用 */
+  height: 100%;
+  max-height: calc(100vh - 100px); /* 固定の最大高さを設定 */
   background: var(--color-bg-elevated);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   border: 1px solid var(--color-border);
   overflow: hidden;
   min-height: 0;
+  position: relative; /* 内部要素の位置安定化 */
 }
 
 /* Geminiサイドバー - PC画面で常時表示 */

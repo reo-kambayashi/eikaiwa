@@ -13,8 +13,9 @@
   flex-direction: column;
   gap: var(--space-sm);
   flex-shrink: 0;
-  max-height: 180px;
-  min-height: 120px;
+  height: 160px; /* 固定高さでレイアウト安定化 */
+  max-height: 160px;
+  min-height: 160px;
 }
 
 /* 改善された入力ヘッダー */
