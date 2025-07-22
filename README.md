@@ -1,52 +1,208 @@
-# English Communication App
+# 🎯 Eikaiwa - AI-Powered English Learning Platform
 
-**日本人向け英語会話練習アプリ - AI powered English learning app for Japanese speakers**
+**日本人向けAI英語学習プラットフォーム | AI-powered English communication platform for Japanese learners**
 
-このプロジェクトは、日本人の英語学習者がAIと対話しながら英語を練習するためのWebアプリケーションです。Google Gemini AIを活用し、音声認識・音声合成機能を備えた包括的な学習環境を提供します。
+Google Gemini AIを活用した包括的な英語学習プラットフォームです。音声認識・音声合成・リアルタイム会話練習を組み合わせ、日本人学習者のための効果的な英語コミュニケーション環境を提供します。
 
-## 🎨 最新のデザインシステム統一 (2025年1月22日更新)
+![Eikaiwa Platform](https://img.shields.io/badge/Platform-Web_App-blue) 
+![AI](https://img.shields.io/badge/AI-Google_Gemini-green)
+![Backend](https://img.shields.io/badge/Backend-FastAPI-red)
+![Frontend](https://img.shields.io/badge/Frontend-React_19-blue)
+![Python](https://img.shields.io/badge/Python-3.12+-yellow)
 
-### 統一されたデザインシステム
-- **完全に統一されたCSS変数**: カラー、スペーシング、タイポグラフィ、アニメーションが全て`design-system.css`で一元管理
-- **モノクローム黒白テーマ**: 一貫性のある黒白ベースのカラーパレット
-- **8ptグリッドシステム**: 統一されたスペーシングシステム
-- **レスポンシブタイポグラフィ**: 全デバイス対応のフォントサイズスケール
-- **共通コンポーネントパターン**: ボタン、入力フィールド、カード、ヘッダーの統一されたスタイル
-- **アクセシビリティ重視**: 最小タッチターゲット、キーボードナビゲーション、ハイコントラスト対応
-- **パフォーマンス最適化**: CSS重複の削除と最適化されたトランジション
+## ✨ 主要機能
 
-### 技術的改善
-- **CSS構造の最適化**: デザインシステムベースの階層化されたCSS
-- **重複コードの削除**: App.css、index.css、コンポーネントCSSの重複変数を統合
-- **統一されたユーティリティクラス**: 再利用可能なスタイルパターン
-- **モーションレスポンシブ**: `prefers-reduced-motion`やハイコントラスト対応
+### 🤖 AI会話パートナー
+- **Google Gemini AI**による自然で知的な英語会話
+- **コンテキスト理解**：会話の流れを記憶し、継続的な対話をサポート
+- **レベル適応**：学習者のレベルに応じた適切な応答生成
+- **日本語サポート**：必要に応じて日本語での説明・解説
 
-## ✨ UI改善履歴
+### 🎤 音声機能
+- **リアルタイム音声認識**：Web Speech APIによる高精度音声入力
+- **AI音声合成**：Gemini TTSによる自然な英語音声出力
+- **視覚フィードバック**：音声認識中の波形アニメーション
+- **カスタマイズ設定**：音声速度、入力タイムアウト調整
 
-### 🎨 モダンで使いやすいインターフェース
-- **レスポンシブデザイン**: デスクトップ、タブレット、モバイル対応
-- **直感的なレイアウト**: 3カラムレイアウト（設定・チャット・Geminiパネル）
-- **日本語UI**: 分かりやすい日本語インターフェース
-- **アクセシビリティ対応**: キーボードナビゲーション、ARIA属性
+### 📚 学習モード
+- **⚡ 瞬間英作文**：日本語から英語への瞬時翻訳練習（24問収録）
+- **🎧 リスニング練習**：Trivia APIと連携した19カテゴリのクイズ形式学習
+- **💬 自由会話**：トピック制限なしのオープン英語会話
+- **📝 文法チェック**：AIによるリアルタイム文法確認とフィードバック
 
-### ⚡ 改善された音声機能
-- **リアルタイム視覚フィードバック**: 音声認識中の波形アニメーション
-- **キーボードショートカット**: Enter送信、Space音声入力
-- **状態表示**: 明確な音声入力・ローディング・準備完了状態
-- **エラーハンドリング**: 優雅な失敗処理とフィードバック
+### 🎨 モダンなUI/UX
+- **レスポンシブデザイン**：デスクトップ・タブレット・モバイル完全対応
+- **統一デザインシステム**：8ptグリッド、モノクロームテーマ
+- **アクセシビリティ対応**：キーボードナビゲーション、ARIA属性完備
+- **直感的操作**：3カラムレイアウトによる効率的な学習環境
 
-詳細は [UI_IMPROVEMENTS.md](./UI_IMPROVEMENTS.md) をご覧ください。
+## 🏗️ アーキテクチャ
 
-## 主な機能
+### バックエンド（FastAPI）
+```
+backend/
+├── main.py                 # FastAPIアプリケーション本体
+├── models.py              # Pydanticデータモデル定義
+├── config.py              # 環境設定・AI初期化
+├── services/              # 機能別サービス層
+│   ├── ai_service.py      # AI関連機能（プロンプト生成）
+│   ├── tts_service.py     # 音声合成サービス
+│   ├── listening_service.py # リスニング練習サービス
+│   └── translation_service.py # 翻訳練習サービス
+└── tests/                 # テストスイート
+```
 
-- **🤖 AI会話パートナー**: Google Gemini AIによる自然な英語会話
-- **🎤 音声認識**: Web Speech APIを使った音声入力
-- **🔊 音声合成**: Google Cloud TTSによる自然な音声出力  
-- **📝 文法チェック**: AI による文法の確認とフィードバック
-- **⚙️ 音声設定**: 読み上げ速度や音声入力タイムアウトの調整
-- **📱 瞬間英作文モード**: 日英翻訳練習機能
+### フロントエンド（React 19）
+```
+frontend/src/
+├── components/            # UIコンポーネント
+│   ├── ChatBox/          # メインチャット画面
+│   ├── VoiceControls/    # 音声操作パネル
+│   ├── SettingsPanel/    # 設定画面
+│   ├── InstantTranslation/ # 瞬間英作文モード
+│   └── ListeningMode/    # リスニング練習モード
+├── hooks/                # カスタムReactフック
+├── styles/               # 統一デザインシステム
+└── utils/                # ユーティリティ関数
+```
 
 ## 🚀 クイックスタート
+
+### 前提条件
+- **Node.js** 18+ 
+- **Python** 3.12+
+- **uv** (Pythonパッケージマネージャー)
+- **Google Gemini API Key**
+
+### 1. プロジェクトセットアップ
+```bash
+git clone https://github.com/reo-kambayashi/eikaiwa.git
+cd eikaiwa
+```
+
+### 2. 環境変数設定
+```bash
+cp .env.example .env
+# .envファイルを編集してGemini API Keyを設定
+```
+
+### 3. バックエンド起動
+```bash
+cd backend
+uv sync                    # 依存関係インストール
+uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### 4. フロントエンド起動
+```bash
+cd frontend
+npm install                # 依存関係インストール
+npm start                  # 開発サーバー起動（localhost:3000）
+```
+
+### 5. アプリケーションアクセス
+- **フロントエンド**: http://localhost:3000
+- **バックエンドAPI**: http://localhost:8000
+- **API文書**: http://localhost:8000/docs
+
+## 🔧 開発・運用
+
+### Docker構成
+```bash
+# 開発環境
+docker-compose -f docker-compose.dev.yml up
+
+# 本番環境
+docker-compose up -d
+```
+
+### テスト実行
+```bash
+# バックエンドテスト
+cd backend && uv run pytest
+
+# フロントエンドテスト  
+cd frontend && npm test
+```
+
+### パフォーマンス監視
+```bash
+# フロントエンドビルド
+cd frontend && npm run build
+
+# Lighthouse監査
+npm run lighthouse
+```
+
+## 📊 技術スタック
+
+### バックエンド
+- **FastAPI** 0.104+ - 高速なPython Webフレームワーク
+- **Google Gemini AI** - 最新のAI会話モデル
+- **Pydantic** 2.0+ - データバリデーション
+- **Uvicorn** - ASGI Webサーバー
+- **Python** 3.12+ - uv管理
+
+### フロントエンド  
+- **React** 19.1+ - モダンUIライブラリ
+- **Web Speech API** - ブラウザ音声認識
+- **React Markdown** - マークダウンレンダリング
+- **CSS Variables** - 統一デザインシステム
+
+### インフラ・DevOps
+- **Docker** - コンテナ化
+- **GitHub Actions** - CI/CD
+- **Environment Variables** - 設定管理
+
+## 🎯 主要APIエンドポイント
+
+| エンドポイント | メソッド | 機能 |
+|---------------|----------|------|
+| `/api/conversation` | POST | AI英語会話生成 |
+| `/api/tts` | POST | 音声合成（日英対応） |
+| `/api/instant-translation/problem` | GET | 瞬間英作文問題取得 |
+| `/api/instant-translation/check` | POST | 翻訳解答チェック |
+| `/api/listening/problem` | GET | リスニング問題取得 |
+| `/api/listening/answer` | POST | リスニング解答チェック |
+
+詳細なAPI仕様は [API Documentation](http://localhost:8000/docs) をご覧ください。
+
+## 🧪 品質保証
+
+### テスト戦略
+- **ユニットテスト**: pytest（バックエンド）、Jest（フロントエンド）
+- **統合テスト**: FastAPI TestClient
+- **E2Eテスト**: React Testing Library
+- **パフォーマンステスト**: Lighthouse CI
+
+### コード品質
+- **型安全性**: TypeScript（フロントエンド）、Pydantic（バックエンド）
+- **リンティング**: ESLint、Black、isort
+- **コードカバレッジ**: 80%以上維持
+
+## 🌟 貢献
+
+プロジェクトへの貢献を歓迎します！
+
+1. リポジトリをフォーク
+2. 機能ブランチを作成 (`git checkout -b feature/amazing-feature`)
+3. 変更をコミット (`git commit -m 'Add amazing feature'`)
+4. ブランチにプッシュ (`git push origin feature/amazing-feature`)
+5. プルリクエストを作成
+
+## � ライセンス
+
+このプロジェクトはMITライセンスの下で公開されています。詳細は [LICENSE](LICENSE) ファイルをご覧ください。
+
+## 📞 サポート
+
+- **Issue報告**: [GitHub Issues](https://github.com/reo-kambayashi/eikaiwa/issues)
+- **機能要望**: [GitHub Discussions](https://github.com/reo-kambayashi/eikaiwa/discussions)
+- **開発者**: [@reo-kambayashi](https://github.com/reo-kambayashi)
+
+---
+
+**Made with ❤️ for Japanese English learners**
 
 ### 前提条件
 - Docker & Docker Compose

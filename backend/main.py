@@ -17,41 +17,36 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 
 import google.generativeai as genai
+# Import configuration and setup from config.py
+from config import (CACHE_TTL, GEMINI_API_KEY, GOOGLE_APPLICATION_CREDENTIALS,
+                    executor, model, response_cache, tts_model)
 from dotenv import load_dotenv
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
+# Import all models from the separate models.py file
+from models import (CombinedResponse, InstantTranslationCheckRequest,
+                    InstantTranslationCheckResponse, InstantTranslationProblem,
+                    JapaneseConsultationRequest, ListeningAnswerRequest,
+                    ListeningAnswerResponse, ListeningProblem,
+                    ListeningTranslateRequest, ListeningTranslateResponse,
+                    Request)
+from models import Response as ResponseModel
+from models import TTSRequest
 from pydantic import BaseModel
-
-# Load environment variables from the `.env` file located at the project root.
-# This allows developers to keep API keys outside of the source code for security.
-# The load_dotenv() function automatically reads the .env file from the project root.
-load_dotenv()
-
-# API keys and credentials read from environment variables
-# These are set in the .env file and loaded at runtime
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GOOGLE_APPLICATION_CREDENTIALS = os.getenv(
-    "GOOGLE_APPLICATION_CREDENTIALS", ""
-)
-
-# Configure Gemini AI model for conversation generation
-# The gemini-2.5-flash model provides fast, high-quality responses
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel("gemini-2.5-flash")
-    # Initialize Gemini TTS model
-    tts_model = genai.GenerativeModel("gemini-2.5-flash-preview-tts")
-else:
-    model = None
-    tts_model = None
-
-# スレッドプールエグゼキューターを設定（AI処理を非同期化するため）
-executor = ThreadPoolExecutor(max_workers=4)
-
-# メモリキャッシュ（単一ユーザー用の高速化）
-response_cache = {}
-CACHE_TTL = 300  # 5分間のキャッシュ
+# Import AI service functions
+from services.ai_service import (create_conversation_prompt,
+                                 create_eiken_problem_generation_prompt,
+                                 create_japanese_consultation_prompt,
+                                 create_translation_check_prompt,
+                                 create_welcome_prompt)
+# Import listening service  
+from services.listening_service import (fetch_trivia_question,
+                                        get_trivia_categories)
+# Import translation service data
+from services.translation_service import TRANSLATION_PROBLEMS
+# Import TTS service
+from services.tts_service import synthesize_speech
 
 # Create FastAPI application instance
 app = FastAPI()
@@ -65,115 +60,6 @@ app.add_middleware(
     allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
     allow_headers=["*"],  # Allow all headers
 )
-# Pydantic models define the structure of requests and responses
-# These ensure type safety and automatic validation
-
-
-class Request(BaseModel):
-    """
-    Request model for conversation API calls from the frontend.
-
-    This defines what data the frontend must send when requesting
-    an AI response for English conversation practice.
-    """
-
-    text: str  # The user's input text or speech transcription
-    conversation_history: list = []  # Previous messages for context
-    enable_grammar_check: bool = True  # Whether to enable grammar checking
-
-
-class JapaneseConsultationRequest(BaseModel):
-    """
-    Request model for Japanese consultation and dictionary features.
-    
-    For asking questions about English expressions, grammar, or vocabulary
-    with responses in Japanese.
-    """
-    
-    text: str  # User's question in Japanese or English
-    conversation_history: list = []  # Previous consultation messages
-
-
-class Response(BaseModel):
-    """
-    Response model returned by the API to the frontend.
-
-    Contains the AI's response text that will be displayed
-    and potentially converted to speech.
-    """
-
-    reply: str  # The AI's response text
-
-
-class TTSRequest(BaseModel):
-    """
-    Request model for text-to-speech synthesis.
-
-    Defines parameters for converting text to natural-sounding speech
-    using Gemini 2.5 Flash Preview TTS service.
-    """
-
-    text: str  # Text to convert to speech
-    voice_name: str = (
-        "Kore"  # Default: bright female English voice for Gemini TTS
-    )
-    language_code: str = "en-US"  # Language and region code
-    speaking_rate: float = 1.0  # Speech speed (0.25-4.0, 1.0 = normal)
-
-
-class InstantTranslationCheckRequest(BaseModel):
-    """
-    Request model for instant translation answer checking.
-
-    Defines the structure for checking user answers against correct translations
-    in the instant translation mode.
-    """
-
-    japanese: str  # Original Japanese text
-    correctAnswer: str  # Correct English translation
-    userAnswer: str  # User's English translation attempt
-
-
-class InstantTranslationProblem(BaseModel):
-    """
-    Response model for instant translation problems.
-
-    Contains a Japanese sentence to be translated to English.
-    """
-
-    japanese: str  # Japanese sentence to translate
-    english: str  # Correct English translation
-    difficulty: str = "medium"  # Problem difficulty level
-    category: str = "general"  # Grammar or topic category
-
-
-class InstantTranslationCheckResponse(BaseModel):
-    """
-    Response model for instant translation answer checking.
-
-    Contains evaluation results and feedback for the user's translation attempt.
-    """
-
-    isCorrect: bool  # Whether the answer is correct
-    feedback: str  # Detailed feedback on the translation
-    score: int  # Numerical score (0-100)
-    suggestions: list = []  # Alternative translations or improvements
-
-
-class CombinedResponse(BaseModel):
-    """
-    Combined response model for simultaneous text and audio generation.
-
-    Contains both AI text response and TTS audio data for optimized performance.
-    """
-
-    reply: str  # The AI's text response
-    audio_data: str = ""  # Base64 encoded audio data
-    content_type: str = "text/plain"  # Audio MIME type
-    use_browser_tts: bool = False  # Whether to fallback to browser TTS
-    fallback_text: str = ""  # Text for browser TTS fallback
-    processing_time: float = 0.0  # Total processing time in seconds
-
 
 # API Endpoints
 # These endpoints handle communication between the frontend and backend
@@ -368,7 +254,7 @@ async def text_to_speech(request: TTSRequest):
         return error_result
 
 
-@app.get("/api/welcome", response_model=Response)
+@app.get("/api/welcome", response_model=ResponseModel)
 async def get_welcome_message():
     """Generate a personalized welcome message."""
 
@@ -376,7 +262,7 @@ async def get_welcome_message():
 
     try:
         if not model:
-            return Response(
+            return ResponseModel(
                 reply="Hello! Welcome to English Communication App! Please set up your API key to get started."
             )
 
@@ -388,20 +274,20 @@ async def get_welcome_message():
         )
 
         if response.text:
-            return Response(reply=response.text)
+            return ResponseModel(reply=response.text)
         else:
-            return Response(
+            return ResponseModel(
                 reply="Hello! Welcome to English Communication App! Let's start practicing English together!"
             )
 
     except Exception as e:
         print(f"Error generating welcome message: {str(e)}")
-        return Response(
+        return ResponseModel(
             reply="Hello! Welcome to English Communication App! I'm here to help you practice English. How are you today?"
         )
 
 
-@app.post("/api/respond", response_model=Response)
+@app.post("/api/respond", response_model=ResponseModel)
 async def respond(req: Request):
     """Generate a response using Gemini API for English conversation practice."""
 
@@ -410,7 +296,7 @@ async def respond(req: Request):
     try:
         if not model:
             # Fallback response if Gemini API is not configured
-            return Response(
+            return ResponseModel(
                 reply="API key not configured. Please set GEMINI_API_KEY environment variable."
             )
 
@@ -424,7 +310,7 @@ async def respond(req: Request):
             cached_data, timestamp = response_cache[cache_key]
             if time.time() - timestamp < CACHE_TTL:
                 print(f"✅ Cache hit for response: {req.text[:30]}...")
-                return Response(reply=cached_data)
+                return ResponseModel(reply=cached_data)
 
         # Create conversation prompt
         prompt = create_conversation_prompt(req.text, req.conversation_history)
@@ -438,21 +324,21 @@ async def respond(req: Request):
         if response.text:
             # レスポンスをキャッシュに保存
             response_cache[cache_key] = (response.text, time.time())
-            return Response(reply=response.text)
+            return ResponseModel(reply=response.text)
         else:
-            return Response(
+            return ResponseModel(
                 reply="Sorry, I couldn't generate a response. Please try again."
             )
 
     except Exception as e:
         # Log the error in production, but don't expose internal details
         print(f"Error generating response: {str(e)}")
-        return Response(
+        return ResponseModel(
             reply="Sorry, there was an error processing your request. Please try again."
         )
 
 
-@app.post("/api/japanese-consultation", response_model=Response)
+@app.post("/api/japanese-consultation", response_model=ResponseModel)
 async def japanese_consultation(req: JapaneseConsultationRequest):
     """Generate Japanese consultation response for English expression and grammar questions."""
 
@@ -461,7 +347,7 @@ async def japanese_consultation(req: JapaneseConsultationRequest):
     try:
         if not model:
             # Fallback response if Gemini API is not configured
-            return Response(
+            return ResponseModel(
                 reply="申し訳ありませんが、APIキーが設定されていません。GEMINI_API_KEYを設定してください。"
             )
 
@@ -475,7 +361,7 @@ async def japanese_consultation(req: JapaneseConsultationRequest):
             cached_data, timestamp = response_cache[cache_key]
             if time.time() - timestamp < CACHE_TTL:
                 print(f"✅ Cache hit for consultation: {req.text[:30]}...")
-                return Response(reply=cached_data)
+                return ResponseModel(reply=cached_data)
 
         # Create Japanese consultation prompt
         prompt = create_japanese_consultation_prompt(
@@ -491,16 +377,16 @@ async def japanese_consultation(req: JapaneseConsultationRequest):
         if response.text:
             # レスポンスをキャッシュに保存
             response_cache[cache_key] = (response.text, time.time())
-            return Response(reply=response.text)
+            return ResponseModel(reply=response.text)
         else:
-            return Response(
+            return ResponseModel(
                 reply="申し訳ありませんが、回答を生成できませんでした。もう一度お試しください。"
             )
 
     except Exception as e:
         # Log the error in production, but don't expose internal details
         print(f"Error generating Japanese consultation response: {str(e)}")
-        return Response(
+        return ResponseModel(
             reply="申し訳ありませんが、エラーが発生しました。もう一度お試しください。"
         )
 
@@ -690,169 +576,6 @@ async def respond_with_audio(
         )
 
 
-def create_conversation_prompt(
-    user_text: str, conversation_history: list = None
-) -> str:
-    """
-    Create prompts for English conversation practice.
-
-    Args:
-        user_text: The user's input message
-        conversation_history: Previous messages for context
-
-    Returns:
-        A formatted prompt string optimized for conversation practice
-    """
-
-    # Format conversation history for context
-    history_context = ""
-    if conversation_history and len(conversation_history) > 0:
-        history_context = "\n\nCONVERSATION HISTORY (for context):\n"
-        # Show last 10 messages to avoid token limit issues
-        recent_history = (
-            conversation_history[-10:]
-            if len(conversation_history) > 10
-            else conversation_history
-        )
-        for msg in recent_history:
-            sender = msg.get("sender", "Unknown")
-            text = msg.get("text", "")
-            history_context += f"{sender}: {text}\n"
-        history_context += "\n"
-
-    # Simplified conversation prompt
-    prompt = f"""
-You are an expert English teacher and conversation partner specializing in helping Japanese learners.
-
-IMPORTANT GUIDELINES:
-- Always be encouraging and supportive
-- Use natural, conversational English
-- Provide gentle corrections when needed
-- Ask follow-up questions to keep the conversation flowing
-- Use examples and explanations when helpful
-- Reference previous parts of the conversation when relevant
-- Keep responses concise and engaging (1-3 sentences)
-- Focus on practical, everyday English
-{history_context}
-
-CURRENT MESSAGE FROM STUDENT:
-"{user_text}"
-
-Please respond naturally as a friendly English teacher and conversation partner.
-"""
-
-    return prompt
-
-
-def create_welcome_prompt() -> str:
-    """Create a welcome prompt for new users."""
-
-    prompt = """
-You are an expert English teacher and conversation partner specializing in helping Japanese learners.
-
-Please create a warm, encouraging welcome message for a new student starting English conversation practice.
-
-GUIDELINES:
-- Keep it friendly and encouraging
-- Mention that you're here to help with English conversation
-- Invite them to start practicing by asking a question or sharing something about themselves
-- Keep it concise (2-3 sentences)
-- Use clear, natural English
-
-Please respond with a welcoming message to get the conversation started.
-"""
-
-    return prompt
-
-
-def create_japanese_consultation_prompt(
-    user_text: str, consultation_type: str = "general", conversation_history: list = None
-) -> str:
-    """
-    Create prompts for Japanese consultation about English expressions and grammar.
-
-    Args:
-        user_text: The user's question in Japanese or English
-        consultation_type: Type of consultation (kept for API compatibility)
-        conversation_history: Previous consultation messages for context
-
-    Returns:
-        A formatted prompt string optimized for Japanese consultation responses
-    """
-
-    # Format conversation history for context
-    history_context = ""
-    if conversation_history and len(conversation_history) > 0:
-        history_context = "\n\n相談履歴（参考情報）:\n"
-        # Show last 8 messages to avoid token limit issues
-        recent_history = (
-            conversation_history[-8:]
-            if len(conversation_history) > 8
-            else conversation_history
-        )
-        for msg in recent_history:
-            sender = msg.get("sender", "Unknown")
-            text = msg.get("text", "")
-            history_context += f"{sender}: {text}\n"
-        history_context += "\n"
-
-    # Simple Japanese consultation prompt
-    prompt = f"""
-あなたは日本人の英語学習者を専門とする、経験豊富で親切な英語教師です。
-
-【重要な指示】:
-- 必ず日本語で回答してください
-- 簡潔で分かりやすい説明を心がけてください（2-3文程度）
-- 1つの具体的な例文を含めてください
-- 一目で読める短さにしてください
-- 要点だけを簡潔に答えてください
-{history_context}
-
-【学習者からの質問】:
-"{user_text}"
-
-上記の質問に対して、日本語で簡潔に回答してください。例文は1つだけ、説明は2-3文以内でお願いします。
-"""
-
-    return prompt
-
-
-def optimize_cache_cleanup():
-    """
-    キャッシュのクリーンアップを実行（メモリ使用量を最適化）
-    """
-    import time
-
-    current_time = time.time()
-    expired_keys = []
-
-    for key, (data, timestamp) in response_cache.items():
-        if current_time - timestamp > CACHE_TTL:
-            expired_keys.append(key)
-
-    for key in expired_keys:
-        del response_cache[key]
-
-    print(f"🧹 Cache cleanup: removed {len(expired_keys)} expired entries")
-
-
-# アプリケーション起動時にキャッシュクリーンアップを定期実行するためのタスク
-import threading
-import time
-
-
-def periodic_cache_cleanup():
-    """定期的なキャッシュクリーンアップ"""
-    while True:
-        time.sleep(300)  # 5分毎に実行
-        optimize_cache_cleanup()
-
-
-# バックグラウンドでキャッシュクリーンアップを開始
-cleanup_thread = threading.Thread(target=periodic_cache_cleanup, daemon=True)
-cleanup_thread.start()
-
-
 # ============================================================================
 # 瞬間英作文モード用のAPI エンドポイント
 # ============================================================================
@@ -860,195 +583,6 @@ cleanup_thread.start()
 # ============================================================================
 # リスニング問題モード用のAPI エンドポイント
 # ============================================================================
-
-
-# リスニング問題の応答モデル
-class ListeningProblem(BaseModel):
-    """
-    リスニング問題のレスポンスモデル
-    """
-
-    question: str  # 問題文（音声で読み上げる）
-    choices: list  # 選択肢のリスト
-    correct_answer: str  # 正解
-    difficulty: str  # 難易度（easy, medium, hard）
-    category: str  # カテゴリ
-    explanation: str  # 解説（任意）
-
-
-class ListeningAnswerRequest(BaseModel):
-    """
-    リスニング問題の回答チェック用リクエストモデル
-    """
-
-    question: str  # 問題文
-    user_answer: str  # ユーザーの回答
-    correct_answer: str  # 正解
-    choices: list  # 選択肢
-
-
-class ListeningAnswerResponse(BaseModel):
-    """
-    リスニング問題の回答チェック用レスポンスモデル
-    """
-
-    is_correct: bool  # 正解かどうか
-    feedback: str  # フィードバック
-    explanation: str  # 解説
-
-
-# 瞬間英作文の問題パターン
-TRANSLATION_PROBLEMS = [
-    {
-        "japanese": "今日は天気がいいですね。",
-        "english": "It's nice weather today.",
-        "difficulty": "easy",
-        "category": "weather",
-    },
-    {
-        "japanese": "昨日、友達と映画を見に行きました。",
-        "english": "I went to see a movie with my friend yesterday.",
-        "difficulty": "medium",
-        "category": "daily_life",
-    },
-    {
-        "japanese": "来週の金曜日に会議があります。",
-        "english": "There will be a meeting next Friday.",
-        "difficulty": "medium",
-        "category": "business",
-    },
-    {
-        "japanese": "もしも時間があれば、一緒に買い物に行きませんか？",
-        "english": "If you have time, would you like to go shopping together?",
-        "difficulty": "hard",
-        "category": "invitation",
-    },
-    {
-        "japanese": "彼女は毎朝7時に起きます。",
-        "english": "She gets up at 7 o'clock every morning.",
-        "difficulty": "easy",
-        "category": "daily_routine",
-    },
-    {
-        "japanese": "この本は私にとって難しすぎます。",
-        "english": "This book is too difficult for me.",
-        "difficulty": "medium",
-        "category": "opinion",
-    },
-    {
-        "japanese": "電車が遅れているので、少し遅れるかもしれません。",
-        "english": "The train is delayed, so I might be a little late.",
-        "difficulty": "hard",
-        "category": "transportation",
-    },
-    {
-        "japanese": "夏休みに家族と北海道に行く予定です。",
-        "english": "I'm planning to go to Hokkaido with my family during summer vacation.",
-        "difficulty": "medium",
-        "category": "travel",
-    },
-    {
-        "japanese": "日本語を勉強するのは楽しいです。",
-        "english": "Studying Japanese is fun.",
-        "difficulty": "easy",
-        "category": "learning",
-    },
-    {
-        "japanese": "もし雨が降ったら、家にいるつもりです。",
-        "english": "If it rains, I intend to stay home.",
-        "difficulty": "hard",
-        "category": "conditional",
-    },
-    # 追加のwork/businessカテゴリ問題
-    {
-        "japanese": "プロジェクトの進捗はいかがですか？",
-        "english": "How is the progress of the project?",
-        "difficulty": "medium",
-        "category": "work",
-    },
-    {
-        "japanese": "来月から新しい部署に異動することになりました。",
-        "english": "I will be transferred to a new department starting next month.",
-        "difficulty": "hard",
-        "category": "work",
-    },
-    {
-        "japanese": "この提案書について質問があります。",
-        "english": "I have a question about this proposal.",
-        "difficulty": "medium",
-        "category": "work",
-    },
-    {
-        "japanese": "会議の資料を準備する必要があります。",
-        "english": "I need to prepare materials for the meeting.",
-        "difficulty": "easy",
-        "category": "work",
-    },
-    {
-        "japanese": "締切を延長していただくことは可能でしょうか？",
-        "english": "Would it be possible to extend the deadline?",
-        "difficulty": "hard",
-        "category": "work",
-    },
-    # technology カテゴリ
-    {
-        "japanese": "新しいアプリをダウンロードしました。",
-        "english": "I downloaded a new app.",
-        "difficulty": "easy",
-        "category": "technology",
-    },
-    {
-        "japanese": "コンピューターが動かなくなってしまいました。",
-        "english": "My computer has stopped working.",
-        "difficulty": "medium",
-        "category": "technology",
-    },
-    {
-        "japanese": "このソフトウェアは非常に使いやすいです。",
-        "english": "This software is very user-friendly.",
-        "difficulty": "medium",
-        "category": "technology",
-    },
-    # health カテゴリ
-    {
-        "japanese": "頭が痛いので病院に行きます。",
-        "english": "I have a headache, so I'm going to the hospital.",
-        "difficulty": "easy",
-        "category": "health",
-    },
-    {
-        "japanese": "毎日運動するように心がけています。",
-        "english": "I try to exercise every day.",
-        "difficulty": "medium",
-        "category": "health",
-    },
-    {
-        "japanese": "バランスの取れた食事を摂ることが大切です。",
-        "english": "It's important to have a balanced diet.",
-        "difficulty": "hard",
-        "category": "health",
-    },
-    # education カテゴリ
-    {
-        "japanese": "大学で経済学を専攻しています。",
-        "english": "I'm majoring in economics at university.",
-        "difficulty": "medium",
-        "category": "education",
-    },
-    {
-        "japanese": "図書館で宿題をしています。",
-        "english": "I'm doing my homework at the library.",
-        "difficulty": "easy",
-        "category": "education",
-    },
-    {
-        "japanese": "今度の試験の準備をしなければなりません。",
-        "english": "I have to prepare for the upcoming exam.",
-        "difficulty": "medium",
-        "category": "education",
-    },
-]
-
 
 @app.get(
     "/api/instant-translation/problem",
@@ -1562,21 +1096,6 @@ async def check_listening_answer(req: ListeningAnswerRequest):
 # リスニング問題翻訳エンドポイント
 # ============================================================================
 
-
-class ListeningTranslateRequest(BaseModel):
-    """
-    リスニング問題翻訳用リクエストモデル
-    """
-    question: str  # 翻訳する英語の問題文
-
-
-class ListeningTranslateResponse(BaseModel):
-    """
-    リスニング問題翻訳用レスポンスモデル
-    """
-    japanese_translation: str  # 日本語翻訳
-
-
 @app.post("/api/listening/translate", response_model=ListeningTranslateResponse)
 async def translate_listening_question(req: ListeningTranslateRequest):
     """
@@ -1711,48 +1230,6 @@ async def check_instant_translation_answer(
             status_code=500,
             detail="Failed to check instant translation answer",
         )
-
-
-def create_translation_check_prompt(
-    japanese: str, correct_answer: str, user_answer: str
-) -> str:
-    """
-    瞬間英作文の回答チェック用プロンプトを作成
-
-    Args:
-        japanese: 日本語の原文
-        correct_answer: 正解の英語
-        user_answer: ユーザーの回答
-
-    Returns:
-        AIが回答を評価するためのプロンプト
-    """
-
-    prompt = f"""
-あなたは経験豊富な英語教師です。日本人学習者の瞬間英作文の回答を評価してください。
-
-【問題】
-日本語: "{japanese}"
-正解: "{correct_answer}"
-学習者の回答: "{user_answer}"
-
-【評価基準】
-- 意味が正確に伝わっているか
-- 文法が正しいか
-- 自然な英語表現か
-- 語彙の選択が適切か
-
-【返答形式】
-以下の形式で評価してください：
-- 「Excellent!」「Good!」「Not quite right」のいずれかで始める
-- 具体的な改善点やアドバイスを含める
-- 励ましの言葉を含める
-- 2-3文で簡潔にまとめる
-
-日本人学習者にとって理解しやすく、学習意欲を高めるような評価をお願いします。
-"""
-
-    return prompt
 
 
 @app.get(
